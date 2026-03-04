@@ -21,9 +21,6 @@ pub async fn stats(
     let target = user.as_ref().unwrap_or_else(|| ctx.author());
     let data = ctx.data();
 
-    // ------------------------------------------------------------------
-    // 1. Look up the user in the database.
-    // ------------------------------------------------------------------
     let db_user =
         queries::get_user_by_discord_id(&data.db, target.id.get() as i64, guild_id.get() as i64)
             .await?;
@@ -40,23 +37,14 @@ pub async fn stats(
         }
     };
 
-    // ------------------------------------------------------------------
-    // 2. Fetch live stats from Hypixel (cached if recent).
-    // ------------------------------------------------------------------
     let bw_stats = data
         .hypixel
         .fetch_bedwars_stats(&db_user.minecraft_uuid)
         .await;
 
-    // ------------------------------------------------------------------
-    // 3. Load points from the database.
-    // ------------------------------------------------------------------
     let points = queries::get_points(&data.db, db_user.id).await?;
     let total_points = points.map(|p| p.total_points).unwrap_or(0.0);
 
-    // ------------------------------------------------------------------
-    // 4. Build and send the embed.
-    // ------------------------------------------------------------------
     let embed = match bw_stats {
         Ok(stats) => CreateEmbed::default()
             .title(format!("Bedwars Stats — {}", target.name))

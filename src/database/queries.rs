@@ -5,7 +5,7 @@
 ///
 /// Some functions are not yet called but exist as part of the public query API
 /// for extensions and future commands.
-use sqlx::SqlitePool;
+use sqlx::{SqlitePool};
 
 use super::models::{DbGuild, DbPoints, DbStatsSnapshot, DbUser};
 
@@ -32,11 +32,7 @@ pub async fn get_guild(pool: &SqlitePool, guild_id: i64) -> Result<Option<DbGuil
 }
 
 /// Update the `config_json` column for a guild.
-pub async fn update_guild_config(
-    pool: &SqlitePool,
-    guild_id: i64,
-    config_json: &str,
-) -> Result<(), sqlx::Error> {
+pub async fn update_guild_config(pool: &SqlitePool, guild_id: i64, config_json: &str,) -> Result<(), sqlx::Error> {
     sqlx::query("UPDATE guilds SET config_json = ? WHERE guild_id = ?")
         .bind(config_json)
         .bind(guild_id)
@@ -96,6 +92,49 @@ pub async fn get_all_registered_users(pool: &SqlitePool) -> Result<Vec<DbUser>, 
     sqlx::query_as::<_, DbUser>("SELECT * FROM users")
         .fetch_all(pool)
         .await
+}
+
+/// Unregister a user by deleting their row from the database.
+pub async fn unregister_user(
+    pool: &SqlitePool,
+    discord_user_id: i64,
+    guild_id: i64,
+) -> Result<(), sqlx::Error> {
+
+    // Get the internal user id
+    let user_id: Option<i64> = sqlx::query_scalar(
+        "SELECT id FROM users WHERE discord_user_id = ? AND guild_id = ?"
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .fetch_optional(pool)
+    .await?;
+
+    if let Some(uid) = user_id {
+        // delete dependent rows first
+        sqlx::query("DELETE FROM hypixel_stats_snapshot WHERE user_id = ?")
+            .bind(uid)
+            .execute(pool)
+            .await?;
+
+        sqlx::query("DELETE FROM discord_stats_snapshot WHERE user_id = ?")
+            .bind(uid)
+            .execute(pool)
+            .await?;
+
+        sqlx::query("DELETE FROM points WHERE user_id = ?")
+            .bind(uid)
+            .execute(pool)
+            .await?;
+
+        // now delete the user
+        sqlx::query("DELETE FROM users WHERE id = ?")
+            .bind(uid)
+            .execute(pool)
+            .await?;
+    }
+
+    Ok(())
 }
 
 /// Get all registered users within a specific guild.

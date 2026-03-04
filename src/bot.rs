@@ -66,8 +66,24 @@ pub async fn build(
                 info!("Bot is connected and ready!");
 
                 // Register slash commands globally.
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                info!("Slash commands registered globally.");
+                let dev_guild = std::env::var("DEV_GUILD_ID").ok();
+                if let Some(dev) = dev_guild {
+                    if let Ok(gid) = dev.parse::<u64>() {
+                        let guild_id = serenity::GuildId::new(gid);
+                        poise::builtins::register_in_guild(
+                            ctx,
+                            &framework.options().commands,
+                            guild_id,
+                        )
+                        .await?;
+                        info!(dev_guild = gid, "Slash commands registered in dev guild");
+                    } else {
+                        info!("DEV_GUILD_ID set but invalid");
+                    }
+                } else {
+                    poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                    info!("Slash commands registered globally.");
+                }
 
                 // Start the background stat sweeper.
                 sweeper::start_sweeper(sweep_db, sweep_hypixel, sweep_interval);

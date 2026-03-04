@@ -17,7 +17,7 @@ use super::models::{BedwarsStats, HypixelPlayerResponse, MojangProfile};
 use crate::shared::cache::TimedCache;
 
 /// Default cache TTL for Hypixel stat lookups (30 seconds).
-const CACHE_TTL_SECS: u64 = 30;
+const CACHE_TTL_SECS: u64 = 60;
 
 /// Maximum number of concurrent Hypixel API requests.
 const MAX_CONCURRENT_REQUESTS: usize = 2;

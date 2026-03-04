@@ -5,10 +5,12 @@
 /// and add it to the vector returned by `all()`.
 pub mod register;
 pub mod stats;
+pub mod unregister;
+pub mod set_reg_role;
 
 use crate::shared::types::{Data, Error};
 
 /// Returns all registered commands.
 pub fn all() -> Vec<poise::Command<Data, Error>> {
-    vec![register::register(), stats::stats()]
+    vec![register::register(), stats::stats(), unregister::unregister(), set_reg_role::set_reg_role()]
 }

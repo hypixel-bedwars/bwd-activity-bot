@@ -3,13 +3,13 @@
 /// Links a Discord user to their Minecraft account by resolving the username
 /// to a UUID via the Mojang API, storing the mapping in the database, and
 /// assigning the guild's configured registered role.
-use poise::serenity_prelude as serenity;
 use time::OffsetDateTime;
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
+use poise::serenity_prelude::RoleId;
 
 /// Register your Minecraft account to start tracking stats and earning points.
 #[poise::command(slash_command, guild_only)]
@@ -28,32 +28,72 @@ pub async fn register(
     let discord_user_id = ctx.author().id.get() as i64;
     let data = ctx.data();
 
-    // ------------------------------------------------------------------
-    // 1. Ensure the guild exists in the database.
-    // ------------------------------------------------------------------
     queries::upsert_guild(&data.db, guild_id_i64).await?;
 
-    // ------------------------------------------------------------------
-    // 2. Load guild config to find the registered role.
-    // ------------------------------------------------------------------
     let guild_row = queries::get_guild(&data.db, guild_id_i64).await?;
     let guild_config: GuildConfig = guild_row
         .as_ref()
         .map(|g| serde_json::from_str(&g.config_json).unwrap_or_default())
         .unwrap_or_default();
 
-    // ------------------------------------------------------------------
-    // 3. Resolve the Minecraft username to a UUID.
-    // ------------------------------------------------------------------
     let profile = data
         .hypixel
         .resolve_username(&minecraft_username)
         .await
         .map_err(|e| format!("Could not resolve Minecraft username: {e}"))?;
 
-    // ------------------------------------------------------------------
-    // 4. Store the user in the database.
-    // ------------------------------------------------------------------
+    let role_id = match guild_config.registered_role_id {
+        Some(id) => id,
+        None => {
+            ctx.say(
+                "Registration is not configured on this server. \
+                An administrator must set a registered role first.",
+            )
+            .await?;
+            info!(
+                "Guild {} attempted to register but has no registered role configured.",
+                guild_id_i64
+            );
+            return Ok(());
+        }
+    };
+
+    // Check if the user is already registered in this guild. If they are
+    // already registered then send a message that will
+    // tell the user that they are already registered
+    if let Some(existing_user) =
+        queries::get_user_by_discord_id(&data.db, discord_user_id, guild_id_i64).await?
+    {
+        ctx.say(format!(
+			"You are already registered as **{}** (UUID `{}`). If you want to change your linked Minecraft account, please unregister first with `/unregister`.",
+			existing_user.minecraft_uuid, existing_user.minecraft_uuid
+		)).await?;
+        debug!(
+            "User {} attempted to register but is already registered as {} in guild {}.",
+            discord_user_id, existing_user.minecraft_uuid, guild_id_i64
+        );
+        return Ok(());
+    }
+
+    // Assign the registered role to the user.
+    let role = RoleId::new(role_id);
+    let member = guild_id.member(ctx.http(), ctx.author().id).await?;
+    
+    if let Err(e) = member.add_role(ctx.http(), role).await {
+        ctx.say(
+            "I couldn't assign the registered role. \
+            Please ensure I have **Manage Roles** permission and my role is above the registered role."
+        )
+        .await?;
+    
+        info!(
+            "Failed to assign registered role to user {} in guild {}: {}",
+            discord_user_id, guild_id_i64, e
+        );
+    
+        return Ok(());
+    }
+
     let now = OffsetDateTime::now_utc()
         .format(&time::format_description::well_known::Rfc3339)
         .unwrap_or_else(|_| "unknown".to_string());
@@ -61,52 +101,17 @@ pub async fn register(
     let db_user =
         queries::register_user(&data.db, discord_user_id, &profile.id, guild_id_i64, &now).await?;
 
+    ctx.say(format!(
+		 "You have been registered as **{}** (UUID `{}`). You can now start earning points and tracking your stats!",
+		 profile.name, profile.id
+	 )).await?;
+
     info!(
         discord_user_id,
         minecraft_uuid = %profile.id,
         minecraft_name = %profile.name,
         "User registered."
     );
-
-    // ------------------------------------------------------------------
-    // 5. Assign the registered role (if configured).
-    // ------------------------------------------------------------------
-    if let Some(role_id) = guild_config.registered_role_id {
-        let role = serenity::RoleId::new(role_id);
-
-        // Verify the role exists in the guild.
-        let guild_roles = guild_id.roles(&ctx.http()).await?;
-        if !guild_roles.contains_key(&role) {
-            ctx.say(format!(
-                "Registered as **{}** (UUID `{}`), but the configured role (ID {}) does not exist in this server. \
-                 Please ask an admin to update the guild config.",
-                profile.name, profile.id, role_id
-            ))
-            .await?;
-            return Ok(());
-        }
-
-        // Add the role to the member.
-        let member = guild_id.member(&ctx.http(), ctx.author().id).await?;
-        member.add_role(&ctx.http(), role).await.map_err(|e| {
-            format!(
-                "Failed to assign role: {e}. Make sure the bot has the Manage Roles permission \
-                 and its role is above the registered role."
-            )
-        })?;
-
-        ctx.say(format!(
-            "Successfully registered as **{}** (UUID `{}`) and assigned <@&{}>!",
-            profile.name, profile.id, role_id
-        ))
-        .await?;
-    } else {
-        ctx.say(format!(
-            "Successfully registered as **{}** (UUID `{}`)! No role assignment configured for this server.",
-            profile.name, profile.id
-        ))
-        .await?;
-    }
 
     // Ensure the user has an initial points row.
     queries::upsert_points(&data.db, db_user.id, 0.0, &now).await?;
