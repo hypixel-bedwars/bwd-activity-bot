@@ -7,10 +7,12 @@ use time::OffsetDateTime;
 use tracing::{debug, info};
 
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
+use sqlx::SqlitePool;
 
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Data, Error};
+use base64::{engine::general_purpose, Engine as _};
 
 /// Core registration logic, shared between `/register` and the Register button.
 ///
@@ -27,7 +29,7 @@ pub async fn perform_registration(
     user_id: serenity::UserId,
     user_tag: &str,
     minecraft_username: &str,
-) -> Result<String, Error> {
+) -> Result<(String, Option<(i64, String)>), Error> {
     let guild_id_i64 = guild_id.get() as i64;
     let discord_user_id = user_id.get() as i64;
 
@@ -54,20 +56,26 @@ pub async fn perform_registration(
     match player_data.social_links.get("DISCORD") {
         Some(linked) => {
             if linked != user_tag {
-                return Ok(format!(
-                    "Ownership verification failed.\n\n\
-                     Hypixel account **{}** is linked to Discord `{}` but you are `{}`.\n\
-                     Please update your Hypixel social link to match your Discord.",
-                    profile.name, linked, user_tag
+                return Ok((
+                    format!(
+                        "Ownership verification failed.\n\n\
+                    Hypixel account **{}** is linked to Discord `{}` but you are `{}`.\n\
+                    Please update your Hypixel social link to match your Discord.",
+                        profile.name, linked, user_tag
+                    ),
+                    None,
                 ));
             }
         }
         None => {
-            return Ok("Ownership verification failed.\n\n\
+            return Ok((
+                "Ownership verification failed.\n\n\
                  Your Hypixel account must have a **Discord social link** set.\n\
                  Please link your Discord in Hypixel:\n\
                  `/socials discord <your discord>`"
-                .to_string());
+                    .to_string(),
+                None,
+            ));
         }
     }
 
@@ -78,9 +86,12 @@ pub async fn perform_registration(
                 "Guild {} attempted registration but has no registered role configured.",
                 guild_id_i64
             );
-            return Ok("Registration is not configured on this server. \
+            return Ok((
+                "Registration is not configured on this server. \
                 An administrator must set a registered role first."
-                .to_string());
+                    .to_string(),
+                None,
+            ));
         }
     };
 
@@ -91,10 +102,13 @@ pub async fn perform_registration(
             "User {} attempted to register but is already registered as {} in guild {}.",
             discord_user_id, existing_user.minecraft_uuid, guild_id_i64
         );
-        return Ok(format!(
-            "You are already registered as **{}** (UUID `{}`). \
-            If you want to change your linked Minecraft account, please unregister first with `/unregister`.",
-            existing_user.minecraft_uuid, existing_user.minecraft_uuid
+        return Ok((
+            format!(
+                "You are already registered as **{}** (UUID `{}`). \
+                If you want to change your linked Minecraft account, please unregister first with `/unregister`.",
+                existing_user.minecraft_uuid, existing_user.minecraft_uuid
+            ),
+            None,
         ));
     }
 
@@ -106,11 +120,12 @@ pub async fn perform_registration(
             "Failed to assign registered role to user {} in guild {}: {}",
             discord_user_id, guild_id_i64, e
         );
-        return Ok(
+        return Ok((
             "I couldn't assign the registered role. \
             Please ensure I have **Manage Roles** permission and my role is above the registered role."
                 .to_string(),
-        );
+            None,
+        ));
     }
 
     let now = OffsetDateTime::now_utc()
@@ -145,11 +160,48 @@ pub async fn perform_registration(
         "User registered."
     );
 
-    Ok(format!(
-        "You have been registered as **{}** (UUID `{}`). \
-        You can now start earning XP and tracking your stats!",
-        profile.name, profile.id
+    Ok((
+        format!(
+            "You have been registered as **{}** (UUID `{}`). \
+            You can now start earning XP and tracking your stats!",
+            profile.name, profile.id
+        ),
+        Some((db_user.id, profile.id)),
     ))
+}
+
+pub async fn fetch_and_cache_head_texture(
+    pool: &SqlitePool,
+    user_id: i64,
+    uuid: &str,
+) -> Option<String> {
+    // Construct the URL you want to fetch. Minotar is convenient:
+    // let url = format!("https://minotar.net/helm/{}/64.png", uuid);
+    // If you have a different API for textures, use that URL.
+
+    let url = format!("https://minotar.net/avatar/{}/128", uuid);
+
+    let resp = match reqwest::get(&url).await {
+        Ok(r) => r,
+        Err(_) => return None,
+    };
+    let bytes = match resp.bytes().await {
+        Ok(b) => b,
+        Err(_) => return None,
+    };
+    // Convert to base64 and build a data URL
+    let b64 = general_purpose::STANDARD.encode(&bytes);
+    let data_url = format!("data:image/png;base64,{}", b64);
+
+    // store in DB
+    let updated_at = OffsetDateTime::now_utc()
+        .format(&time::format_description::well_known::Rfc3339)
+        .ok();
+    if let Some(ts) = updated_at {
+        let _ = queries::set_user_head_texture(pool, user_id, &data_url, &ts).await;
+    }
+
+    Some(data_url)
 }
 
 /// Register your Minecraft account to start tracking stats and earning XP.
@@ -164,7 +216,7 @@ pub async fn register(
         .guild_id()
         .ok_or("This command can only be used in a server")?;
 
-    let msg = perform_registration(
+    let (msg, user_data) = perform_registration(
         ctx.serenity_context(),
         ctx.data(),
         guild_id,
@@ -173,6 +225,10 @@ pub async fn register(
         &minecraft_username,
     )
     .await?;
+
+    if let Some((db_user_id, uuid)) = user_data {
+        let _ = fetch_and_cache_head_texture(&ctx.data().db, db_user_id, &uuid).await;
+    }
 
     // Detect success by looking for the phrase we set in the success branch.
     let success = msg.contains("You have been registered");

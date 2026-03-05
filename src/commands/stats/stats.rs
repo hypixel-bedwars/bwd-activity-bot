@@ -77,6 +77,13 @@ pub async fn stats(
             Err(_) => db_user.minecraft_uuid.clone(),
         },
     };
+    
+    let thumbnail_url = if let Some(tex) = &db_user.head_texture {
+        tex.clone()
+    } else {
+        let url = format!("https://minotar.net/avatar/{}/80", db_user.minecraft_uuid);
+        url
+    };
 
     let mut embed = CreateEmbed::default()
         .title(format!("📊 Stats — {}", mc_name))
@@ -85,10 +92,7 @@ pub async fn stats(
             mc_name
         ))
         .color(0x00BFFF)
-        .thumbnail(format!(
-            "https://minotar.net/avatar/{}/80",
-            db_user.minecraft_uuid
-        ))
+        .thumbnail(thumbnail_url)
         .author(
             serenity::CreateEmbedAuthor::new(&target.name)
                 .icon_url(target.avatar_url().unwrap_or_default()),

@@ -33,6 +33,11 @@ pub struct DbUser {
     pub minecraft_username: Option<String>,
     pub guild_id: i64,
     pub registered_at: String,
+
+    // Optional cached head texture (base64 data URL or raw encoded PNG). New column.
+    pub head_texture: Option<String>,
+    // RFC3339 timestamp of when head_texture was last updated.
+    pub head_texture_updated_at: Option<String>,
 }
 
 // ---------------------------------------------------------------------------

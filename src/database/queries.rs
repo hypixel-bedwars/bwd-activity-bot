@@ -180,6 +180,24 @@ pub async fn get_all_registered_users(pool: &SqlitePool) -> Result<Vec<DbUser>, 
         .await
 }
 
+/// Store cached head texture for a user (head_texture is a base64 PNG or data URL).
+pub async fn set_user_head_texture(
+    pool: &SqlitePool,
+    user_id: i64,
+    head_texture: &str,
+    updated_at: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "UPDATE users SET head_texture = ?, head_texture_updated_at = ? WHERE id = ?",
+    )
+    .bind(head_texture)
+    .bind(updated_at)
+    .bind(user_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
 /// Unregister a user by deleting their row from the database.
 pub async fn unregister_user(
     pool: &SqlitePool,

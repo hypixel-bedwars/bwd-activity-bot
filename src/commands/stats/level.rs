@@ -146,7 +146,16 @@ pub async fn level(
     stat_deltas.truncate(8);
 
     // ── fetch avatar ──────────────────────────────────────────────────────────
-    let avatar_bytes = fetch_avatar(&db_user.minecraft_uuid).await;
+    let avatar_bytes = if let Some(tex) = &db_user.head_texture {
+        if let Some(encoded) = tex.strip_prefix("data:image/png;base64,") {
+            use base64::{engine::general_purpose, Engine as _};
+            general_purpose::STANDARD.decode(encoded).ok()
+        } else {
+            None
+        }
+    } else {
+        fetch_avatar(&db_user.minecraft_uuid).await
+    };
 
     // ── render level card ─────────────────────────────────────────────────────
     let mc_name = match &db_user.minecraft_username {

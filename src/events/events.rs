@@ -134,7 +134,16 @@ async fn handle_register_button(
     .await;
 
     let reply_text = match msg {
-        Ok(text) => text,
+        Ok((text, Some((db_user_id, uuid)))) => {
+            let _ = crate::commands::registration::register::fetch_and_cache_head_texture(
+                &data.db,
+                db_user_id,
+                &uuid,
+            ).await;
+    
+            text
+        }
+        Ok((text, None)) => text,
         Err(e) => {
             warn!(
                 user = component.user.id.get(),
