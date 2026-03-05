@@ -19,6 +19,7 @@ mod database;
 mod discord_stats;
 mod hypixel;
 mod xp;
+mod events;
 mod shared;
 mod sweeper;
 

@@ -8,6 +8,7 @@ pub mod stats;
 pub mod unregister;
 pub mod set_register_role;
 pub mod edit_stats;
+pub mod send_registration_message;
 
 use crate::shared::types::{Data, Error};
 
@@ -19,5 +20,6 @@ pub fn all() -> Vec<poise::Command<Data, Error>> {
         unregister::unregister(),
         set_register_role::set_register_role(),
         edit_stats::edit_stats(),
+        send_registration_message::send_registration_message(),
     ]
 }

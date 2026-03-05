@@ -12,6 +12,7 @@ use tracing::info;
 use crate::commands;
 use crate::config::AppConfig;
 use crate::discord_stats::tracker;
+use crate::events::events;
 use crate::hypixel::client::HypixelClient;
 use crate::shared::types::{Data, Error};
 use crate::sweeper;
@@ -41,8 +42,16 @@ pub async fn build(
             commands: commands::all(),
 
             // Event handler: forward events to the Discord stats tracker.
-            event_handler: |_ctx, event, _framework, data| {
-                Box::pin(async move { tracker::handle_event(event, data).await })
+            event_handler: |ctx, event, _framework, data| {
+                Box::pin(async move {
+                    // Calls event handler for buttons and other custom interactions (if any).
+                    if let Err(e) = events::event_handler(ctx, event, data).await {
+                        tracing::error!(error = %e, "Custom events handler failed");
+                    }
+
+                    // Calls event handler for tracking Discord stats.
+                    tracker::handle_event(event, data).await
+                })
             },
 
             // Pre-command hook: track command usage as a Discord stat.
@@ -65,16 +74,16 @@ pub async fn build(
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 info!("Bot is connected and ready!");
-        
+
                 let dev_guild = std::env::var("DEV_GUILD_ID").ok();
-        
+
                 if let Some(dev) = dev_guild {
                     if let Ok(gid) = dev.parse::<u64>() {
                         let guild_id = serenity::GuildId::new(gid);
-        
+
                         // Remove any existing global commands (prevents duplicates)
                         serenity::Command::set_global_commands(&ctx.http, vec![]).await?;
-        
+
                         // Register commands only in the dev guild
                         poise::builtins::register_in_guild(
                             ctx,
@@ -82,19 +91,23 @@ pub async fn build(
                             guild_id,
                         )
                         .await?;
-        
+
                         info!(dev_guild = gid, "Slash commands registered in dev guild");
                     } else {
                         info!("DEV_GUILD_ID set but invalid");
                     }
                 } else {
-					info!("DEV_GUILD_ID not set, skipping slash command registration");
-				}
-        
+                    info!("DEV_GUILD_ID not set, skipping slash command registration");
+                }
+
                 // Start background sweeper
                 sweeper::start_sweeper(sweep_db, sweep_hypixel, sweep_interval, sweep_config);
-        
-                Ok(Data { db, hypixel, config })
+
+                Ok(Data {
+                    db,
+                    hypixel,
+                    config,
+                })
             })
         })
         .build();
