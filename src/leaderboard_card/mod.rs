@@ -105,10 +105,20 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     let header_y = MARGIN;
     let header_w = IMG_W - MARGIN * 2;
 
-    fill_rounded_rect(&mut img, header_x, header_y, header_w, HEADER_H, 10, HEADER_BG);
+    fill_rounded_rect(
+        &mut img, header_x, header_y, header_w, HEADER_H, 10, HEADER_BG,
+    );
 
     // Title: "LEADERBOARD"
-    render_text(&font, &mut img, header_x + 20, header_y + 12, "LEADERBOARD", 3, WHITE);
+    render_text(
+        &font,
+        &mut img,
+        header_x + 20,
+        header_y + 12,
+        "LEADERBOARD",
+        3,
+        WHITE,
+    );
 
     // Page info right-aligned in header
     let page_text = format!("PAGE {}/{}", params.page, params.total_pages);
@@ -128,13 +138,29 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         2,
         MUTED,
     );
-    render_text(&font, &mut img, header_x + 700, col_header_y, "LEVEL", 2, MUTED);
+    render_text(
+        &font,
+        &mut img,
+        header_x + 700,
+        col_header_y,
+        "LEVEL",
+        2,
+        MUTED,
+    );
 
     // Right-align "XP" header
     let xp_header = "XP";
     let xp_header_w = measure_text(&font, xp_header, 2);
     let xp_header_x = (header_x + header_w).saturating_sub(20 + xp_header_w);
-    render_text(&font, &mut img, xp_header_x, col_header_y, xp_header, 2, MUTED);
+    render_text(
+        &font,
+        &mut img,
+        xp_header_x,
+        col_header_y,
+        xp_header,
+        2,
+        MUTED,
+    );
 
     // Divider below column headers
     fill_rect(&mut img, header_x, col_header_y + 22, header_w, 1, DIVIDER);
@@ -219,7 +245,15 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
 
         // Level
         let level_text = format!("{}", row.level);
-        render_text(&font, &mut img, header_x + 700, row_y + 16, &level_text, 2, CYAN);
+        render_text(
+            &font,
+            &mut img,
+            header_x + 700,
+            row_y + 16,
+            &level_text,
+            2,
+            CYAN,
+        );
 
         // XP right-aligned
         let xp_text = format_xp(row.total_xp);
@@ -285,7 +319,10 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
     );
     let radius = 6u32;
     if let Some(bytes) = avatar_bytes {
-        debug!("leaderboard_card::draw_avatar: avatar bytes len={}", bytes.len());
+        debug!(
+            "leaderboard_card::draw_avatar: avatar bytes len={}",
+            bytes.len()
+        );
         if let Ok(dyn_img) = image::load_from_memory(bytes) {
             let avatar = dyn_img.resize_exact(
                 AVATAR_SIZE,
@@ -306,7 +343,9 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
             debug!("leaderboard_card::draw_avatar: rendered avatar image");
             return;
         } else {
-            debug!("leaderboard_card::draw_avatar: failed to decode avatar bytes, using placeholder");
+            debug!(
+                "leaderboard_card::draw_avatar: failed to decode avatar bytes, using placeholder"
+            );
         }
     }
     // Fallback placeholder
@@ -318,7 +357,10 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
 // ---------------------------------------------------------------------------
 
 fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8>) {
-    debug!("leaderboard_card::fill_rect: x={}, y={}, w={}, h={}", x, y, w, h);
+    debug!(
+        "leaderboard_card::fill_rect: x={}, y={}, w={}, h={}",
+        x, y, w, h
+    );
     let img_w = img.width();
     let img_h = img.height();
     for dy in 0..h {
@@ -489,5 +531,8 @@ fn render_text(
         }
         cursor_x += glyph_w * scale + scale;
     }
-    debug!("leaderboard_card::render_text: finished rendering text='{}'", text);
+    debug!(
+        "leaderboard_card::render_text: finished rendering text='{}'",
+        text
+    );
 }
