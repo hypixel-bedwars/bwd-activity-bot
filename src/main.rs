@@ -25,6 +25,7 @@ mod hypixel;
 mod leaderboard_card;
 mod leaderboard_updater;
 mod level_card;
+mod milestones;
 mod shared;
 mod stats_definitions;
 mod sweeper;

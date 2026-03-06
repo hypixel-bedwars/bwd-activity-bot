@@ -225,12 +225,6 @@ fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8
 /// rounded rectangle with corner radius `r`.  Uses circle-distance check in
 /// corner regions.
 fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
-    // Note: this function may be called very frequently; the debug call is
-    // intentionally compact to avoid excessive formatting cost.
-    debug!(
-        "level_card::is_inside_rounded_rect: px={}, py={}, w={}, h={}, r={}",
-        px, py, w, h, r
-    );
     // Which corner region (if any) are we in?
     let in_left = px < r;
     let in_right = px >= w.saturating_sub(r);

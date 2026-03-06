@@ -39,12 +39,20 @@ const HEADER_BG: Rgba<u8> = Rgba([0x16, 0x16, 0x28, 0xff]);
 // ---------------------------------------------------------------------------
 
 const IMG_W: u32 = 1200;
-const IMG_H: u32 = 700;
+/// Height of the player-rows section (header + column headers + 10 rows).
+const BASE_IMG_H: u32 = 700;
 const MARGIN: u32 = 20;
 const HEADER_H: u32 = 70;
 const ROW_H: u32 = 56;
 const AVATAR_SIZE: u32 = 40;
 const CORNER_R: u32 = 12;
+
+/// Height of the milestone section header row (title + divider).
+const MILESTONE_SECTION_HEADER_H: u32 = 48;
+/// Height per individual milestone entry row.
+const MILESTONE_ROW_H: u32 = 28;
+/// Padding below the last milestone row before the image edge.
+const MILESTONE_BOTTOM_PAD: u32 = 16;
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -64,6 +72,14 @@ pub struct LeaderboardRow {
     pub avatar_bytes: Option<Vec<u8>>,
 }
 
+/// A single milestone entry with its reach count.
+pub struct MilestoneEntry {
+    /// The level threshold for this milestone.
+    pub level: i64,
+    /// Number of users in the guild who have reached this level or higher.
+    pub user_count: i64,
+}
+
 /// Parameters for rendering a leaderboard page.
 pub struct LeaderboardCardParams {
     /// The rows to display (up to 10).
@@ -72,22 +88,36 @@ pub struct LeaderboardCardParams {
     pub page: u32,
     /// Total number of pages for the footer.
     pub total_pages: u32,
+    /// Milestones to render below the player rows. Empty means no section.
+    pub milestones: Vec<MilestoneEntry>,
 }
 
 /// Render a leaderboard card and return the PNG bytes.
 pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     debug!(
-        "leaderboard_card::render: page={} total_pages={} rows={}",
+        "leaderboard_card::render: page={} total_pages={} rows={} milestones={}",
         params.page,
         params.total_pages,
-        params.rows.len()
+        params.rows.len(),
+        params.milestones.len(),
     );
 
     let font = image::load_from_memory(FONT_PNG)
         .expect("embedded font sheet is valid PNG")
         .to_rgba8();
 
-    let mut img = RgbaImage::from_pixel(IMG_W, IMG_H, BG);
+    // Compute the total image height. If there are milestones, extend the
+    // canvas to fit the milestone section below the player rows.
+    let milestone_section_h = if params.milestones.is_empty() {
+        0
+    } else {
+        MILESTONE_SECTION_HEADER_H
+            + (params.milestones.len() as u32) * MILESTONE_ROW_H
+            + MILESTONE_BOTTOM_PAD
+    };
+    let img_h = BASE_IMG_H + milestone_section_h;
+
+    let mut img = RgbaImage::from_pixel(IMG_W, img_h, BG);
 
     // == OUTER PANEL ==========================================================
     fill_rounded_rect(
@@ -95,7 +125,7 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         MARGIN / 2,
         MARGIN / 2,
         IMG_W - MARGIN,
-        IMG_H - MARGIN,
+        img_h - MARGIN,
         CORNER_R,
         PANEL,
     );
@@ -268,7 +298,57 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         let empty_text = "No players to display";
         let text_w = measure_text(&font, empty_text, 3);
         let cx = (IMG_W - text_w) / 2;
-        render_text(&font, &mut img, cx, IMG_H / 2 - 12, empty_text, 3, MUTED);
+        render_text(
+            &font,
+            &mut img,
+            cx,
+            BASE_IMG_H / 2 - 12,
+            empty_text,
+            3,
+            MUTED,
+        );
+    }
+
+    // == MILESTONES SECTION ===================================================
+    if !params.milestones.is_empty() {
+        debug!(
+            "leaderboard_card::render: rendering {} milestone(s)",
+            params.milestones.len()
+        );
+
+        let section_x = MARGIN;
+        let section_w = IMG_W - MARGIN * 2;
+
+        // Divider line between player rows and milestones section.
+        let divider_y = BASE_IMG_H - 8;
+        fill_rect(&mut img, section_x, divider_y, section_w, 2, DIVIDER);
+
+        // Section title "MILESTONES"
+        let title_y = BASE_IMG_H + 8;
+        render_text(
+            &font,
+            &mut img,
+            section_x + 20,
+            title_y,
+            "MILESTONES",
+            2,
+            CYAN,
+        );
+
+        // Divider below the section title
+        // fill_rect(&mut img, section_x, title_y + 22, section_w, 1, DIVIDER);
+
+        // One row per milestone
+        let first_row_y = title_y + 28;
+        for (i, milestone) in params.milestones.iter().enumerate() {
+            let row_y = first_row_y + (i as u32) * MILESTONE_ROW_H;
+
+            let line = format!(
+                "Level {} - {} users reached",
+                milestone.level, milestone.user_count
+            );
+            render_text(&font, &mut img, section_x + 20, row_y, &line, 2, WHITE);
+        }
     }
 
     // == ENCODE PNG ============================================================
@@ -311,12 +391,6 @@ fn format_xp(xp: f64) -> String {
 
 /// Draw an avatar (or placeholder) at the given position.
 fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8>>) {
-    debug!(
-        "leaderboard_card::draw_avatar: x={}, y={}, has_avatar={}",
-        x,
-        y,
-        avatar_bytes.is_some()
-    );
     let radius = 6u32;
     if let Some(bytes) = avatar_bytes {
         debug!(
@@ -357,10 +431,6 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
 // ---------------------------------------------------------------------------
 
 fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8>) {
-    debug!(
-        "leaderboard_card::fill_rect: x={}, y={}, w={}, h={}",
-        x, y, w, h
-    );
     let img_w = img.width();
     let img_h = img.height();
     for dy in 0..h {
@@ -375,11 +445,6 @@ fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8
 }
 
 fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
-    // Note: called very frequently, keep debug compact.
-    debug!(
-        "leaderboard_card::is_inside_rounded_rect: px={}, py={}, w={}, h={}, r={}",
-        px, py, w, h, r
-    );
     let in_left = px < r;
     let in_right = px >= w.saturating_sub(r);
     let in_top = py < r;
@@ -397,10 +462,6 @@ fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
 }
 
 fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32, color: Rgba<u8>) {
-    debug!(
-        "leaderboard_card::fill_rounded_rect: x={}, y={}, w={}, h={}, r={}",
-        x, y, w, h, r
-    );
     let img_w = img.width();
     let img_h = img.height();
     for dy in 0..h {
@@ -417,7 +478,6 @@ fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32
 }
 
 fn measure_glyph_width(font: &RgbaImage, c: u8) -> u32 {
-    debug!("leaderboard_card::measure_glyph_width: c={}", c);
     let grid_col = (c % 16) as u32;
     let grid_row = (c / 16) as u32;
     let src_x = grid_col * 8;

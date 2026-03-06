@@ -17,6 +17,7 @@ use crate::config::{AppConfig, GuildConfig};
 use crate::database::models::{DbUser, DbXP};
 use crate::database::queries;
 use crate::hypixel::client::HypixelClient;
+use crate::milestones;
 use crate::shared::types::StatDelta;
 use crate::stats_definitions::is_discord_stat;
 use crate::xp::XPConfig;
@@ -238,6 +239,10 @@ async fn apply_stat_deltas(
         return Ok(());
     }
 
+    // Track whether a level-up occurred so we can fire the milestone hook
+    // after the transaction commits (avoiding any DB access inside the tx).
+    let mut level_up: Option<(i64, i64)> = None; // (old_level, new_level)
+
     let mut tx = pool.begin().await?;
 
     // Atomic XP increment protects against lost updates when multiple sweeper
@@ -301,6 +306,7 @@ async fn apply_stat_deltas(
                 "{}: level up detected.",
                 source_label
             );
+            level_up = Some((old_level, new_level));
         }
     }
 
@@ -318,6 +324,33 @@ async fn apply_stat_deltas(
     }
 
     tx.commit().await?;
+
+    // === Milestone hook =====================================================
+    // Runs outside the transaction so a hook failure never rolls back XP.
+    // The hook itself is currently a no-op but exists as an extension point.
+    if let Some((old_level, new_level)) = level_up {
+        let milestones = queries::get_milestones(pool, user.guild_id)
+            .await
+            .unwrap_or_default();
+
+        for m in &milestones {
+            // Fire for every milestone threshold crossed in this level-up.
+            if m.level > old_level && m.level <= new_level {
+                debug!(
+                    user_id = user.id,
+                    discord_user_id = user.discord_user_id,
+                    milestone_level = m.level,
+                    "Milestone reached — calling handle_milestone_reached."
+                );
+                milestones::handle_milestone_reached(
+                    user.discord_user_id as u64,
+                    m.level,
+                )
+                .await;
+            }
+        }
+    }
+
     Ok(())
 }
 

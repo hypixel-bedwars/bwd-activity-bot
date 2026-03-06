@@ -8,7 +8,7 @@
 use sqlx::{Sqlite, SqlitePool, Transaction};
 use tracing::debug;
 
-use super::models::{DbGuild, DbPersistentLeaderboard, DbStatsSnapshot, DbSweepCursor, DbUser, DbXP, LeaderboardEntry};
+use super::models::{DbGuild, DbMilestone, DbPersistentLeaderboard, DbStatsSnapshot, DbSweepCursor, DbUser, DbXP, LeaderboardEntry, MilestoneWithCount};
 
 // =========================================================================
 // guilds
@@ -687,4 +687,120 @@ pub async fn update_persistent_leaderboard_messages(
     .execute(pool)
     .await?;
     Ok(())
+}
+
+// =========================================================================
+// milestones
+// =========================================================================
+
+/// Insert a new milestone for a guild.
+///
+/// Returns `Ok(true)` if the milestone was created, `Ok(false)` if a
+/// milestone at that level already exists for the guild (no-op).
+pub async fn add_milestone(
+    pool: &SqlitePool,
+    guild_id: i64,
+    level: i64,
+) -> Result<bool, sqlx::Error> {
+    debug!("queries::add_milestone: guild_id={}, level={}", guild_id, level);
+    let rows_affected = sqlx::query(
+        "INSERT INTO milestones (guild_id, level) VALUES (?, ?)
+         ON CONFLICT(guild_id, level) DO NOTHING",
+    )
+    .bind(guild_id)
+    .bind(level)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    Ok(rows_affected > 0)
+}
+
+/// Update the level of an existing milestone identified by its ID.
+///
+/// Returns `Ok(true)` if the update succeeded, `Ok(false)` if the milestone
+/// was not found or the new level conflicts with an existing one.
+pub async fn edit_milestone(
+    pool: &SqlitePool,
+    guild_id: i64,
+    milestone_id: i64,
+    new_level: i64,
+) -> Result<bool, sqlx::Error> {
+    debug!(
+        "queries::edit_milestone: guild_id={}, milestone_id={}, new_level={}",
+        guild_id, milestone_id, new_level
+    );
+    let rows_affected = sqlx::query(
+        "UPDATE milestones SET level = ? WHERE id = ? AND guild_id = ?",
+    )
+    .bind(new_level)
+    .bind(milestone_id)
+    .bind(guild_id)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    Ok(rows_affected > 0)
+}
+
+/// Delete a milestone by its ID within a guild.
+///
+/// Returns `Ok(true)` if the row was deleted, `Ok(false)` if it was not found.
+pub async fn remove_milestone(
+    pool: &SqlitePool,
+    guild_id: i64,
+    milestone_id: i64,
+) -> Result<bool, sqlx::Error> {
+    debug!(
+        "queries::remove_milestone: guild_id={}, milestone_id={}",
+        guild_id, milestone_id
+    );
+    let rows_affected = sqlx::query(
+        "DELETE FROM milestones WHERE id = ? AND guild_id = ?",
+    )
+    .bind(milestone_id)
+    .bind(guild_id)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    Ok(rows_affected > 0)
+}
+
+/// Retrieve all milestones for a guild, ordered by level ascending.
+pub async fn get_milestones(
+    pool: &SqlitePool,
+    guild_id: i64,
+) -> Result<Vec<DbMilestone>, sqlx::Error> {
+    debug!("queries::get_milestones: guild_id={}", guild_id);
+    sqlx::query_as::<_, DbMilestone>(
+        "SELECT id, guild_id, level FROM milestones
+         WHERE guild_id = ?
+         ORDER BY level ASC",
+    )
+    .bind(guild_id)
+    .fetch_all(pool)
+    .await
+}
+
+/// Retrieve all milestones for a guild together with the count of users who
+/// have reached each milestone level.
+///
+/// The count is the number of users in the guild whose current level is
+/// greater than or equal to the milestone level.
+pub async fn get_milestones_with_counts(
+    pool: &SqlitePool,
+    guild_id: i64,
+) -> Result<Vec<MilestoneWithCount>, sqlx::Error> {
+    debug!("queries::get_milestones_with_counts: guild_id={}", guild_id);
+    sqlx::query_as::<_, MilestoneWithCount>(
+        "SELECT m.id, m.guild_id, m.level,
+                COUNT(x.user_id) AS user_count
+         FROM milestones m
+         LEFT JOIN users u ON u.guild_id = m.guild_id
+         LEFT JOIN xp x ON x.user_id = u.id AND x.level >= m.level
+         WHERE m.guild_id = ?
+         GROUP BY m.id
+         ORDER BY m.level ASC",
+    )
+    .bind(guild_id)
+    .fetch_all(pool)
+    .await
 }

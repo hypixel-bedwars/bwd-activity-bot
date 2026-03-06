@@ -118,10 +118,34 @@ pub struct LeaderboardEntry {
 }
 
 // ---------------------------------------------------------------------------
+// milestones
+// ---------------------------------------------------------------------------
+
+/// A row from the `milestones` table.
+#[derive(Debug, Clone, FromRow)]
+pub struct DbMilestone {
+    pub id: i64,
+    pub guild_id: i64,
+    /// The level threshold that defines this milestone.
+    pub level: i64,
+}
+
+/// A milestone row joined with the count of users who have reached it.
+/// Returned by the `get_milestones_with_counts` query.
+#[derive(Debug, Clone, FromRow)]
+pub struct MilestoneWithCount {
+    pub id: i64,
+    pub guild_id: i64,
+    pub level: i64,
+    /// Number of users in this guild whose level is >= this milestone's level.
+    pub user_count: i64,
+}
+
+// ---------------------------------------------------------------------------
 // Message Validation
 // ---------------------------------------------------------------------------
 
-// Note for future self: Right now your cooldown is per user globally, so if you wanna do this for 
+// Note for future self: Right now your cooldown is per user globally, so if you wanna do this for
 // multiple guilds you might want to change the key to (user_id, guild_id) or something like that.
 pub struct MessageValidationState {
     pub last_counted: Mutex<HashMap<i64, OffsetDateTime>>,

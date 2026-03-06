@@ -6,7 +6,7 @@
 use sqlx::SqlitePool;
 
 use crate::database::queries;
-use crate::leaderboard_card::{self, LeaderboardCardParams, LeaderboardRow};
+use crate::leaderboard_card::{self, LeaderboardCardParams, LeaderboardRow, MilestoneEntry};
 
 /// Players per leaderboard page (fixed).
 pub const PAGE_SIZE: i64 = 10;
@@ -72,10 +72,24 @@ pub async fn generate_leaderboard_page(
         })
         .collect();
 
+    // Fetch milestones with user counts for the guild.
+    let milestone_data = queries::get_milestones_with_counts(pool, guild_id)
+        .await
+        .unwrap_or_default();
+
+    let milestones: Vec<MilestoneEntry> = milestone_data
+        .into_iter()
+        .map(|m| MilestoneEntry {
+            level: m.level,
+            user_count: m.user_count,
+        })
+        .collect();
+
     let params = LeaderboardCardParams {
         rows,
         page: clamped_page,
         total_pages,
+        milestones,
     };
 
     let png_bytes = leaderboard_card::render(&params);

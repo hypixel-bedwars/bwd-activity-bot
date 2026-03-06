@@ -4,7 +4,7 @@
 /// to a UUID via the Mojang API, storing the mapping in the database, and
 /// assigning the guild's configured registered role.
 use time::OffsetDateTime;
-use tracing::{debug, info, error};
+use tracing::{debug, error, info};
 
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use sqlx::SqlitePool;
@@ -12,7 +12,7 @@ use sqlx::SqlitePool;
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Data, Error};
-use base64::{engine::general_purpose, Engine as _};
+use base64::{Engine as _, engine::general_purpose};
 
 /// Core registration logic, shared between `/register` and the Register button.
 ///
@@ -33,6 +33,14 @@ pub async fn perform_registration(
     let guild_id_i64 = guild_id.get() as i64;
     let discord_user_id = user_id.get() as i64;
 
+    debug!(
+        guild_id = guild_id_i64,
+        discord_user_id,
+        user_tag = %user_tag,
+        minecraft_username = %minecraft_username,
+        "Starting registration"
+    );
+
     queries::upsert_guild(&data.db, guild_id_i64).await?;
 
     let guild_row = queries::get_guild(&data.db, guild_id_i64).await?;
@@ -41,11 +49,27 @@ pub async fn perform_registration(
         .map(|g| serde_json::from_str(&g.config_json).unwrap_or_default())
         .unwrap_or_default();
 
+    debug!(
+        guild_id = guild_id_i64,
+        config = ?guild_config,
+        "Loaded guild configuration"
+    );
+
+    debug!(minecraft_username = %minecraft_username, "Resolving Minecraft username");
+
     let profile = data
         .hypixel
         .resolve_username(minecraft_username)
         .await
         .map_err(|e| format!("Could not resolve Minecraft username: {e}"))?;
+
+    debug!(
+        minecraft_name = %profile.name,
+        minecraft_uuid = %profile.id,
+        "Minecraft username resolved"
+    );
+
+    debug!(minecraft_uuid = %profile.id, "Fetching Hypixel player data");
 
     let player_data = data
         .hypixel
@@ -53,9 +77,25 @@ pub async fn perform_registration(
         .await
         .map_err(|e| format!("Could not fetch Hypixel player data: {e}"))?;
 
+    debug!(minecraft_uuid = %profile.id, "Hypixel player data fetched");
+
     match player_data.social_links.get("DISCORD") {
         Some(linked) => {
+            debug!(
+                minecraft_name = %profile.name,
+                linked_discord = %linked,
+                expected_discord = %user_tag,
+                "Found Hypixel Discord social link"
+            );
+
             if linked != user_tag {
+                debug!(
+                    minecraft_name = %profile.name,
+                    linked_discord = %linked,
+                    actual_discord = %user_tag,
+                    "Ownership verification failed"
+                );
+
                 return Ok((
                     format!(
                         "Ownership verification failed.\n\n\
@@ -66,8 +106,19 @@ pub async fn perform_registration(
                     None,
                 ));
             }
+
+            debug!(
+                minecraft_name = %profile.name,
+                discord = %linked,
+                "Ownership verification succeeded"
+            );
         }
         None => {
+            debug!(
+                minecraft_name = %profile.name,
+                "Ownership verification failed: no Discord social link"
+            );
+
             return Ok((
                 "Ownership verification failed.\n\n\
                  Your Hypixel account must have a **Discord social link** set.\n\
@@ -83,9 +134,10 @@ pub async fn perform_registration(
         Some(id) => id,
         None => {
             debug!(
-                "Guild {} attempted registration but has no registered role configured.",
-                guild_id_i64
+                guild_id = guild_id_i64,
+                "Registration attempted but no registered role configured"
             );
+
             return Ok((
                 "Registration is not configured on this server. \
                 An administrator must set a registered role first."
@@ -99,9 +151,12 @@ pub async fn perform_registration(
         queries::get_user_by_discord_id(&data.db, discord_user_id, guild_id_i64).await?
     {
         debug!(
-            "User {} attempted to register but is already registered as {} in guild {}.",
-            discord_user_id, existing_user.minecraft_uuid, guild_id_i64
+            guild_id = guild_id_i64,
+            discord_user_id,
+            minecraft_uuid = %existing_user.minecraft_uuid,
+            "User attempted duplicate registration"
         );
+
         return Ok((
             format!(
                 "You are already registered as **{}** (UUID `{}`). \
@@ -117,9 +172,13 @@ pub async fn perform_registration(
 
     if let Err(e) = member.add_role(&serenity_ctx.http, role).await {
         error!(
-            "Failed to assign registered role to user {} in guild {}: {}",
-            discord_user_id, guild_id_i64, e
+            guild_id = guild_id_i64,
+            discord_user_id,
+            role_id,
+            error = %e,
+            "Failed to assign registered role"
         );
+
         return Ok((
             "I couldn't assign the registered role. \
             Please ensure I have **Manage Roles** permission and my role is above the registered role."
@@ -127,6 +186,13 @@ pub async fn perform_registration(
             None,
         ));
     }
+
+    debug!(
+        guild_id = guild_id_i64,
+        discord_user_id,
+        role_id,
+        "Registered role assigned"
+    );
 
     let now = OffsetDateTime::now_utc()
         .format(&time::format_description::well_known::Rfc3339)
@@ -142,22 +208,44 @@ pub async fn perform_registration(
     )
     .await?;
 
+    debug!(
+        db_user_id = db_user.id,
+        minecraft_uuid = %profile.id,
+        "User inserted into database"
+    );
+
     let bw = &player_data.bedwars;
     for (stat_name, value) in &bw.stats {
         queries::insert_hypixel_snapshot(&data.db, db_user.id, stat_name, *value, &now).await?;
     }
 
+    debug!(
+        db_user_id = db_user.id,
+        stat_count = bw.stats.len(),
+        "Inserted Hypixel stat snapshots"
+    );
+
     for stat_name in &["messages_sent", "reactions_added", "commands_used"] {
         queries::insert_discord_snapshot(&data.db, db_user.id, stat_name, 0.0, &now).await?;
     }
 
+    debug!(
+        db_user_id = db_user.id,
+        "Inserted initial Discord stat snapshots"
+    );
+
     queries::upsert_xp(&data.db, db_user.id, 0.0, &now).await?;
+
+    debug!(
+        db_user_id = db_user.id,
+        "Initialized XP record"
+    );
 
     info!(
         discord_user_id,
         minecraft_uuid = %profile.id,
         minecraft_name = %profile.name,
-        "User registered."
+        "User registered"
     );
 
     Ok((

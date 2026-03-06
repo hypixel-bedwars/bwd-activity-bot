@@ -30,23 +30,46 @@ pub async fn send_registration_message(
         return Ok(());
     }
 
-    let instructions = "\
-        ## How to Register\n\
-        To link your Minecraft account and start earning XP, press the **Register** button below.\n\n\
-        **Before you press it, make sure:**\n\
-        - Your server nickname follows the format: `[NNN emoji] YourMinecraftUsername`\n\
-          *(e.g. `[313 💫] VA80`, `[204 ✨] CosmicFuji`)*\n\
-        - Your **Hypixel** profile has your Discord tag set as a social link\n\
-          *(in-game: `/profile` → Social Media → Discord)*\n\n\
-        Once both are set, hit the button and the bot will handle the rest.";
+    let embed = CreateEmbed::default()
+        .title("🔗 Account Registration")
+        .color(0x00BFFF)
+        .description(
+            "Link your **Minecraft account** to start earning **XP** and tracking your stats on this server."
+        )
+        .field(
+            "📛 Step 1 — Set Your Nickname",
+            "Your server nickname must follow this format:\n\
+            `[NNN emoji] YourMinecraftUsername`\n\n\
+            **Examples:**\n\
+            `[313 💫] VA80`\n\
+            `[204 ✨] CosmicFuji`",
+            false,
+        )
+        .field(
+            "🔗 Step 2 — Link Your Discord on Hypixel",
+            "Your **Hypixel profile** must have your Discord set as a social link.\n\n\
+            **In-game command:**\n\
+            `/socials discord <your_discord_tag>`",
+            false,
+        )
+        .field(
+            "✅ Final Step",
+            "Once both steps are completed, press the **Register** button below.\n\
+            The bot will automatically verify your account.",
+            false,
+        )
+        .footer(serenity::CreateEmbedFooter::new(
+            "Your Minecraft username must match the nickname you set.",
+        ));
 
-    let message = serenity::CreateMessage::new()
-        .content(instructions)
-        .components(vec![serenity::CreateActionRow::Buttons(vec![
+    let message = serenity::CreateMessage::new().embed(embed).components(vec![
+        serenity::CreateActionRow::Buttons(vec![
             serenity::CreateButton::new("register_button")
                 .label("Register")
+                .emoji('✅')
                 .style(serenity::ButtonStyle::Success),
-        ])]);
+        ]),
+    ]);
 
     channel
         .id
@@ -54,9 +77,9 @@ pub async fn send_registration_message(
         .await?;
 
     info!(
-		"Sent registration message to channel '{}' ({})",
-		channel.name, channel.id
-	);
+        "Sent registration message to channel '{}' ({})",
+        channel.name, channel.id
+    );
 
     let embed = CreateEmbed::default()
         .title("Registration Message Sent")
