@@ -54,10 +54,9 @@ pub async fn send_registration_message(
         .await?;
 
     info!(
-        admin = ctx.author().id.get(),
-        channel = channel.id.get(),
-        "Registration message sent."
-    );
+		"Sent registration message to channel '{}' ({})",
+		channel.name, channel.id
+	);
 
     let embed = CreateEmbed::default()
         .title("Registration Message Sent")

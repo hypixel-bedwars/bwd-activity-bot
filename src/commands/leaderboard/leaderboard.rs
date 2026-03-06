@@ -7,6 +7,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use poise::serenity_prelude::{self as serenity, CreateAttachment, CreateInteractionResponse, CreateInteractionResponseMessage};
+use tracing::debug;
 
 use crate::shared::cache::TimedCache;
 use crate::shared::types::{Context, Error};
@@ -44,6 +45,7 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
             .components(components),
     )
     .await?;
+    debug!("Sent leaderboard page {} for guild {}", page, guild_id);
 
     Ok(())
 }

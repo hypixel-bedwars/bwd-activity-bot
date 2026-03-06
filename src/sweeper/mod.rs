@@ -9,7 +9,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use sqlx::SqlitePool;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 use crate::config::AppConfig;
 use crate::hypixel::client::HypixelClient;
@@ -48,7 +48,7 @@ pub fn start_discord_sweeper(pool: SqlitePool, interval_seconds: u64, config: Ap
         loop {
             tokio::time::sleep(interval).await;
 
-            info!("Discord sweeper: starting sweep iteration...");
+            debug!("Discord sweeper: starting sweep iteration...");
 
             if let Err(e) = stat_sweeper::run_discord_sweep(&pool, &config).await {
                 error!(error = %e, "Discord sweeper: sweep iteration failed.");

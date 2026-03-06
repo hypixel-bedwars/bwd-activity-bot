@@ -4,6 +4,7 @@
 /// i.e. the difference between the latest snapshot and the baseline
 /// snapshot taken when the user first ran `/register`.
 use poise::serenity_prelude::{self as serenity, CreateEmbed, CreateEmbedFooter};
+use tracing::info;
 
 use crate::config::GuildConfig;
 use crate::database::queries;
@@ -131,5 +132,6 @@ pub async fn stats(
     }
 
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    info!("Displayed stats for user {} ({})", target.name, target.id);
     Ok(())
 }

@@ -11,7 +11,7 @@ use std::sync::Arc;
 use anyhow::{Result, anyhow};
 use sqlx::SqlitePool;
 use time::OffsetDateTime;
-use tracing::{error, info, warn};
+use tracing::{debug, error, info, warn};
 
 use crate::config::{AppConfig, GuildConfig};
 use crate::database::models::{DbUser, DbXP};
@@ -41,11 +41,11 @@ pub async fn run_hypixel_sweep(
     let users = queries::get_all_registered_users(pool).await?;
 
     if users.is_empty() {
-        info!("Hypixel sweep: no registered users, skipping.");
+        debug!("Hypixel sweep: no registered users, skipping.");
         return Ok(());
     }
 
-    info!(
+    debug!(
         "Hypixel sweep: processing {} registered user(s)...",
         users.len()
     );
@@ -70,11 +70,11 @@ pub async fn run_discord_sweep(pool: &SqlitePool, config: &AppConfig) -> Result<
     let users = queries::get_all_registered_users(pool).await?;
 
     if users.is_empty() {
-        info!("Discord sweep: no registered users, skipping.");
+        debug!("Discord sweep: no registered users, skipping.");
         return Ok(());
     }
 
-    info!(
+    debug!(
         "Discord sweep: processing {} registered user(s)...",
         users.len()
     );
@@ -280,7 +280,7 @@ async fn apply_stat_deltas(
                 .await?;
         }
 
-        info!(
+        debug!(
             user_id = user.id,
             earned,
             total_xp = xp_row.total_xp,
@@ -291,7 +291,7 @@ async fn apply_stat_deltas(
         );
 
         if new_level > old_level {
-            info!(
+            debug!(
                 user_id = user.id,
                 discord_user_id = user.discord_user_id,
                 old_level,

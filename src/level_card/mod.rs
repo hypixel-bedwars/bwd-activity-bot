@@ -13,6 +13,7 @@
 use std::io::Cursor;
 
 use image::{DynamicImage, GenericImageView, ImageFormat, Rgba, RgbaImage};
+use tracing::debug;
 
 // ---------------------------------------------------------------------------
 // Embedded font sheet
@@ -57,6 +58,18 @@ pub struct LevelCardParams {
 
 /// Render the level card and return the PNG bytes.
 pub fn render(params: &LevelCardParams) -> Vec<u8> {
+    debug!(
+        "level_card::render: minecraft_username={}, level={}, total_xp={}, xp_this_level={}, xp_for_next_level={}, stat_deltas_len={}, xp_gained={}, has_avatar={}",
+        params.minecraft_username,
+        params.level,
+        params.total_xp,
+        params.xp_this_level,
+        params.xp_for_next_level,
+        params.stat_deltas.len(),
+        params.xp_gained,
+        params.avatar_bytes.is_some()
+    );
+
     let font = image::load_from_memory(FONT_PNG)
         .expect("embedded font sheet is valid PNG")
         .to_rgba8();
@@ -68,6 +81,10 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
 
     // == AVATAR ==============================================================
     if let Some(bytes) = &params.avatar_bytes {
+        debug!(
+            "level_card::render: loading avatar from provided bytes (len={})",
+            bytes.len()
+        );
         if let Ok(dyn_img) = image::load_from_memory(bytes) {
             let avatar = dyn_img.resize_exact(80, 80, image::imageops::FilterType::Nearest);
             // Draw avatar with rounded corners (r=8)
@@ -79,9 +96,11 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
                 }
             }
         } else {
+            debug!("level_card::render: failed to decode avatar bytes, drawing placeholder");
             fill_rounded_rect(&mut img, 28, 28, 80, 80, 8, MUTED);
         }
     } else {
+        debug!("level_card::render: no avatar provided, drawing placeholder");
         fill_rounded_rect(&mut img, 28, 28, 80, 80, 8, MUTED);
     }
 
@@ -175,6 +194,10 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
     DynamicImage::ImageRgba8(img)
         .write_to(&mut Cursor::new(&mut buf), ImageFormat::Png)
         .expect("PNG encoding should not fail");
+    debug!(
+        "level_card::render: finished encoding PNG (bytes={})",
+        buf.len()
+    );
     buf
 }
 
@@ -184,6 +207,7 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
 
 /// Fill a solid-colour axis-aligned rectangle (no rounding).
 fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8>) {
+    debug!("level_card::fill_rect: x={}, y={}, w={}, h={}", x, y, w, h);
     let img_w = img.width();
     let img_h = img.height();
     for dy in 0..h {
@@ -201,6 +225,12 @@ fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8
 /// rounded rectangle with corner radius `r`.  Uses circle-distance check in
 /// corner regions.
 fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
+    // Note: this function may be called very frequently; the debug call is
+    // intentionally compact to avoid excessive formatting cost.
+    debug!(
+        "level_card::is_inside_rounded_rect: px={}, py={}, w={}, h={}, r={}",
+        px, py, w, h, r
+    );
     // Which corner region (if any) are we in?
     let in_left = px < r;
     let in_right = px >= w.saturating_sub(r);
@@ -222,6 +252,10 @@ fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
 /// Fill a rounded rectangle at `(x, y)` with size `(w, h)` and corner
 /// radius `r`.
 fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32, color: Rgba<u8>) {
+    debug!(
+        "level_card::fill_rounded_rect: x={}, y={}, w={}, h={}, r={}",
+        x, y, w, h, r
+    );
     let img_w = img.width();
     let img_h = img.height();
     for dy in 0..h {
@@ -241,6 +275,7 @@ fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32
 /// sheet.  Scans the 8x8 cell and returns the index of the rightmost
 /// non-transparent column + 1, or 4 as a fallback for empty cells.
 fn measure_glyph_width(font: &RgbaImage, c: u8) -> u32 {
+    debug!("level_card::measure_glyph_width: c={}", c);
     let grid_col = (c % 16) as u32;
     let grid_row = (c / 16) as u32;
     let src_x = grid_col * 8;
@@ -268,6 +303,11 @@ fn measure_glyph_width(font: &RgbaImage, c: u8) -> u32 {
 /// Mirrors the exact cursor logic of `render_text` so right-alignment is
 /// pixel-perfect.
 fn measure_text(font: &RgbaImage, text: &str, scale: u32) -> u32 {
+    debug!(
+        "level_card::measure_text: text_len={}, scale={}",
+        text.len(),
+        scale
+    );
     let mut width: u32 = 0;
     let mut last_was_glyph = false;
 
@@ -299,6 +339,7 @@ fn measure_text(font: &RgbaImage, text: &str, scale: u32) -> u32 {
         width = width.saturating_sub(scale);
     }
 
+    debug!("level_card::measure_text: result_width={}", width);
     width
 }
 
@@ -313,6 +354,14 @@ fn render_text(
     scale: u32,
     color: Rgba<u8>,
 ) {
+    debug!(
+        "level_card::render_text: x={}, y={}, text_len={}, scale={}, color={:?}",
+        x,
+        y,
+        text.len(),
+        scale,
+        color
+    );
     let img_w = img.width();
     let img_h = img.height();
     let mut cursor_x = x;
@@ -360,4 +409,8 @@ fn render_text(
 
         cursor_x += glyph_w * scale + scale; // glyph width + 1-px gap
     }
+    debug!(
+        "level_card::render_text: finished rendering text='{}'",
+        text
+    );
 }

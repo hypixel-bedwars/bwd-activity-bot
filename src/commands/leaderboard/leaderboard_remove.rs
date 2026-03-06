@@ -3,6 +3,7 @@
 /// Deletes the stored leaderboard messages and removes the database row so
 /// the background updater stops refreshing.
 use poise::serenity_prelude::{self as serenity};
+use tracing::info;
 
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
@@ -77,6 +78,8 @@ pub async fn leaderboard_remove(ctx: Context<'_>) -> Result<(), Error> {
             .await?;
         }
     }
+    
+    info!("Persistent leaderboard removed for guild {}", guild_id);
 
     Ok(())
 }

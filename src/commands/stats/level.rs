@@ -3,7 +3,7 @@
 /// Shows a user's XP, level, progress to the next level, and stat changes
 /// since the last sweep.  Attaches a generated PNG level card image.
 use poise::serenity_prelude::{self as serenity, CreateAttachment, CreateEmbed};
-use tracing::info;
+use tracing::{info, debug};
 
 use crate::config::GuildConfig;
 use crate::database::queries;
@@ -26,7 +26,7 @@ async fn fetch_avatar(uuid: &str) -> Option<Vec<u8>> {
         .await
         .ok()?;
 
-    info!("Fetched avatar for UUID {}: HTTP {}", uuid, resp.status());
+    debug!("Fetched avatar for UUID {}: HTTP {}", uuid, resp.status());
 
     if resp.status().is_success() {
         resp.bytes().await.ok().map(|b| b.to_vec())
@@ -183,6 +183,11 @@ pub async fn level(
     // == SEND IMAGE ONLY (no embed) ===========================================
     ctx.send(poise::CreateReply::default().attachment(attachment))
         .await?;
+    
+    info!(
+		"Sent level card for user {} (Discord ID {}, Minecraft username {:#?}) in guild {}",
+		target.name, target.id, db_user.minecraft_username, guild_id
+	);
 
     Ok(())
 }

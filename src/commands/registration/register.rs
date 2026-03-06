@@ -4,7 +4,7 @@
 /// to a UUID via the Mojang API, storing the mapping in the database, and
 /// assigning the guild's configured registered role.
 use time::OffsetDateTime;
-use tracing::{debug, info};
+use tracing::{debug, info, error};
 
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use sqlx::SqlitePool;
@@ -82,7 +82,7 @@ pub async fn perform_registration(
     let role_id = match guild_config.registered_role_id {
         Some(id) => id,
         None => {
-            info!(
+            debug!(
                 "Guild {} attempted registration but has no registered role configured.",
                 guild_id_i64
             );
@@ -116,7 +116,7 @@ pub async fn perform_registration(
     let member = guild_id.member(&serenity_ctx.http, user_id).await?;
 
     if let Err(e) = member.add_role(&serenity_ctx.http, role).await {
-        info!(
+        error!(
             "Failed to assign registered role to user {} in guild {}: {}",
             discord_user_id, guild_id_i64, e
         );

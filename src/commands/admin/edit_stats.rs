@@ -10,6 +10,7 @@
 /// All subcommands are ephemeral (visible only to the invoker) and require the
 /// invoker's Discord user ID to be in `AppConfig.admin_user_ids`.
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
+use tracing::info;
 
 use crate::config::GuildConfig;
 use crate::database::queries;
@@ -257,6 +258,8 @@ pub async fn add_bedwars(
         "Added **{mode_display} — {metric_display}** (`{stat_key}`) → **{xp_per_unit} XP/unit**."
     ))
     .await?;
+    
+    info!("Added **{mode_display} — {metric_display}** (`{stat_key}`) XP configuration by {}", ctx.author().name);
 
     Ok(())
 }
@@ -315,6 +318,8 @@ pub async fn add_discord(
         "Added Discord stat **{stat_display}** (`{stat}`) → **{xp_per_unit} XP/unit**."
     ))
     .await?;
+    
+    info!("Added Discord stat `{stat}` XP configuration by {}", ctx.author().name);
 
     Ok(())
 }
@@ -355,6 +360,8 @@ pub async fn edit_stat(
         "Updated `{stat_name}`: {old_xp} XP/unit → **{new_xp_value} XP/unit**."
     ))
     .await?;
+    
+    info!("Updated `{stat_name}` XP configuration by {}", ctx.author().name);
 
     Ok(())
 }
@@ -389,6 +396,7 @@ pub async fn remove(
         "Removed `{stat_name}` from XP configuration. Existing snapshots are preserved."
     ))
     .await?;
+    info!("Removed `{stat_name}` from XP configuration by {}", ctx.author().name);
 
     Ok(())
 }

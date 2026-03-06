@@ -6,6 +6,7 @@
 use std::io::Cursor;
 
 use image::{DynamicImage, GenericImageView, ImageFormat, Rgba, RgbaImage};
+use tracing::debug;
 
 // ---------------------------------------------------------------------------
 // Embedded font sheet (shared with level_card)
@@ -75,6 +76,13 @@ pub struct LeaderboardCardParams {
 
 /// Render a leaderboard card and return the PNG bytes.
 pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
+    debug!(
+        "leaderboard_card::render: page={} total_pages={} rows={}",
+        params.page,
+        params.total_pages,
+        params.rows.len()
+    );
+
     let font = image::load_from_memory(FONT_PNG)
         .expect("embedded font sheet is valid PNG")
         .to_rgba8();
@@ -97,20 +105,10 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     let header_y = MARGIN;
     let header_w = IMG_W - MARGIN * 2;
 
-    fill_rounded_rect(
-        &mut img, header_x, header_y, header_w, HEADER_H, 10, HEADER_BG,
-    );
+    fill_rounded_rect(&mut img, header_x, header_y, header_w, HEADER_H, 10, HEADER_BG);
 
     // Title: "LEADERBOARD"
-    render_text(
-        &font,
-        &mut img,
-        header_x + 20,
-        header_y + 12,
-        "LEADERBOARD",
-        3,
-        WHITE,
-    );
+    render_text(&font, &mut img, header_x + 20, header_y + 12, "LEADERBOARD", 3, WHITE);
 
     // Page info right-aligned in header
     let page_text = format!("PAGE {}/{}", params.page, params.total_pages);
@@ -130,29 +128,13 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         2,
         MUTED,
     );
-    render_text(
-        &font,
-        &mut img,
-        header_x + 700,
-        col_header_y,
-        "LEVEL",
-        2,
-        MUTED,
-    );
+    render_text(&font, &mut img, header_x + 700, col_header_y, "LEVEL", 2, MUTED);
 
     // Right-align "XP" header
     let xp_header = "XP";
     let xp_header_w = measure_text(&font, xp_header, 2);
     let xp_header_x = (header_x + header_w).saturating_sub(20 + xp_header_w);
-    render_text(
-        &font,
-        &mut img,
-        xp_header_x,
-        col_header_y,
-        xp_header,
-        2,
-        MUTED,
-    );
+    render_text(&font, &mut img, xp_header_x, col_header_y, xp_header, 2, MUTED);
 
     // Divider below column headers
     fill_rect(&mut img, header_x, col_header_y + 22, header_w, 1, DIVIDER);
@@ -161,6 +143,11 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     let rows_start_y = col_header_y + 28;
 
     for (i, row) in params.rows.iter().enumerate() {
+        debug!(
+            "leaderboard_card::render: drawing row index={} rank={} username={}",
+            i, row.rank, row.username
+        );
+
         let row_y = rows_start_y + (i as u32) * ROW_H;
 
         // Row background (top 3 get special colours)
@@ -232,15 +219,7 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
 
         // Level
         let level_text = format!("{}", row.level);
-        render_text(
-            &font,
-            &mut img,
-            header_x + 700,
-            row_y + 16,
-            &level_text,
-            2,
-            CYAN,
-        );
+        render_text(&font, &mut img, header_x + 700, row_y + 16, &level_text, 2, CYAN);
 
         // XP right-aligned
         let xp_text = format_xp(row.total_xp);
@@ -251,6 +230,7 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
 
     // == EMPTY STATE ==========================================================
     if params.rows.is_empty() {
+        debug!("leaderboard_card::render: no rows to render (empty state)");
         let empty_text = "No players to display";
         let text_w = measure_text(&font, empty_text, 3);
         let cx = (IMG_W - text_w) / 2;
@@ -262,6 +242,11 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     DynamicImage::ImageRgba8(img)
         .write_to(&mut Cursor::new(&mut buf), ImageFormat::Png)
         .expect("PNG encoding should not fail");
+
+    debug!(
+        "leaderboard_card::render: finished encoding PNG (bytes={})",
+        buf.len()
+    );
     buf
 }
 
@@ -271,8 +256,10 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
 
 /// Format XP with comma separators (e.g. 12450.0 -> "12,450").
 fn format_xp(xp: f64) -> String {
+    debug!("leaderboard_card::format_xp: xp={}", xp);
     let whole = xp.round() as i64;
     if whole < 0 {
+        debug!("leaderboard_card::format_xp: negative xp, returning 0");
         return "0".to_string();
     }
     let s = whole.to_string();
@@ -283,13 +270,22 @@ fn format_xp(xp: f64) -> String {
         }
         result.push(c);
     }
-    result.chars().rev().collect()
+    let formatted = result.chars().rev().collect();
+    debug!("leaderboard_card::format_xp: formatted={}", formatted);
+    formatted
 }
 
 /// Draw an avatar (or placeholder) at the given position.
 fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8>>) {
+    debug!(
+        "leaderboard_card::draw_avatar: x={}, y={}, has_avatar={}",
+        x,
+        y,
+        avatar_bytes.is_some()
+    );
     let radius = 6u32;
     if let Some(bytes) = avatar_bytes {
+        debug!("leaderboard_card::draw_avatar: avatar bytes len={}", bytes.len());
         if let Ok(dyn_img) = image::load_from_memory(bytes) {
             let avatar = dyn_img.resize_exact(
                 AVATAR_SIZE,
@@ -307,7 +303,10 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
                     }
                 }
             }
+            debug!("leaderboard_card::draw_avatar: rendered avatar image");
             return;
+        } else {
+            debug!("leaderboard_card::draw_avatar: failed to decode avatar bytes, using placeholder");
         }
     }
     // Fallback placeholder
@@ -319,6 +318,7 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
 // ---------------------------------------------------------------------------
 
 fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8>) {
+    debug!("leaderboard_card::fill_rect: x={}, y={}, w={}, h={}", x, y, w, h);
     let img_w = img.width();
     let img_h = img.height();
     for dy in 0..h {
@@ -333,6 +333,11 @@ fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8
 }
 
 fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
+    // Note: called very frequently, keep debug compact.
+    debug!(
+        "leaderboard_card::is_inside_rounded_rect: px={}, py={}, w={}, h={}, r={}",
+        px, py, w, h, r
+    );
     let in_left = px < r;
     let in_right = px >= w.saturating_sub(r);
     let in_top = py < r;
@@ -350,6 +355,10 @@ fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
 }
 
 fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32, color: Rgba<u8>) {
+    debug!(
+        "leaderboard_card::fill_rounded_rect: x={}, y={}, w={}, h={}, r={}",
+        x, y, w, h, r
+    );
     let img_w = img.width();
     let img_h = img.height();
     for dy in 0..h {
@@ -366,6 +375,7 @@ fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32
 }
 
 fn measure_glyph_width(font: &RgbaImage, c: u8) -> u32 {
+    debug!("leaderboard_card::measure_glyph_width: c={}", c);
     let grid_col = (c % 16) as u32;
     let grid_row = (c / 16) as u32;
     let src_x = grid_col * 8;
@@ -390,6 +400,11 @@ fn measure_glyph_width(font: &RgbaImage, c: u8) -> u32 {
 }
 
 fn measure_text(font: &RgbaImage, text: &str, scale: u32) -> u32 {
+    debug!(
+        "leaderboard_card::measure_text: text_len={}, scale={}",
+        text.len(),
+        scale
+    );
     let mut width: u32 = 0;
     let mut last_was_glyph = false;
 
@@ -414,6 +429,7 @@ fn measure_text(font: &RgbaImage, text: &str, scale: u32) -> u32 {
     if last_was_glyph {
         width = width.saturating_sub(scale);
     }
+    debug!("leaderboard_card::measure_text: width={}", width);
     width
 }
 
@@ -426,6 +442,13 @@ fn render_text(
     scale: u32,
     color: Rgba<u8>,
 ) {
+    debug!(
+        "leaderboard_card::render_text: x={}, y={}, text_len={}, scale={}",
+        x,
+        y,
+        text.len(),
+        scale
+    );
     let img_w = img.width();
     let img_h = img.height();
     let mut cursor_x = x;
@@ -466,4 +489,5 @@ fn render_text(
         }
         cursor_x += glyph_w * scale + scale;
     }
+    debug!("leaderboard_card::render_text: finished rendering text='{}'", text);
 }

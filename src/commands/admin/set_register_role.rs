@@ -49,7 +49,7 @@ pub async fn set_register_role(
         .unwrap_or_default();
 
     guild_config.registered_role_id = Some(role.id.get());
-    info!(
+    debug!(
         "Setting registration role for guild {} to {} (ID {})",
         guild_id, role.name, role.id
     );
@@ -66,6 +66,10 @@ pub async fn set_register_role(
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
 
     debug!("Finished handling /set-register-role");
+    info!(
+		"Updated registration role for guild {} to {} (ID {})",
+		guild_id, role.name, role.id
+	);
 
     Ok(())
 }

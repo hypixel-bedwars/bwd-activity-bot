@@ -1,7 +1,7 @@
 /// "/unregister" command.
 /// Unregisters the user by deleting their row from the database and removing the registered role (if they have it).
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::config::GuildConfig;
 use crate::database::queries;
@@ -27,11 +27,7 @@ pub async fn unregister(ctx: Context<'_>) -> Result<(), Error> {
 
     queries::unregister_user(&data.db, discord_user_id, guild_id_i64).await?;
 
-    info!(
-        discord_user_id,
-        guild_id = guild_id_i64,
-        "Unregistered user from guild"
-    );
+    info!("User {} unregistered ", ctx.author().id);
 
     if let Some(role_id) = guild_config.registered_role_id {
         let role = serenity::RoleId::new(role_id);
@@ -43,7 +39,7 @@ pub async fn unregister(ctx: Context<'_>) -> Result<(), Error> {
 
         // check role exists in cached guild
         if !role_exists {
-            info!(
+            debug!(
                 role_id,
                 guild_id = guild_id_i64,
                 "Registered role not found in guild, skipping role removal"

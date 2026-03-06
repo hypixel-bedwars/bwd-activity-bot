@@ -4,6 +4,7 @@
 /// message IDs in the database so the background updater can edit them
 /// periodically.
 use poise::serenity_prelude::{self as serenity, CreateAttachment, CreateMessage};
+use tracing::info;
 
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
@@ -131,6 +132,8 @@ pub async fn leaderboard_create(
             )),
     )
     .await?;
+    
+    info!("Created persistent leaderboard for guild {} in channel {}", guild_id, channel_id);
 
     // send a follow-up message that has the time when it was last updated (so the admin can see that it worked and know when it will update next)
     // it will look something like this
