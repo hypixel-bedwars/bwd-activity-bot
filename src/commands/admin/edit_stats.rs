@@ -431,55 +431,17 @@ pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
         .collect();
     rows.sort_by(|a, b| a.0.cmp(&b.0));
 
-    // Column widths (min width = header width)
-    const HDR_STAT: &str = "Stat";
-    const HDR_KEY: &str = "Raw Key";
-    const HDR_XP: &str = "XP/unit";
-
-    let col_stat = rows
+    let description = rows
         .iter()
-        .map(|(d, _, _)| d.len())
-        .max()
-        .unwrap_or(0)
-        .max(HDR_STAT.len());
-    let col_key = rows
-        .iter()
-        .map(|(_, k, _)| k.len())
-        .max()
-        .unwrap_or(0)
-        .max(HDR_KEY.len());
-    let col_xp = rows
-        .iter()
-        .map(|(_, _, v)| format!("{:.0}", v).len())
-        .max()
-        .unwrap_or(0)
-        .max(HDR_XP.len());
-
-    // Separator line
-    let sep = format!(
-        "{}-+-{}-+-{}",
-        "-".repeat(col_stat),
-        "-".repeat(col_key),
-        "-".repeat(col_xp),
-    );
-
-    // Header
-    let header = format!(
-        "{:<col_stat$} | {:<col_key$} | {:>col_xp$}",
-        HDR_STAT, HDR_KEY, HDR_XP,
-    );
-
-    // Data rows
-    let data_lines: Vec<String> = rows
-        .iter()
-        .map(|(d, k, v)| format!("{:<col_stat$} | {:<col_key$} | {:>col_xp$.0}", d, k, v,))
-        .collect();
-
-    let table = format!("{}\n{}\n{}", header, sep, data_lines.join("\n"),);
-
+        .map(|(display, key, xp)| {
+            format!("**{}** — {:.0} XP (`{}`)", display, xp, key)
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    
     let embed = CreateEmbed::default()
         .title(format!("XP Stats — {} configured", rows.len()))
-        .description(format!("```\n{}\n```", table))
+        .description(description)
         .color(0x00BFFF);
 
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
