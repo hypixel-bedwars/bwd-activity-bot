@@ -1,5 +1,8 @@
-// This is a skeleton project — many public items exist for extensibility but
-// are not yet consumed within the crate itself.
+// Althrough this is not a skeleton project anymore
+// I would prefer to keep some of the unused codearound for now 
+// most of the dead code is just me nor reading them yet
+// but as i work on the project with very bug fix i will eventually read most of them
+// and thats why i am letting this be for now.
 #![allow(dead_code)]
 
 //! Entry point for the memum-activity-bot.
