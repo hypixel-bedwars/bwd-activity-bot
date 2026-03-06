@@ -15,6 +15,7 @@ use tracing::{debug, error};
 
 use crate::database::queries;
 use crate::shared::types::{Data, Error};
+use crate::discord_stats::validation::validate_message;
 
 /// Handle a Serenity `FullEvent` and record relevant Discord activity.
 ///
@@ -31,6 +32,14 @@ pub async fn handle_event(event: &FullEvent, data: &Data) -> Result<(), Error> {
             let Some(guild_id) = new_message.guild_id else {
                 return Ok(()); // DM, ignore.
             };
+
+            if !validate_message(
+                new_message.author.id.get() as i64,
+                &new_message.content,
+                data,
+            ) {
+                return Ok(());
+            }
 
             increment_stat(
                 &data.db,

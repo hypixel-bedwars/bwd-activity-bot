@@ -9,6 +9,7 @@ use sqlx::SqlitePool;
 
 use crate::commands::leaderboard::leaderboard::LeaderboardCache;
 use crate::config::AppConfig;
+use crate::database::models::MessageValidationState;
 use crate::hypixel::client::HypixelClient;
 
 // ---------------------------------------------------------------------------
@@ -44,6 +45,10 @@ pub struct Data {
 
     /// Timed cache for leaderboard page images, keyed by `(guild_id, page)`.
     pub leaderboard_cache: LeaderboardCache,
+    
+    /// State for message validation, used by the Discord activity tracker to determine
+    /// if a message is valid for XP (e.g. not a bot command, not a duplicate, etc.).
+    pub message_validation: MessageValidationState,
 }
 
 // ---------------------------------------------------------------------------

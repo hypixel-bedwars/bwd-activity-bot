@@ -49,6 +49,10 @@ pub struct AppConfig {
     /// so this controls how many pages the persistent message cycles through.
     /// Defaults to 10 if `PERSISTENT_LEADERBOARD_PLAYERS` is unset.
     pub persistent_leaderboard_players: u64,
+
+    pub min_message_length: u64,
+
+    pub message_cooldown_seconds: u64,
 }
 
 impl AppConfig {
@@ -90,6 +94,14 @@ impl AppConfig {
                 .unwrap_or_else(|_| "10".to_string())
                 .parse()
                 .expect("PERSISTENT_LEADERBOARD_PLAYERS must be a valid u64"),
+            min_message_length: env::var("MIN_MESSAGE_LENGTH")
+                .unwrap_or_else(|_| "5".to_string())
+                .parse()
+                .expect("MIN_MESSAGE_LENGTH must be a valid u64"),
+            message_cooldown_seconds: env::var("MESSAGE_COOLDOWN_SECONDS")
+                .unwrap_or_else(|_| "30".to_string())
+                .parse()
+                .expect("MESSAGE_COOLDOWN_SECONDS must be a valid u64"),
         }
     }
 }

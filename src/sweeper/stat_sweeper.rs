@@ -400,6 +400,8 @@ mod tests {
             admin_user_ids: Vec::new(),
             leaderboard_cache_seconds: 60,
             persistent_leaderboard_players: 10,
+            min_message_length: 5,
+			message_cooldown_seconds: 30,
         }
     }
 

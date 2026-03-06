@@ -18,6 +18,7 @@ use crate::hypixel::client::HypixelClient;
 use crate::leaderboard_updater;
 use crate::shared::types::{Data, Error};
 use crate::sweeper;
+use crate::database::models::MessageValidationState;
 
 /// Build and return the Poise framework, ready to be started.
 ///
@@ -129,6 +130,10 @@ pub async fn build(
                     hypixel,
                     config,
                     leaderboard_cache,
+                    message_validation: MessageValidationState {
+                        last_counted: Default::default(),
+                        last_message: Default::default(),
+                    },
                 })
             })
         })

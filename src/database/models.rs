@@ -1,3 +1,5 @@
+use std::{collections::HashMap, sync::Mutex};
+
 /// Database row models.
 ///
 /// Each struct maps 1-to-1 to a database table and derives `sqlx::FromRow`
@@ -5,6 +7,7 @@
 ///
 /// Fields are intentionally public so consuming code can access any column.
 use sqlx::FromRow;
+use time::OffsetDateTime;
 
 // ---------------------------------------------------------------------------
 // guilds
@@ -112,4 +115,15 @@ pub struct LeaderboardEntry {
     pub minecraft_uuid: String,
     pub total_xp: f64,
     pub level: i64,
+}
+
+// ---------------------------------------------------------------------------
+// Message Validation
+// ---------------------------------------------------------------------------
+
+// Note for future self: Right now your cooldown is per user globally, so if you wanna do this for 
+// multiple guilds you might want to change the key to (user_id, guild_id) or something like that.
+pub struct MessageValidationState {
+    pub last_counted: Mutex<HashMap<i64, OffsetDateTime>>,
+    pub last_message: Mutex<HashMap<i64, String>>,
 }
