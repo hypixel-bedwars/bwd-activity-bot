@@ -2,8 +2,8 @@
 ///
 /// Posts a persistent registration message containing instructions and a
 /// "Register" button in the specified channel. When a member clicks the
-/// button, the bot reads their server nickname, extracts their Minecraft
-/// username, and runs the same registration flow as `/register`.
+/// button, the bot will verify their already-registered Minecraft account
+/// and link it to the server.
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use tracing::info;
 
@@ -37,12 +37,9 @@ pub async fn send_registration_message(
             "Link your **Minecraft account** to start earning **XP** and tracking your stats on this server."
         )
         .field(
-            "📛 Step 1 — Set Your Nickname",
-            "Your server nickname must follow this format:\n\
-            `[NNN emoji] YourMinecraftUsername`\n\n\
-            **Examples:**\n\
-            `[313 💫] VA80`\n\
-            `[204 ✨] CosmicFuji`",
+            "📝 Step 1 — Register Your Minecraft Username",
+            "Run the following command:\n\
+            `/register <your_minecraft_username>`",
             false,
         )
         .field(
@@ -55,11 +52,11 @@ pub async fn send_registration_message(
         .field(
             "✅ Final Step",
             "Once both steps are completed, press the **Register** button below.\n\
-            The bot will automatically verify your account.",
+            The bot will verify your account and finish the registration process.",
             false,
         )
         .footer(serenity::CreateEmbedFooter::new(
-            "Your Minecraft username must match the nickname you set.",
+            "Your Minecraft username must match the one you used with /register.",
         ));
 
     let message = serenity::CreateMessage::new().embed(embed).components(vec![

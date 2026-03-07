@@ -5,20 +5,7 @@ use crate::commands::leaderboard::leaderboard as lb;
 use crate::commands::registration::register::perform_registration;
 use crate::shared::types::{Data, Error};
 
-/// Extract the Minecraft username from a server nickname.
-///
-/// Expects the format `[NNN emoji] Username` — e.g. `[313 💫] VA80`.
-/// Returns `Some(username)` if the pattern is matched, `None` otherwise.
-fn extract_username_from_nickname(nickname: &str) -> Option<&str> {
-    // Find the closing bracket followed by a space.
-    let bracket_end = nickname.find("] ")?;
-    let username = nickname[bracket_end + 2..].trim();
-    if username.is_empty() {
-        None
-    } else {
-        Some(username)
-    }
-}
+use crate::database::queries;
 
 pub async fn event_handler(
     ctx: &serenity::Context,
@@ -58,62 +45,50 @@ async fn handle_register_button(
         }
     };
 
-    // Fetch the guild member to read their server nickname.
-    let member = match guild_id.member(&ctx.http, component.user.id).await {
-        Ok(m) => m,
+    // Get user from database
+    let db_user = match queries::get_user_by_discord_id(
+        &data.db,
+        component.user.id.get() as i64,
+        guild_id.get() as i64,
+    )
+    .await
+    {
+        Ok(user) => user,
         Err(e) => {
-            warn!(
-                "Failed to fetch member {} in guild {}: {}",
-                component.user.id, guild_id, e
-            );
-            respond_ephemeral(
-                ctx,
-                component,
-                "Could not retrieve your server profile. Please try again.",
-            )
-            .await?;
+            warn!("Failed to query DB for user: {}", e);
+            respond_ephemeral(ctx, component, "Database error.").await?;
             return Ok(());
         }
     };
 
-    // The server nickname is preferred; fall back to the global username if absent,
-    // but we require the structured format so we reject anything that doesn't match.
-    let nickname = match member.nick.as_deref() {
-        Some(n) => n,
+    // User must already have a Minecraft username stored
+    let minecraft_username = match db_user {
+        Some(user) => match user.minecraft_username {
+            Some(username) => username,
+            None => {
+                respond_ephemeral(
+                    ctx,
+                    component,
+                    "No Minecraft username found for your account.\n\n\
+                    Please run the `/register <minecraft_username>` command first.",
+                )
+                .await?;
+                return Ok(());
+            }
+        },
         None => {
             respond_ephemeral(
                 ctx,
                 component,
-                "You don't have a server nickname set.\n\n\
-                Please ask an admin to set your nickname to the format:\n\
-                `[NNN emoji] YourMinecraftUsername`\n\
-                *(e.g. `[313 💫] VA80`)*",
+                "You are not registered yet.\n\n\
+                Please run `/register <minecraft_username>` first.",
             )
             .await?;
             return Ok(());
         }
     };
 
-    let minecraft_username = match extract_username_from_nickname(nickname) {
-        Some(u) => u.to_string(),
-        None => {
-            respond_ephemeral(
-                ctx,
-                component,
-                &format!(
-                    "Your server nickname **`{nickname}`** doesn't match the required format.\n\n\
-                    It must look like: `[NNN emoji] YourMinecraftUsername`\n\
-                    *(e.g. `[313 💫] VA80`, `[204 ✨] CosmicFuji`)*\n\n\
-                    Please ask an admin to update your nickname, then try again."
-                ),
-            )
-            .await?;
-            return Ok(());
-        }
-    };
-
-    // Acknowledge the interaction immediately; Discord requires a response within 3 seconds.
-    // We use a deferred ephemeral reply so we can follow up after the async API calls complete.
+    // Acknowledge interaction immediately
     component
         .create_response(
             ctx,
@@ -139,8 +114,9 @@ async fn handle_register_button(
                 &data.db,
                 db_user_id,
                 &uuid,
-            ).await;
-    
+            )
+            .await;
+
             text
         }
         Ok((text, None)) => text,
@@ -166,7 +142,6 @@ async fn handle_register_button(
     Ok(())
 }
 
-/// Send a one-shot ephemeral response to a component interaction.
 async fn respond_ephemeral(
     ctx: &serenity::Context,
     component: &serenity::ComponentInteraction,
