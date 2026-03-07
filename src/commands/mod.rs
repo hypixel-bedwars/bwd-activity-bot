@@ -28,6 +28,7 @@ pub fn all() -> Vec<poise::Command<Data, Error>> {
         stats::level::level(),
         admin::set_register_role::set_register_role(),
         admin::edit_stats::edit_stats(),
+        admin::xp::xp(),
         leaderboard::leaderboard::leaderboard(),
         leaderboard::leaderboard_create::leaderboard_create(),
         leaderboard::leaderboard_remove::leaderboard_remove(),

@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde_json::Value;
 /// Database query functions.
 ///
@@ -6,12 +7,14 @@ use serde_json::Value;
 ///
 /// Some functions are not yet called but exist as part of the public query API
 /// for extensions and future commands.
-use sqlx::{Postgres, PgPool, Transaction};
+use sqlx::{PgPool, Postgres, Transaction};
 use tracing::debug;
-use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-use super::models::{DbGuild, DbMilestone, DbPersistentLeaderboard, DbStatDelta, DbStatsSnapshot, DbSweepCursor, DbUser, DbXP, LeaderboardEntry, MilestoneWithCount};
+use super::models::{
+    DbGuild, DbMilestone, DbPersistentLeaderboard, DbStatDelta, DbStatsSnapshot, DbSweepCursor,
+    DbUser, DbXP, LeaderboardEntry, MilestoneWithCount,
+};
 
 // =========================================================================
 // guilds
@@ -43,10 +46,7 @@ pub async fn update_guild_config(
     guild_id: i64,
     config_json: Value,
 ) -> Result<(), sqlx::Error> {
-    debug!(
-        "queries::update_guild_config: guild_id={}",
-        guild_id
-    );
+    debug!("queries::update_guild_config: guild_id={}", guild_id);
 
     sqlx::query("UPDATE guilds SET config_json = $1 WHERE guild_id = $2")
         .bind(config_json)
@@ -106,7 +106,10 @@ pub async fn get_hypixel_snapshot_before(
     stat_name: &str,
     before_ts: &str,
 ) -> Result<Option<DbStatsSnapshot>, sqlx::Error> {
-    debug!("queries::get_hypixel_snapshot_before: user_id={}, stat_name={}, before_ts={}", user_id, stat_name, before_ts);
+    debug!(
+        "queries::get_hypixel_snapshot_before: user_id={}, stat_name={}, before_ts={}",
+        user_id, stat_name, before_ts
+    );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM hypixel_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2 AND timestamp < $3
@@ -128,7 +131,10 @@ pub async fn get_discord_snapshot_before(
     stat_name: &str,
     before_ts: &str,
 ) -> Result<Option<DbStatsSnapshot>, sqlx::Error> {
-    debug!("queries::get_discord_snapshot_before: user_id={}, stat_name={}, before_ts={}", user_id, stat_name, before_ts);
+    debug!(
+        "queries::get_discord_snapshot_before: user_id={}, stat_name={}, before_ts={}",
+        user_id, stat_name, before_ts
+    );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM discord_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2 AND timestamp < $3
@@ -148,7 +154,10 @@ pub async fn get_first_hypixel_snapshot(
     user_id: i64,
     stat_name: &str,
 ) -> Result<Option<DbStatsSnapshot>, sqlx::Error> {
-    debug!("queries::get_first_hypixel_snapshot: user_id={}, stat_name={}", user_id, stat_name);
+    debug!(
+        "queries::get_first_hypixel_snapshot: user_id={}, stat_name={}",
+        user_id, stat_name
+    );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM hypixel_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
@@ -167,7 +176,10 @@ pub async fn get_first_discord_snapshot(
     user_id: i64,
     stat_name: &str,
 ) -> Result<Option<DbStatsSnapshot>, sqlx::Error> {
-    debug!("queries::get_first_discord_snapshot: user_id={}, stat_name={}", user_id, stat_name);
+    debug!(
+        "queries::get_first_discord_snapshot: user_id={}, stat_name={}",
+        user_id, stat_name
+    );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM discord_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
@@ -186,7 +198,10 @@ pub async fn get_user_by_discord_id(
     discord_user_id: i64,
     guild_id: i64,
 ) -> Result<Option<DbUser>, sqlx::Error> {
-    debug!("queries::get_user_by_discord_id: discord_user_id={}, guild_id={}", discord_user_id, guild_id);
+    debug!(
+        "queries::get_user_by_discord_id: discord_user_id={}, guild_id={}",
+        discord_user_id, guild_id
+    );
     sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE discord_user_id = $1 AND guild_id = $2")
         .bind(discord_user_id)
         .bind(guild_id)
@@ -209,19 +224,21 @@ pub async fn set_user_head_texture(
     head_texture: &str,
     updated_at: &str,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::set_user_head_texture: user_id={}, head_texture_len={}, updated_at={}", user_id, head_texture.len(), updated_at);
-    sqlx::query(
-        "UPDATE users SET head_texture = $1, head_texture_updated_at = $2 WHERE id = $3",
-    )
-    .bind(head_texture)
-    .bind(updated_at)
-    .bind(user_id)
-    .execute(pool)
-    .await?;
+    debug!(
+        "queries::set_user_head_texture: user_id={}, head_texture_len={}, updated_at={}",
+        user_id,
+        head_texture.len(),
+        updated_at
+    );
+    sqlx::query("UPDATE users SET head_texture = $1, head_texture_updated_at = $2 WHERE id = $3")
+        .bind(head_texture)
+        .bind(updated_at)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
- 
 /// Unregister a user by deleting their row from the database.
 pub async fn unregister_user(
     pool: &PgPool,
@@ -269,7 +286,10 @@ pub async fn insert_hypixel_snapshot(
     stat_value: f64,
     timestamp: DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::insert_hypixel_snapshot: user_id={}, stat_name={}, stat_value={}, timestamp={}", user_id, stat_name, stat_value, timestamp);
+    debug!(
+        "queries::insert_hypixel_snapshot: user_id={}, stat_name={}, stat_value={}, timestamp={}",
+        user_id, stat_name, stat_value, timestamp
+    );
     sqlx::query(
         "INSERT INTO hypixel_stats_snapshot (user_id, stat_name, stat_value, timestamp)
          VALUES ($1, $2, $3, $4)",
@@ -289,7 +309,10 @@ pub async fn get_latest_hypixel_snapshot(
     user_id: i64,
     stat_name: &str,
 ) -> Result<Option<DbStatsSnapshot>, sqlx::Error> {
-    debug!("queries::get_latest_hypixel_snapshot: user_id={}, stat_name={}", user_id, stat_name);
+    debug!(
+        "queries::get_latest_hypixel_snapshot: user_id={}, stat_name={}",
+        user_id, stat_name
+    );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM hypixel_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
@@ -335,7 +358,10 @@ pub async fn insert_discord_snapshot(
     stat_value: f64,
     timestamp: DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::insert_discord_snapshot: user_id={}, stat_name={}, stat_value={}, timestamp={}", user_id, stat_name, stat_value, timestamp);
+    debug!(
+        "queries::insert_discord_snapshot: user_id={}, stat_name={}, stat_value={}, timestamp={}",
+        user_id, stat_name, stat_value, timestamp
+    );
     sqlx::query(
         "INSERT INTO discord_stats_snapshot (user_id, stat_name, stat_value, timestamp)
          VALUES ($1, $2, $3, $4)",
@@ -355,7 +381,10 @@ pub async fn get_latest_discord_snapshot(
     user_id: i64,
     stat_name: &str,
 ) -> Result<Option<DbStatsSnapshot>, sqlx::Error> {
-    debug!("queries::get_latest_discord_snapshot: user_id={}, stat_name={}", user_id, stat_name);
+    debug!(
+        "queries::get_latest_discord_snapshot: user_id={}, stat_name={}",
+        user_id, stat_name
+    );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM discord_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
@@ -408,7 +437,10 @@ pub async fn set_xp_and_level(
     level: i32,
     timestamp: &DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::set_xp_and_level: user_id={}, total_xp={}, level={}, timestamp={}", user_id, total_xp, level, timestamp);
+    debug!(
+        "queries::set_xp_and_level: user_id={}, total_xp={}, level={}, timestamp={}",
+        user_id, total_xp, level, timestamp
+    );
     sqlx::query(
         "INSERT INTO xp (user_id, total_xp, level, last_updated)
          VALUES ($1, $2, $3, $4)
@@ -445,6 +477,54 @@ pub async fn delete_xp(pool: &PgPool, user_id: i64) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
+/// Increment a user's total XP by the given amount.
+///
+/// If the user has no XP record yet, creates one with total_xp = amount and level = 1.
+pub async fn increment_xp(
+    pool: &PgPool,
+    user_id: i64,
+    amount: f64,
+    timestamp: &DateTime<Utc>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::increment_xp: user_id={}, amount={}, timestamp={}",
+        user_id, amount, timestamp
+    );
+    sqlx::query(
+        "INSERT INTO xp (user_id, total_xp, level, last_updated)
+         VALUES ($1, $2, 1, $3)
+         ON CONFLICT(user_id) DO UPDATE SET
+             total_xp = xp.total_xp + excluded.total_xp,
+             last_updated = excluded.last_updated",
+    )
+    .bind(user_id)
+    .bind(amount)
+    .bind(timestamp)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Update a user's level and last_updated timestamp.
+pub async fn update_level(
+    pool: &PgPool,
+    user_id: i64,
+    level: i32,
+    timestamp: &DateTime<Utc>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::update_level: user_id={}, level={}, timestamp={}",
+        user_id, level, timestamp
+    );
+    sqlx::query("UPDATE xp SET level = $1, last_updated = $2 WHERE user_id = $3")
+        .bind(level)
+        .bind(timestamp)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
 // =========================================================================
 // sweep_cursor
 // =========================================================================
@@ -456,7 +536,10 @@ pub async fn get_sweep_cursor(
     source: &str,
     stat_name: &str,
 ) -> Result<Option<DbSweepCursor>, sqlx::Error> {
-    debug!("queries::get_sweep_cursor: user_id={}, source={}, stat_name={}", user_id, source, stat_name);
+    debug!(
+        "queries::get_sweep_cursor: user_id={}, source={}, stat_name={}",
+        user_id, source, stat_name
+    );
     sqlx::query_as::<_, DbSweepCursor>(
         "SELECT * FROM sweep_cursor
          WHERE user_id = $1 AND source = $2 AND stat_name = $3",
@@ -478,8 +561,10 @@ pub async fn upsert_sweep_cursor(
     last_snapshot_ts: &DateTime<Utc>,
     updated_at: &DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::upsert_sweep_cursor: user_id={}, source={}, stat_name={}, stat_value={}, last_snapshot_ts={}, updated_at={}",
-        user_id, source, stat_name, stat_value, last_snapshot_ts, updated_at);
+    debug!(
+        "queries::upsert_sweep_cursor: user_id={}, source={}, stat_name={}, stat_value={}, last_snapshot_ts={}, updated_at={}",
+        user_id, source, stat_name, stat_value, last_snapshot_ts, updated_at
+    );
     sqlx::query(
         "INSERT INTO sweep_cursor (user_id, source, stat_name, stat_value, last_snapshot_ts, updated_at)
          VALUES ($1, $2, $3, $4, $5, $6)
@@ -509,8 +594,10 @@ pub async fn upsert_sweep_cursor_in_tx(
     last_snapshot_ts: &DateTime<Utc>,
     updated_at: &DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::upsert_sweep_cursor_in_tx: user_id={}, source={}, stat_name={}, stat_value={}, last_snapshot_ts={}, updated_at={}",
-        user_id, source, stat_name, stat_value, last_snapshot_ts, updated_at);
+    debug!(
+        "queries::upsert_sweep_cursor_in_tx: user_id={}, source={}, stat_name={}, stat_value={}, last_snapshot_ts={}, updated_at={}",
+        user_id, source, stat_name, stat_value, last_snapshot_ts, updated_at
+    );
     sqlx::query(
         "INSERT INTO sweep_cursor (user_id, source, stat_name, stat_value, last_snapshot_ts, updated_at)
          VALUES ($1, $2, $3, $4, $5, $6)
@@ -544,7 +631,10 @@ pub async fn get_leaderboard(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<LeaderboardEntry>, sqlx::Error> {
-    debug!("queries::get_leaderboard: guild_id={}, offset={}, limit={}", guild_id, offset, limit);
+    debug!(
+        "queries::get_leaderboard: guild_id={}, offset={}, limit={}",
+        guild_id, offset, limit
+    );
     sqlx::query_as::<_, LeaderboardEntry>(
         "SELECT u.discord_user_id,
                 u.minecraft_username,
@@ -565,10 +655,7 @@ pub async fn get_leaderboard(
 }
 
 /// Count the total number of registered users in a guild (for pagination math).
-pub async fn count_users_in_guild(
-    pool: &PgPool,
-    guild_id: i64,
-) -> Result<i64, sqlx::Error> {
+pub async fn count_users_in_guild(pool: &PgPool, guild_id: i64) -> Result<i64, sqlx::Error> {
     debug!("queries::count_users_in_guild: guild_id={}", guild_id);
     sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM users WHERE guild_id = $1")
         .bind(guild_id)
@@ -637,7 +724,10 @@ pub async fn delete_persistent_leaderboard(
     pool: &PgPool,
     guild_id: i64,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::delete_persistent_leaderboard: guild_id={}", guild_id);
+    debug!(
+        "queries::delete_persistent_leaderboard: guild_id={}",
+        guild_id
+    );
     sqlx::query("DELETE FROM persistent_leaderboards WHERE guild_id = $1")
         .bind(guild_id)
         .execute(pool)
@@ -662,7 +752,12 @@ pub async fn update_persistent_leaderboard_messages(
     message_ids: &serde_json::Value,
     last_updated: &DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
-    debug!("queries::update_persistent_leaderboard_messages: guild_id={}, message_ids_len={}, last_updated={}", guild_id, message_ids.as_array().map(|a| a.len()).unwrap_or(0), last_updated);
+    debug!(
+        "queries::update_persistent_leaderboard_messages: guild_id={}, message_ids_len={}, last_updated={}",
+        guild_id,
+        message_ids.as_array().map(|a| a.len()).unwrap_or(0),
+        last_updated
+    );
     sqlx::query(
         "UPDATE persistent_leaderboards
          SET message_ids = $1, last_updated = $2
@@ -684,12 +779,11 @@ pub async fn update_persistent_leaderboard_messages(
 ///
 /// Returns `Ok(true)` if the milestone was created, `Ok(false)` if a
 /// milestone at that level already exists for the guild (no-op).
-pub async fn add_milestone(
-    pool: &PgPool,
-    guild_id: i64,
-    level: i32,
-) -> Result<bool, sqlx::Error> {
-    debug!("queries::add_milestone: guild_id={}, level={}", guild_id, level);
+pub async fn add_milestone(pool: &PgPool, guild_id: i64, level: i32) -> Result<bool, sqlx::Error> {
+    debug!(
+        "queries::add_milestone: guild_id={}, level={}",
+        guild_id, level
+    );
     let rows_affected = sqlx::query(
         "INSERT INTO milestones (guild_id, level) VALUES ($1, $2)
          ON CONFLICT(guild_id, level) DO NOTHING",
@@ -716,15 +810,14 @@ pub async fn edit_milestone(
         "queries::edit_milestone: guild_id={}, milestone_id={}, new_level={}",
         guild_id, milestone_id, new_level
     );
-    let rows_affected = sqlx::query(
-        "UPDATE milestones SET level = $1 WHERE id = $2 AND guild_id = $3",
-    )
-    .bind(new_level)
-    .bind(milestone_id)
-    .bind(guild_id)
-    .execute(pool)
-    .await?
-    .rows_affected();
+    let rows_affected =
+        sqlx::query("UPDATE milestones SET level = $1 WHERE id = $2 AND guild_id = $3")
+            .bind(new_level)
+            .bind(milestone_id)
+            .bind(guild_id)
+            .execute(pool)
+            .await?
+            .rows_affected();
     Ok(rows_affected > 0)
 }
 
@@ -740,22 +833,17 @@ pub async fn remove_milestone(
         "queries::remove_milestone: guild_id={}, milestone_id={}",
         guild_id, milestone_id
     );
-    let rows_affected = sqlx::query(
-        "DELETE FROM milestones WHERE id = $1 AND guild_id = $2",
-    )
-    .bind(milestone_id)
-    .bind(guild_id)
-    .execute(pool)
-    .await?
-    .rows_affected();
+    let rows_affected = sqlx::query("DELETE FROM milestones WHERE id = $1 AND guild_id = $2")
+        .bind(milestone_id)
+        .bind(guild_id)
+        .execute(pool)
+        .await?
+        .rows_affected();
     Ok(rows_affected > 0)
 }
 
 /// Retrieve all milestones for a guild, ordered by level ascending.
-pub async fn get_milestones(
-    pool: &PgPool,
-    guild_id: i64,
-) -> Result<Vec<DbMilestone>, sqlx::Error> {
+pub async fn get_milestones(pool: &PgPool, guild_id: i64) -> Result<Vec<DbMilestone>, sqlx::Error> {
     debug!("queries::get_milestones: guild_id={}", guild_id);
     sqlx::query_as::<_, DbMilestone>(
         "SELECT id, guild_id, level FROM milestones
