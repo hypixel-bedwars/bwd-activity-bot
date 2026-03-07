@@ -1,8 +1,7 @@
 /// `/stats` command.
 ///
-/// Shows each configured stat as its **change since registration** —
-/// i.e. the difference between the latest snapshot and the baseline
-/// snapshot taken when the user first ran `/register`.
+/// Shows each configured stat as its **change since registration**
+/// and also displays the **XP reward configured for each stat**.
 use poise::serenity_prelude::{self as serenity, CreateEmbed, CreateEmbedFooter};
 use tracing::info;
 
@@ -27,7 +26,7 @@ pub async fn stats(
     let target = user.as_ref().unwrap_or_else(|| ctx.author());
     let data = ctx.data();
 
-    // resolve registered user 
+    // resolve registered user
     let db_user =
         queries::get_user_by_discord_id(&data.db, target.id.get() as i64, guild_id_i64).await?;
 
@@ -47,9 +46,6 @@ pub async fn stats(
     };
 
     // on-demand Hypixel refresh
-    // Stamps last_command_activity and refreshes Hypixel stats if the cooldown
-    // has elapsed.  The command already deferred above so Discord's "thinking…"
-    // indicator covers any API latency.
     sweeper::refresh_hypixel_user_if_stale(
         &data.db,
         &data.hypixel,
@@ -58,7 +54,7 @@ pub async fn stats(
     )
     .await;
 
-    // load guild config to find active stats
+    // load guild config
     let guild_row = queries::get_guild(&data.db, guild_id_i64).await?;
     let guild_config: GuildConfig = guild_row
         .as_ref()
@@ -79,11 +75,12 @@ pub async fn stats(
                 "No stats are currently configured. \
                  An admin can add stats with `/edit-stats add`.",
             );
+
         ctx.send(poise::CreateReply::default().embed(embed)).await?;
         return Ok(());
     }
 
-    // fetch latest and initial snapshots, compute deltas
+    // resolve minecraft name
     let mc_name = match &db_user.minecraft_username {
         Some(name) => name.clone(),
         None => match data.hypixel.resolve_uuid(&db_user.minecraft_uuid).await {
@@ -91,12 +88,11 @@ pub async fn stats(
             Err(_) => db_user.minecraft_uuid.to_string(),
         },
     };
-    
+
     let thumbnail_url = if let Some(tex) = &db_user.head_texture {
         tex.clone()
     } else {
-        let url = format!("https://minotar.net/avatar/{}/80", db_user.minecraft_uuid);
-        url
+        format!("https://minotar.net/avatar/{}/80", db_user.minecraft_uuid)
     };
 
     let mut embed = CreateEmbed::default()
@@ -117,34 +113,79 @@ pub async fn stats(
             active_keys.len()
         )));
 
+    // --------------------------
+    // Stat delta fields
+    // --------------------------
+
     for key in &active_keys {
         let (latest_val, initial_val) = if is_discord_stat(key) {
             let latest = queries::get_latest_discord_snapshot(&data.db, db_user.id, key)
                 .await?
                 .map(|s| s.stat_value)
                 .unwrap_or(0.0);
+
             let initial = queries::get_first_discord_snapshot(&data.db, db_user.id, key)
                 .await?
                 .map(|s| s.stat_value)
                 .unwrap_or(0.0);
+
             (latest, initial)
         } else {
             let latest = queries::get_latest_hypixel_snapshot(&data.db, db_user.id, key)
                 .await?
                 .map(|s| s.stat_value)
                 .unwrap_or(0.0);
+
             let initial = queries::get_first_hypixel_snapshot(&data.db, db_user.id, key)
                 .await?
                 .map(|s| s.stat_value)
                 .unwrap_or(0.0);
+
             (latest, initial)
         };
 
         let delta = (latest_val - initial_val).max(0.0);
-        embed = embed.field(display_name_for_key(key), format!("+{:.0}", delta), true);
+
+        embed = embed.field(
+            display_name_for_key(key),
+            format!("+{:.0}", delta),
+            true,
+        );
     }
 
+    // --------------------------
+    // XP reward section
+    // --------------------------
+
+    let mut rows: Vec<(String, String, f64)> = guild_config
+        .xp_config
+        .iter()
+        .map(|(k, v)| (display_name_for_key(k), k.clone(), *v))
+        .collect();
+
+    rows.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let xp_description = rows
+        .iter()
+        .map(|(display, key, xp)| {
+            format!("**{}** — {:.0} XP (`{}`)", display, xp, key)
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    embed = embed.field(
+        "XP Rewards",
+        xp_description,
+        false,
+    );
+
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
-    info!("Displayed stats for user {} ({})", target.name, target.id);
+
+    info!(
+        "Displayed stats for user {} ({})",
+        target.name,
+        target.id
+    );
+
     Ok(())
 }
