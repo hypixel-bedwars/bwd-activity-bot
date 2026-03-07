@@ -16,7 +16,7 @@ use crate::xp::calculator;
     guild_only,
     ephemeral,
     subcommands("add", "remove"),
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn xp(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
@@ -27,7 +27,7 @@ pub async fn xp(_ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn add(
     ctx: Context<'_>,
@@ -87,7 +87,7 @@ pub async fn add(
     slash_command,
     guild_only,
     ephemeral,
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn remove(
     ctx: Context<'_>,

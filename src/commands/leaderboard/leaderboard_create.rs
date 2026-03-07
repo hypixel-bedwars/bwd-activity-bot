@@ -19,7 +19,7 @@ use super::helpers::{self, PAGE_SIZE};
     slash_command,
     guild_only,
     rename = "leaderboard_create",
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn leaderboard_create(
     ctx: Context<'_>,

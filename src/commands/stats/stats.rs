@@ -9,7 +9,7 @@ use tracing::info;
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
-use crate::stats_definitions::{display_name_for_key, is_discord_stat};
+use crate::utils::stats_definitions::{display_name_for_key, is_discord_stat};
 use crate::sweeper;
 
 #[poise::command(slash_command, guild_only)]

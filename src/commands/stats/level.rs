@@ -10,7 +10,7 @@ use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::level_card::{self, LevelCardParams};
 use crate::shared::types::{Context, Error};
-use crate::stats_definitions::{display_name_for_key, is_discord_stat};
+use crate::utils::stats_definitions::{display_name_for_key, is_discord_stat};
 use crate::sweeper;
 use crate::xp::calculator::xp_for_level;
 

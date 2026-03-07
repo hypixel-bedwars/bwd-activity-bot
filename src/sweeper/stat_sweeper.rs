@@ -19,7 +19,7 @@ use crate::database::queries;
 use crate::hypixel::client::HypixelClient;
 use crate::milestones;
 use crate::shared::types::StatDelta;
-use crate::stats_definitions::is_discord_stat;
+use crate::utils::stats_definitions::is_discord_stat;
 use crate::xp::XPConfig;
 use crate::xp::calculator;
 

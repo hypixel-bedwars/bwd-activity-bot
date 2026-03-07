@@ -14,7 +14,7 @@ use crate::shared::types::{Context, Error};
     guild_only,
     ephemeral,
     rename = "set-register-role",
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn set_register_role(
     ctx: Context<'_>,

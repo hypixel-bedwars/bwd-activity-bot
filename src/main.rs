@@ -23,14 +23,12 @@ mod discord_stats;
 mod events;
 mod hypixel;
 mod leaderboard_card;
-mod leaderboard_updater;
 mod level_card;
 mod milestones;
-mod permissions;
 mod shared;
-mod stats_definitions;
 mod sweeper;
 mod xp;
+mod utils;
 
 use poise::serenity_prelude as serenity;
 use tracing::info;

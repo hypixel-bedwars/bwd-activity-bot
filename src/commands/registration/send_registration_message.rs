@@ -14,7 +14,7 @@ use crate::shared::types::{Context, Error};
     slash_command,
     guild_only,
     ephemeral,
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn send_registration_message(
     ctx: Context<'_>,

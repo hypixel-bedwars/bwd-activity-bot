@@ -15,7 +15,7 @@ use tracing::info;
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
-use crate::stats_definitions::{
+use crate::utils::stats_definitions::{
     BEDWARS_METRICS, BEDWARS_MODES, DISCORD_STATS, display_name_for_key,
 };
 
@@ -185,7 +185,7 @@ pub async fn edit_stats(_ctx: Context<'_>) -> Result<(), Error> {
     guild_only,
     ephemeral,
     rename = "add-bedwars",
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn add_bedwars(
     ctx: Context<'_>,
@@ -265,7 +265,7 @@ pub async fn add_bedwars(
     guild_only,
     ephemeral,
     rename = "add-discord",
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn add_discord(
     ctx: Context<'_>,
@@ -325,7 +325,7 @@ pub async fn add_discord(
     guild_only,
     ephemeral,
     rename = "edit",
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn edit_stat(
     ctx: Context<'_>,
@@ -369,7 +369,7 @@ pub async fn edit_stat(
     slash_command,
     guild_only,
     ephemeral,
-    check = "crate::permissions::admin_check"
+    check = "crate::utils::permissions::admin_check"
 )]
 pub async fn remove(
     ctx: Context<'_>,

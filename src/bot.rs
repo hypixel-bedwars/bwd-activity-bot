@@ -15,7 +15,7 @@ use crate::config::AppConfig;
 use crate::discord_stats::tracker;
 use crate::events::events;
 use crate::hypixel::client::HypixelClient;
-use crate::leaderboard_updater;
+use crate::utils::leaderboard_updater;
 use crate::shared::types::{Data, Error};
 use crate::sweeper;
 use crate::database::models::MessageValidationState;
