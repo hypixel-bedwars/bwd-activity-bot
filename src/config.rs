@@ -52,6 +52,13 @@ pub struct AppConfig {
     pub min_message_length: u64,
 
     pub message_cooldown_seconds: u64,
+
+    /// Minimum time between Hypixel API refreshes for a single user, in seconds.
+    ///
+    /// Commands such as `/level` and `/stats` will only trigger a live Hypixel
+    /// fetch if the user's `last_hypixel_refresh` is older than this value.
+    /// Defaults to 60 if `HYPIXEL_REFRESH_COOLDOWN_SECONDS` is unset.
+    pub hypixel_refresh_cooldown_seconds: u64,
 }
 
 impl AppConfig {
@@ -101,6 +108,10 @@ impl AppConfig {
                 .unwrap_or_else(|_| "30".to_string())
                 .parse()
                 .expect("MESSAGE_COOLDOWN_SECONDS must be a valid u64"),
+            hypixel_refresh_cooldown_seconds: env::var("HYPIXEL_REFRESH_COOLDOWN_SECONDS")
+                .unwrap_or_else(|_| "60".to_string())
+                .parse()
+                .expect("HYPIXEL_REFRESH_COOLDOWN_SECONDS must be a valid u64"),
         }
     }
 }

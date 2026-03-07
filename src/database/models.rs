@@ -44,6 +44,15 @@ pub struct DbUser {
     pub head_texture: Option<String>,
     // RFC3339 timestamp of when head_texture was last updated.
     pub head_texture_updated_at: Option<DateTime<Utc>>,
+
+    /// Timestamp of the most recent successful Hypixel API fetch for this user.
+    /// `None` means the user has never been swept.
+    pub last_hypixel_refresh: Option<DateTime<Utc>>,
+
+    /// Timestamp of the most recent stat command (/level, /stats) used by this
+    /// user in this guild. `None` means no stat command has been used since
+    /// migration 008.
+    pub last_command_activity: Option<DateTime<Utc>>,
 }
 
 // ---------------------------------------------------------------------------

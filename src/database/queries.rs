@@ -217,6 +217,77 @@ pub async fn get_all_registered_users(pool: &PgPool) -> Result<Vec<DbUser>, sqlx
         .await
 }
 
+/// Get all registered users, sorted so that recently active users come first.
+///
+/// "Active" is defined as having a `last_command_activity` timestamp on or
+/// after `activity_cutoff`.  Within each group (active / inactive) users are
+/// ordered by `last_hypixel_refresh` ascending (least-recently-refreshed
+/// first) so that stale data is prioritised within each tier.
+///
+/// Used by the Hypixel background sweeper.
+pub async fn get_users_prioritized_for_hypixel_sweep(
+    pool: &PgPool,
+    activity_cutoff: DateTime<Utc>,
+) -> Result<Vec<DbUser>, sqlx::Error> {
+    debug!(
+        "queries::get_users_prioritized_for_hypixel_sweep: activity_cutoff={}",
+        activity_cutoff
+    );
+    sqlx::query_as::<_, DbUser>(
+        "SELECT * FROM users
+         ORDER BY
+             CASE WHEN last_command_activity >= $1 THEN 0 ELSE 1 END ASC,
+             COALESCE(last_hypixel_refresh, '1970-01-01 00:00:00+00') ASC",
+    )
+    .bind(activity_cutoff)
+    .fetch_all(pool)
+    .await
+}
+
+/// Record that a Hypixel API fetch completed successfully for this user.
+///
+/// Called by `sweep_hypixel_user` after every successful API round-trip so
+/// that the cooldown check in commands has an accurate timestamp to compare
+/// against.
+pub async fn update_last_hypixel_refresh(
+    pool: &PgPool,
+    user_id: i64,
+    timestamp: &DateTime<Utc>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::update_last_hypixel_refresh: user_id={}, timestamp={}",
+        user_id, timestamp
+    );
+    sqlx::query("UPDATE users SET last_hypixel_refresh = $1 WHERE id = $2")
+        .bind(timestamp)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+/// Record that the user invoked a stat-related command right now.
+///
+/// Called at the start of `/level` and `/stats` so that the background
+/// sweeper can identify recently active users and prioritise their refresh
+/// slot in the next sweep cycle.
+pub async fn update_last_command_activity(
+    pool: &PgPool,
+    user_id: i64,
+    timestamp: &DateTime<Utc>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::update_last_command_activity: user_id={}, timestamp={}",
+        user_id, timestamp
+    );
+    sqlx::query("UPDATE users SET last_command_activity = $1 WHERE id = $2")
+        .bind(timestamp)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
 /// Store cached head texture for a user (head_texture is a base64 PNG or data URL).
 pub async fn set_user_head_texture(
     pool: &PgPool,

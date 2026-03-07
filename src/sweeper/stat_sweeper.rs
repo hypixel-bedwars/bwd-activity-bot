@@ -34,12 +34,24 @@ struct CursorUpdate {
 }
 
 /// Run a single Hypixel sweep iteration for all registered users.
+///
+/// Users are sorted so that recently active users (those who invoked a stat
+/// command within the last hour) appear first, guaranteeing they receive
+/// fresh data sooner in the sweep cycle.  Within each tier users are ordered
+/// by `last_hypixel_refresh` ascending, so the stalest data is always
+/// processed first.
+///
+/// A 1-second sleep between users keeps the Hypixel API well under its rate
+/// limit even when the user list is large.
 pub async fn run_hypixel_sweep(
     pool: &PgPool,
     hypixel: &Arc<HypixelClient>,
     config: &AppConfig,
 ) -> Result<()> {
-    let users = queries::get_all_registered_users(pool).await?;
+    // Active = used a stat command within the last hour.
+    let activity_cutoff = chrono::Utc::now() - chrono::Duration::hours(1);
+    let users =
+        queries::get_users_prioritized_for_hypixel_sweep(pool, activity_cutoff).await?;
 
     if users.is_empty() {
         debug!("Hypixel sweep: no registered users, skipping.");
@@ -60,6 +72,9 @@ pub async fn run_hypixel_sweep(
                 "Hypixel sweep: failed to process user, skipping."
             );
         }
+
+        // Pace requests at ≤1 req/s to stay well under Hypixel's rate limit.
+        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
     }
 
     info!("Hypixel sweep: iteration complete.");
@@ -96,7 +111,17 @@ pub async fn run_discord_sweep(pool: &PgPool, config: &AppConfig) -> Result<()> 
 }
 
 /// Sweep one user's Hypixel stats.
-async fn sweep_hypixel_user(
+///
+/// This is the shared stat-refresh pipeline used by both the background
+/// sweeper and command-triggered on-demand refreshes.  On success it:
+///   1. Fetches the player's current Bedwars stats from the Hypixel API.
+///   2. Computes deltas against the most recent snapshot in the DB.
+///   3. Runs `apply_stat_deltas` to persist snapshots, award XP, and fire
+///      milestone hooks.
+///   4. Updates `users.last_hypixel_refresh` to the current timestamp so
+///      the cooldown check in commands and the priority sort in the sweeper
+///      both have an accurate reference point.
+pub(crate) async fn sweep_hypixel_user(
     pool: &PgPool,
     hypixel: &Arc<HypixelClient>,
     user: &DbUser,
@@ -156,7 +181,20 @@ async fn sweep_hypixel_user(
         "hypixel",
         "Hypixel sweep",
     )
-    .await
+    .await?;
+
+    // Record that this user's Hypixel data was just refreshed.  This timestamp
+    // is used by the on-demand cooldown check in /level and /stats, and by the
+    // priority sort in the background sweeper.
+    if let Err(e) = queries::update_last_hypixel_refresh(pool, user.id, &now).await {
+        warn!(
+            user_id = user.id,
+            error = %e,
+            "sweep_hypixel_user: failed to update last_hypixel_refresh, continuing."
+        );
+    }
+
+    Ok(())
 }
 
 /// Sweep one user's Discord stats using cursor checkpoints.
@@ -503,6 +541,7 @@ mod tests {
             persistent_leaderboard_players: 10,
             min_message_length: 5,
             message_cooldown_seconds: 30,
+            hypixel_refresh_cooldown_seconds: 60,
         }
     }
 
