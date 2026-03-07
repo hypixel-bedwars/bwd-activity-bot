@@ -184,6 +184,8 @@ pub async fn level(
             Err(_) => db_user.minecraft_uuid.to_string(),
         },
     };
+    
+    let rank = queries::get_user_rank_in_guild(&data.db, db_user.id, guild_id_i64).await?;
 
     let params = LevelCardParams {
         minecraft_username: mc_name,
@@ -194,6 +196,7 @@ pub async fn level(
         stat_deltas,
         xp_gained,
         avatar_bytes,
+        rank,
     };
 
     let png_bytes = level_card::render(&params);

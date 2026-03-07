@@ -385,6 +385,31 @@ pub async fn get_all_users_in_guild(
         .await
 }
 
+/// Get the rank of a user within their guild, based on total XP. Returns `None` if the user is not registered or has no XP record.
+pub async fn get_user_rank_in_guild(
+	pool: &PgPool,
+	user_id: i64,
+	guild_id: i64,
+) -> Result<Option<i64>, sqlx::Error> {
+	debug!(
+		"queries::get_user_rank_in_guild: user_id={}, guild_id={}",
+		user_id, guild_id
+	);
+	sqlx::query_scalar::<_, i64>(
+		"SELECT rank FROM (
+			 SELECT u.id AS user_id, RANK() OVER (ORDER BY COALESCE(x.total_xp, 0) DESC) AS rank
+			 FROM users u
+			 LEFT JOIN xp x ON x.user_id = u.id
+			 WHERE u.guild_id = $1
+		 ) sub
+		 WHERE user_id = $2",
+	)
+	.bind(guild_id)
+	.bind(user_id)
+	.fetch_optional(pool)
+	.await
+}
+
 // =========================================================================
 // hypixel_stats_snapshot
 // =========================================================================

@@ -54,6 +54,8 @@ pub struct LevelCardParams {
     /// Raw PNG / JPEG bytes of the player's 80x80 Crafatar avatar.
     /// `None` -> a placeholder rectangle is drawn instead.
     pub avatar_bytes: Option<Vec<u8>>,
+    /// Rank of the user in the guild by total XP, if available.
+    pub rank: Option<i64>,
 }
 
 /// Render the level card and return the PNG bytes.
@@ -110,7 +112,7 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
         &font,
         &mut img,
         124,
-        30,
+        29,
         &params.minecraft_username,
         3,
         WHITE,
@@ -126,6 +128,31 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
         2,
         CYAN,
     );
+    
+    let rank_colour = if let Some(rank) = params.rank {
+		if rank == 1 {
+			GOLD
+		} else if rank <= 3 {
+			GREEN
+		} else {
+			MUTED
+		}
+	} else {
+		MUTED
+	};
+    
+    // "RANK #{rank}": scale=2, GOLD (if rank is available)
+	if let Some(rank) = params.rank {
+		render_text(
+			&font,
+			&mut img,
+			124,
+			92,
+			&format!("RANK #{}", rank),
+			2,
+			rank_colour,
+		);
+	}
 
     // == PROGRESS BAR ========================================================
     // Bar background (rounded)
