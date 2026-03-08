@@ -544,7 +544,7 @@ mod tests {
         AppConfig {
             discord_token: "test".to_string(),
             hypixel_api_key: "test".to_string(),
-            database_url: "sqlite:test.db".to_string(),
+            database_url: "postgres://postgres:password@localhost:5432/memum_activity_bot".to_string(),
             hypixel_sweep_interval_seconds: 60,
             discord_sweep_interval_seconds: 15,
             base_level_xp: 100.0,
@@ -563,9 +563,9 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("system clock should be after unix epoch")
             .as_nanos();
-        let db_path = format!("target/test-sweeper-{}.db", nanos);
-        let _ = std::fs::remove_file(&db_path);
-        database::init_db(&format!("sqlite:{}", db_path))
+        let db_name = format!("test_sweeper_{}", nanos);
+        let db_url = format!("postgres://user:pass@localhost/{}", db_name);
+        database::init_db(&db_url)
             .await
             .expect("test db should initialize")
     }

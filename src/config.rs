@@ -21,7 +21,7 @@ pub struct AppConfig {
     /// Hypixel API key for fetching player stats.
     pub hypixel_api_key: String,
 
-    /// SQLx database connection string (e.g. `sqlite:bot.db`).
+    /// SQLx database connection string (e.g. `postgres://user:pass@localhost/db`).
     pub database_url: String,
 
     /// How often the Hypixel stat sweeper runs, in seconds.
@@ -70,7 +70,8 @@ impl AppConfig {
             discord_token: env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN must be set in .env"),
             hypixel_api_key: env::var("HYPIXEL_API_KEY")
                 .expect("HYPIXEL_API_KEY must be set in .env"),
-            database_url: env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite:bot.db".to_string()),
+            database_url: env::var("DATABASE_URL")
+                .unwrap_or_else(|_| "postgres://user:pass@localhost/db".to_string()),
             hypixel_sweep_interval_seconds: env::var("HYPIXEL_SWEEP_INTERVAL_SECONDS")
                 .unwrap_or_else(|_| "60".to_string())
                 .parse()

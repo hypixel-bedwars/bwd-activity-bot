@@ -1,20 +1,15 @@
 /// Leaderboard card image generator.
 ///
-/// Produces a 1200x700 PNG leaderboard image using the same Minecraft bitmap
-/// font sheet as the level card. Shows up to 10 players per page with rank,
-/// username, level, and total XP.
+/// Produces a 1200x700 PNG leaderboard image using the shared
+/// [`crate::font::renderer::FontRenderer`] bitmap font engine.
+/// Shows up to 10 players per page with rank, username, level, and total XP.
 use std::io::Cursor;
 
 use image::{DynamicImage, GenericImageView, ImageFormat, Rgba, RgbaImage};
 use tracing::debug;
 
-use crate::hypixel::models::{HypixelRank, plus_color_to_rgba};
-
-// ---------------------------------------------------------------------------
-// Embedded font sheet (shared with level_card)
-// ---------------------------------------------------------------------------
-
-static FONT_PNG: &[u8] = include_bytes!("../../font/assets/textures/font/ascii.png");
+use crate::font::renderer::FontRenderer;
+use crate::hypixel::models::{plus_color_to_rgba, HypixelRank};
 
 // ---------------------------------------------------------------------------
 // Colour constants
@@ -114,9 +109,7 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         params.rows.len(),
     );
 
-    let font = image::load_from_memory(FONT_PNG)
-        .expect("embedded font sheet is valid PNG")
-        .to_rgba8();
+    let font = FontRenderer::get();
 
     let mut img = RgbaImage::from_pixel(IMG_W, BASE_IMG_H, BG);
 
@@ -132,10 +125,9 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     let col_header_y = header_y + 10;
 
     let level_header = "Level";
-    let level_header_w = measure_text(&font, level_header, 3);
+    let level_header_w = font.measure_text(level_header, 3);
 
-    render_text(
-        &font,
+    font.render_text(
         &mut img,
         level_column_center - level_header_w / 2,
         col_header_y,
@@ -145,10 +137,9 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     );
 
     let xp_header = "XP";
-    let xp_header_w = measure_text(&font, xp_header, 3);
+    let xp_header_w = font.measure_text(xp_header, 3);
 
-    render_text(
-        &font,
+    font.render_text(
         &mut img,
         xp_column_center - xp_header_w / 2,
         col_header_y,
@@ -178,20 +169,19 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
             MUTED
         };
         let rank_text = format!("#{}", row.rank);
-        render_text(
-            &font,
+        font.render_text(
             &mut img,
             header_x + 20,
             row_y + 16,
             &rank_text,
-            3,
+            5,
             rank_color,
         );
 
         // Hypixel rank badge + username, starting after the position number
         let name_x = header_x + 100;
         let text_y = row_y + 14;
-        let text_scale = 3u32;
+        let text_scale = 5u32;
 
         // Parse the stored rank string into a HypixelRank enum so we can
         // derive colours and label text.
@@ -210,6 +200,13 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
 
         let name_col = hypixel_rank.name_color();
 
+        debug!(
+            "rank debug: username={} raw_rank={:?} parsed_rank={:?}",
+            row.username,
+            raw_rank,
+            hypixel_rank
+        );
+        
         if hypixel_rank != HypixelRank::None {
             // Decompose the label into coloured segments.
             // e.g. "[MVP+]" → "[MVP" in cyan, "+" in gold, "]" in cyan.
@@ -229,31 +226,23 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
                 let after = &label[after_start..];
 
                 // Render "[RANK" part
-                render_text(
-                    &font, &mut img, cursor_x, text_y, before, text_scale, name_col,
-                );
-                cursor_x += measure_text(&font, before, text_scale);
+                font.render_text(&mut img, cursor_x, text_y, before, text_scale, name_col);
+                cursor_x += font.measure_text(before, text_scale);
 
                 // Render '+' (or '++') in plus_color
                 let plus_str = &label[plus_pos..after_start];
-                render_text(
-                    &font, &mut img, cursor_x, text_y, plus_str, text_scale, plus_color,
-                );
-                cursor_x += measure_text(&font, plus_str, text_scale);
+                font.render_text(&mut img, cursor_x, text_y, plus_str, text_scale, plus_color);
+                cursor_x += font.measure_text(plus_str, text_scale);
 
                 // Render ']' in name color
                 if !after.is_empty() {
-                    render_text(
-                        &font, &mut img, cursor_x, text_y, after, text_scale, name_col,
-                    );
-                    cursor_x += measure_text(&font, after, text_scale);
+                    font.render_text(&mut img, cursor_x, text_y, after, text_scale, name_col);
+                    cursor_x += font.measure_text(after, text_scale);
                 }
             } else {
                 // No '+' (e.g. "[VIP]") — render entire label in name color
-                render_text(
-                    &font, &mut img, cursor_x, text_y, label, text_scale, name_col,
-                );
-                cursor_x += measure_text(&font, label, text_scale);
+                font.render_text(&mut img, cursor_x, text_y, label, text_scale, name_col);
+                cursor_x += font.measure_text(label, text_scale);
             }
 
             // Small gap between badge and username
@@ -261,8 +250,7 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         }
 
         // Username in white
-        render_text(
-            &font,
+        font.render_text(
             &mut img,
             cursor_x,
             text_y,
@@ -272,47 +260,31 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         );
 
         let level_text = format!("{}", row.level);
-        let level_w = measure_text(&font, &level_text, text_scale);
+        let level_w = font.measure_text(&level_text, text_scale);
 
         let level_column_center = header_x + 700;
         let level_x = level_column_center - level_w / 2;
 
         // Level
         let level_text = format!("{}", row.level);
-        render_text(
-            &font,
-            &mut img,
-            level_x,
-            row_y + 14,
-            &level_text,
-            text_scale,
-            CYAN,
-        );
+        font.render_text(&mut img, level_x, row_y + 14, &level_text, text_scale, CYAN);
         // XP right aligned
         let xp_text = format_xp(row.total_xp);
-        let xp_w = measure_text(&font, &xp_text, 3);
+        let xp_w = font.measure_text(&xp_text, 3);
 
         let xp_column_center = header_x + header_w - 120;
         let xp_x = xp_column_center - xp_w / 2;
 
-        render_text(&font, &mut img, xp_x, row_y + 14, &xp_text, 3, WHITE);
+        font.render_text(&mut img, xp_x, row_y + 14, &xp_text, 3, WHITE);
     }
 
     // == EMPTY STATE ==========================================================
     if params.rows.is_empty() {
         debug!("leaderboard_card::render: no rows to render (empty state)");
         let empty_text = "No players to display";
-        let text_w = measure_text(&font, empty_text, 3);
+        let text_w = font.measure_text(empty_text, 3);
         let cx = (IMG_W - text_w) / 2;
-        render_text(
-            &font,
-            &mut img,
-            cx,
-            BASE_IMG_H / 2 - 12,
-            empty_text,
-            3,
-            MUTED,
-        );
+        font.render_text(&mut img, cx, BASE_IMG_H / 2 - 12, empty_text, 3, MUTED);
     }
 
     // == ENCODE PNG ============================================================
@@ -339,14 +311,11 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
         params.total_users,
     );
 
-    let font = image::load_from_memory(FONT_PNG)
-        .expect("embedded font sheet is valid PNG")
-        .to_rgba8();
+    let font = FontRenderer::get();
 
     // Height: header + one row per milestone + bottom padding.
     // Minimum 200 px so an empty card still looks intentional.
-    let content_h =
-        (params.milestones.len() as u32).max(1) * MILESTONE_ROW_H + 40;
+    let content_h = (params.milestones.len() as u32).max(1) * MILESTONE_ROW_H + 40;
     let img_h = content_h.max(200);
 
     let mut img = RgbaImage::from_pixel(IMG_W, img_h, BG);
@@ -364,9 +333,9 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
 
     // Total users right-aligned
     let users_text = format!("{} registered players", params.total_users);
-    let users_w = measure_text(&font, &users_text, 2);
+    let users_w = font.measure_text(&users_text, 2);
     let users_x = (IMG_W - MARGIN * 2).saturating_sub(20 + users_w) + MARGIN;
-    render_text(&font, &mut img, users_x, MARGIN + 10, &users_text, 2, MUTED);
+    font.render_text(&mut img, users_x, MARGIN + 10, &users_text, 2, MUTED);
 
     // Divider below header
     // let divider_y = MARGIN + MILESTONE_SECTION_HEADER_H - 6;
@@ -375,10 +344,9 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
     // == MILESTONE ROWS =======================================================
     if params.milestones.is_empty() {
         let msg = "No milestones configured for this server.";
-        let msg_w = measure_text(&font, msg, 2);
+        let msg_w = font.measure_text(msg, 2);
         let cx = (IMG_W - msg_w) / 2;
-        render_text(
-            &font,
+        font.render_text(
             &mut img,
             cx,
             MARGIN + MILESTONE_SECTION_HEADER_H + 10,
@@ -404,15 +372,7 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
 
             // Level badge
             let level_text = format!("Level {}", milestone.level);
-            render_text(
-                &font,
-                &mut img,
-                MARGIN + 20,
-                row_y + 8,
-                &level_text,
-                3,
-                GOLD,
-            );
+            font.render_text(&mut img, MARGIN + 20, row_y + 8, &level_text, 3, GOLD);
 
             // User count
             let count_text = format!(
@@ -424,8 +384,7 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
                     "s have"
                 },
             );
-            render_text(
-                &font,
+            font.render_text(
                 &mut img,
                 MARGIN + 220,
                 row_y + (MILESTONE_ROW_H / 2) - 12,
@@ -537,7 +496,7 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
 }
 
 // ---------------------------------------------------------------------------
-// Drawing primitives (same as level_card)
+// Drawing primitives
 // ---------------------------------------------------------------------------
 
 fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8>) {
@@ -585,133 +544,4 @@ fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32
             }
         }
     }
-}
-
-fn measure_glyph_width(font: &RgbaImage, c: u8) -> u32 {
-    let grid_col = (c % 16) as u32;
-    let grid_row = (c / 16) as u32;
-    let src_x = grid_col * 8;
-    let src_y = grid_row * 8;
-
-    let mut rightmost: i32 = -1;
-    for row in 0..8u32 {
-        for col in 0..8u32 {
-            let px = font.get_pixel(src_x + col, src_y + row);
-            if px[3] > 128 {
-                if col as i32 > rightmost {
-                    rightmost = col as i32;
-                }
-            }
-        }
-    }
-    if rightmost < 0 {
-        4
-    } else {
-        (rightmost + 1) as u32
-    }
-}
-
-fn measure_text(font: &RgbaImage, text: &str, scale: u32) -> u32 {
-    debug!(
-        "leaderboard_card::measure_text: text_len={}, scale={}",
-        text.len(),
-        scale
-    );
-    let mut width: u32 = 0;
-    let mut last_was_glyph = false;
-
-    for ch in text.chars() {
-        let c = ch as u32;
-        if c < 0x20 || c > 0x7e {
-            width += 4 * scale + scale;
-            last_was_glyph = false;
-            continue;
-        }
-        let c = c as u8;
-        if c == b' ' {
-            width += 4 * scale;
-            last_was_glyph = false;
-            continue;
-        }
-        let glyph_w = measure_glyph_width(font, c);
-        width += glyph_w * scale + scale;
-        last_was_glyph = true;
-    }
-
-    if last_was_glyph {
-        width = width.saturating_sub(scale);
-    }
-    debug!("leaderboard_card::measure_text: width={}", width);
-    width
-}
-
-fn render_text(
-    font: &RgbaImage,
-    img: &mut RgbaImage,
-    x: u32,
-    y: u32,
-    text: &str,
-    scale: u32,
-    color: Rgba<u8>,
-) {
-    debug!(
-        "leaderboard_card::render_text: x={}, y={}, text_len={}, scale={}",
-        x,
-        y,
-        text.len(),
-        scale
-    );
-    let img_w = img.width();
-    let img_h = img.height();
-    let mut cursor_x = x;
-
-    for ch in text.chars() {
-        let c = ch as u32;
-        if c < 0x20 || c > 0x7e {
-            cursor_x += 4 * scale + scale;
-            continue;
-        }
-        let c = c as u8;
-        if c == b' ' {
-            cursor_x += 4 * scale;
-            continue;
-        }
-
-        let grid_col = (c % 16) as u32;
-        let grid_row = (c / 16) as u32;
-        let src_x = grid_col * 8;
-        let src_y = grid_row * 8;
-        let glyph_w = measure_glyph_width(font, c);
-
-        for fy in 0..8u32 {
-            for fx in 0..glyph_w {
-                let fpx = font.get_pixel(src_x + fx, src_y + fy);
-                if fpx[3] > 128 {
-                    for by in 0..scale {
-                        for bx in 0..scale {
-                            let px = cursor_x + fx * scale + bx;
-                            let py = y + fy * scale + by;
-
-                            if px < img_w && py < img_h {
-                                img.put_pixel(px, py, color);
-
-                                // extra pixels for bold effect
-                                if px + 1 < img_w {
-                                    img.put_pixel(px + 1, py, color);
-                                }
-                                if py + 1 < img_h {
-                                    img.put_pixel(px, py + 1, color);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        cursor_x += glyph_w * scale + scale;
-    }
-    debug!(
-        "leaderboard_card::render_text: finished rendering text='{}'",
-        text
-    );
 }

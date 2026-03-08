@@ -11,7 +11,7 @@
 //! 1. Load environment variables from `.env`.
 //! 2. Initialize structured logging via `tracing`.
 //! 3. Parse application configuration.
-//! 4. Initialize the SQLite database and run migrations.
+//! 4. Initialize the Postgres database and run migrations.
 //! 5. Build the Poise framework (commands, event handler, sweeper).
 //! 6. Start the Discord gateway client.
 
@@ -22,6 +22,7 @@ mod config;
 mod database;
 mod discord_stats;
 mod events;
+mod font;
 mod hypixel;
 mod milestones;
 mod shared;
@@ -46,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     tracing_subscriber::fmt()
         .with_env_filter(
             EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| EnvFilter::new("memum_activity_bot=info,warn")),
+                .unwrap_or_else(|_| EnvFilter::new("memum_activity_bot=debug")),
         )
         .init();
 
