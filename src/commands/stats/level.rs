@@ -6,9 +6,9 @@ use poise::serenity_prelude::{self as serenity, CreateAttachment, CreateEmbed};
 use tracing::{debug, info};
 use uuid::Uuid;
 
+use crate::cards::level_card::{self, LevelCardParams};
 use crate::config::GuildConfig;
 use crate::database::queries;
-use crate::level_card::{self, LevelCardParams};
 use crate::shared::types::{Context, Error};
 use crate::sweeper;
 use crate::utils::stats_definitions::{display_name_for_key, is_discord_stat};

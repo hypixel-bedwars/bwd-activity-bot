@@ -21,7 +21,7 @@ use crate::hypixel::models::{HypixelRank, plus_color_to_rgba};
 // Embedded font sheet
 // ---------------------------------------------------------------------------
 
-static FONT_PNG: &[u8] = include_bytes!("../font/assets/textures/font/ascii.png");
+static FONT_PNG: &[u8] = include_bytes!("../../font/assets/textures/font/ascii.png");
 
 // ---------------------------------------------------------------------------
 // Colour constants

@@ -14,7 +14,7 @@ use crate::hypixel::models::{HypixelRank, plus_color_to_rgba};
 // Embedded font sheet (shared with level_card)
 // ---------------------------------------------------------------------------
 
-static FONT_PNG: &[u8] = include_bytes!("../font/assets/textures/font/ascii.png");
+static FONT_PNG: &[u8] = include_bytes!("../../font/assets/textures/font/ascii.png");
 
 // ---------------------------------------------------------------------------
 // Colour constants
@@ -124,27 +124,16 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     let header_x = MARGIN;
     let header_y = MARGIN;
     let header_w = IMG_W - MARGIN * 2;
-    
+
     let level_column_center = header_x + 700;
     let xp_column_center = header_x + header_w - 120;
 
-    // Title: "LEADERBOARD"
-    render_text(
-        &font,
-        &mut img,
-        header_x + 20,
-        header_y + 15,
-        "LEADERBOARD",
-        7,
-        WHITE,
-    );
-
     // == COLUMN HEADERS =======================================================
-    let col_header_y = header_y + HEADER_H + 10;
-    
+    let col_header_y = header_y + 10;
+
     let level_header = "Level";
     let level_header_w = measure_text(&font, level_header, 3);
-    
+
     render_text(
         &font,
         &mut img,
@@ -154,10 +143,10 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         3,
         MUTED,
     );
-    
+
     let xp_header = "XP";
     let xp_header_w = measure_text(&font, xp_header, 3);
-    
+
     render_text(
         &font,
         &mut img,
@@ -281,10 +270,10 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
             text_scale,
             name_col,
         );
-        
+
         let level_text = format!("{}", row.level);
         let level_w = measure_text(&font, &level_text, text_scale);
-        
+
         let level_column_center = header_x + 700;
         let level_x = level_column_center - level_w / 2;
 
@@ -356,10 +345,8 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
 
     // Height: header + one row per milestone + bottom padding.
     // Minimum 200 px so an empty card still looks intentional.
-    let content_h = MILESTONE_SECTION_HEADER_H
-        + MILESTONE_HEADER_GAP
-        + (params.milestones.len() as u32).max(1) * MILESTONE_ROW_H
-        + MILESTONE_BOTTOM_PAD;
+    let content_h =
+        (params.milestones.len() as u32).max(1) * MILESTONE_ROW_H + 40;
     let img_h = content_h.max(200);
 
     let mut img = RgbaImage::from_pixel(IMG_W, img_h, BG);
@@ -375,22 +362,11 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
     //     PANEL,
     // );
 
-    // == HEADER ===============================================================
-    render_text(
-        &font,
-        &mut img,
-        MARGIN + 20,
-        MARGIN + 14,
-        "MILESTONES",
-        7,
-        WHITE,
-    );
-
     // Total users right-aligned
     let users_text = format!("{} registered players", params.total_users);
     let users_w = measure_text(&font, &users_text, 2);
     let users_x = (IMG_W - MARGIN * 2).saturating_sub(20 + users_w) + MARGIN;
-    render_text(&font, &mut img, users_x, MARGIN + 20, &users_text, 2, MUTED);
+    render_text(&font, &mut img, users_x, MARGIN + 10, &users_text, 2, MUTED);
 
     // Divider below header
     // let divider_y = MARGIN + MILESTONE_SECTION_HEADER_H - 6;
@@ -411,7 +387,7 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
             MUTED,
         );
     } else {
-        let first_row_y = MARGIN + MILESTONE_SECTION_HEADER_H + MILESTONE_HEADER_GAP;
+        let first_row_y = MARGIN + 20;
         for (i, milestone) in params.milestones.iter().enumerate() {
             let row_y = first_row_y + (i as u32) * MILESTONE_ROW_H;
 

@@ -6,10 +6,10 @@
 /// leaderboard background updater.
 use sqlx::PgPool;
 
-use crate::database::queries;
-use crate::leaderboard_card::{
+use crate::cards::leaderboard_card::{
     self, LeaderboardCardParams, LeaderboardRow, MilestoneCardParams, MilestoneEntry,
 };
+use crate::database::queries;
 
 /// Players per leaderboard page (fixed).
 pub const PAGE_SIZE: i64 = 10;

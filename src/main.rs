@@ -16,19 +16,18 @@
 //! 6. Start the Discord gateway client.
 
 mod bot;
+mod cards;
 mod commands;
 mod config;
 mod database;
 mod discord_stats;
 mod events;
 mod hypixel;
-mod leaderboard_card;
-mod level_card;
 mod milestones;
 mod shared;
 mod sweeper;
-mod xp;
 mod utils;
+mod xp;
 
 use poise::serenity_prelude as serenity;
 use tracing::info;

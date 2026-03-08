@@ -26,7 +26,7 @@ pub type Context<'a> = poise::Context<'a, Data, Error>;
 /// This is constructed once during bot setup and then shared (via `Arc` internally
 /// by Poise) for the lifetime of the process.
 pub struct Data {
-    /// SQLite connection pool for all database operations.
+    /// Postgres connection pool for all database operations.
     pub db: PgPool,
 
     /// Pre-configured Hypixel API client (with built-in cache and rate limiter).
