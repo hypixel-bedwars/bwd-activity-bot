@@ -1,0 +1,6747 @@
+{
+  "success": true,
+  "player": {
+    "_id": "65f5240bed1b1f213db681df",
+    "uuid": "330370b85ac14bc6859ca74bfe906ea8",
+    "displayname": "VA80",
+    "firstLogin": 1710564363619,
+    "lastLogin": 1772879826102,
+    "playername": "va80",
+    "achievementsOneTime": [
+      "general_first_join",
+      "general_first_chat",
+      "general_first_game",
+      "bedwars_buggy_beds",
+      "bedwars_its_dark_down_there",
+      "bedwars_first_blood",
+      "bedwars_revenge",
+      "easter_you_didnt_see_that_coming",
+      "bedwars_thats_a_first",
+      "bedwars_already_over",
+      "bedwars_destroy_beds",
+      "general_a_long_journey_begins",
+      "bedwars_super_looter",
+      "bedwars_builder",
+      "bedwars_merciless",
+      "bedwars_first",
+      "easter_midspring_nights_dream",
+      "bedwars_sneaky_rusher",
+      "bedwars_rejoining_the_dream",
+      "bedwars_bed_trap",
+      "general_first_party",
+      "duels_trial_by_combat",
+      "bedwars_strategist",
+      "general_first_friend",
+      "bedwars_ultimate_defense",
+      "easter_pep_in_your_step",
+      "bedwars_the_last_of_us",
+      "bedwars_getting_the_job_done_better",
+      "bedwars_survivor",
+      "bedwars_emerald_hoarder",
+      "skyblock_businessman",
+      "skyblock_your_adventure_begins",
+      "duels_untouchable",
+      "duels_speed_duel",
+      "easter_springtime_match_ups",
+      "easter_bw_jump_boost",
+      "bedwars_alchemist",
+      "general_youtuber",
+      "bedwars_geared_up",
+      "duels_speedy_sumo",
+      "easter_happy_easter_2024",
+      "murdermystery_be_the_hero",
+      "bedwars_team_player",
+      "skywars_peacemaker",
+      "bedwars_slumber_your_journey_starts_here",
+      "bedwars_slumber_you_did_it",
+      "bedwars_ninja",
+      "duels_my_preference",
+      "duels_ninja",
+      "arcade_woops_didnt_mean_to",
+      "general_grapple_pro",
+      "arcade_dropper_fast_way_down",
+      "arcade_dropper_wasnt_so_bad",
+      "tntgames_tnt_tag_close",
+      "tntgames_timer",
+      "tntgames_tnt_tag_dm",
+      "tntgames_tnt_tag_tagger",
+      "tntgames_tnt_tag_traveller",
+      "duels_rematch",
+      "duels_one_v_one_me",
+      "bedwars_fireballs",
+      "duels_hat_trick",
+      "duels_on_fire",
+      "duels_build_battle",
+      "bedwars_pickaxe_challenge",
+      "bedwars_slumber_forged_in_fire",
+      "bedwars_slumber_millionaires_club",
+      "bedwars_slumber_hotel_regular",
+      "general_use_portal",
+      "bedwars_savvy_shopper",
+      "tntgames_tnt_tag_differenttags",
+      "tntgames_bow_spleef_first_double_jump",
+      "bedwars_slumber_hotel_vip",
+      "general_vip",
+      "housing_give_cookie",
+      "bedwars_dont_need_bed",
+      "duels_domination",
+      "duels_the_waiting_game",
+      "housing_become_resident",
+      "skywars_well_well",
+      "duels_master_builders",
+      "bedwars_slumber_sold_the_dreamscape",
+      "housing_join_guild",
+      "duels_revenge",
+      "duels_not_close_at_all",
+      "bedwars_you_cant_do_that",
+      "duels_got_ya",
+      "duels_void_archer",
+      "duels_community_oriented",
+      "duels_well_rounded",
+      "duels_last_stand",
+      "bedwars_golem",
+      "bedwars_minefield",
+      "duels_gg",
+      "bedwars_distraction",
+      "skywars_touch_of_death",
+      "skywars_gapple",
+      "skywars_open_chest",
+      "general_friends_25",
+      "murdermystery_ride_monorail",
+      "uhc_warming_up",
+      "summer_home_run",
+      "buildbattle_every_second_counts",
+      "buildbattle_artist",
+      "buildbattle_no_mistakes",
+      "general_vip_plus",
+      "general_creeperbook",
+      "skywars_map_select",
+      "skywars_legendary",
+      "housing_join_friend",
+      "woolgames_resilient",
+      "halloween2017_tricked",
+      "halloween2017_fear_the_pumpkinator",
+      "bedwars_diamond_hoarder",
+      "buildbattle_stenographer",
+      "murdermystery_soldiers_eliminated",
+      "bedwars_slayer",
+      "buildbattle_braniac",
+      "general_fishing_hobbyist",
+      "general_doing_my_part",
+      "murdermystery_survive_storm_on_top",
+      "murdermystery_shoot_thrown_knife",
+      "bedwars_out_of_stock",
+      "bedwars_future_is_now",
+      "halloween2017_pumpkin_death",
+      "skyblock_production_expanded",
+      "skyblock_mass_production",
+      "skyblock_time_to_go_on_vacation",
+      "skyblock_super_fuel",
+      "skyblock_into_the_deep",
+      "skyblock_resourceful"
+    ],
+    "lastLogout": 1772880477372,
+    "stats": {
+      "TNTGames": {
+        "lastTourneyAd": 1710690814564,
+        "packages": [
+          "shop_2018",
+          "tiered_achievement_flag_3",
+          "clicked_tnt_run_npc"
+        ],
+        "kills_tntag": 2,
+        "coins": 112085,
+        "deaths_tntag": 2,
+        "winstreak": 0,
+        "flags": {
+          "show_pre_game_hints": false
+        },
+        "run_potions_splashed_on_players": 0,
+        "record_tntrun": 184,
+        "deaths_tntrun": 3,
+        "wins": 0,
+        "new_tntrun_double_jumps": 1,
+        "new_pvprun_double_jumps": 1,
+        "new_spleef_double_jumps": 1,
+        "new_spleef_repulsor": 1,
+        "new_spleef_tripleshot": 1,
+        "new_tntag_speedy": 1,
+        "new_firewizard_regen": 1,
+        "new_firewizard_explode": 1,
+        "new_icewizard_regen": 1,
+        "new_icewizard_explode": 1,
+        "new_witherwizard_regen": 1,
+        "new_witherwizard_explode": 1,
+        "new_bloodwizard_regen": 1,
+        "new_bloodwizard_explode": 1,
+        "new_kineticwizard_regen": 1,
+        "new_kineticwizard_explode": 1
+      },
+      "Bedwars": {
+        "packages": [
+          "leaderboards_resync_mar_2021",
+          "victorydance_anvil_rain",
+          "victorydance_fireworks",
+          "figurine_alchemy",
+          "figurine_defended_bed",
+          "figurine_alex",
+          "figurine_diamonds",
+          "figurine_top_killer",
+          "npcskin_ratman",
+          "figurine_ratman",
+          "figurine_hammer_vs_heatwave",
+          "figurine_executives_meeting",
+          "figurine_don_espresso",
+          "victorydance_dragon_rider",
+          "killeffect_head_rocket",
+          "killeffect_heart_aura",
+          "figurine_blitz_star",
+          "figurine_kart_racing",
+          "victorydance_dreamscape",
+          "figurine_regular_sandman",
+          "deathcry_cat_hit",
+          "bw_challenge_no_team_upgrades_collected",
+          "killmessages_to_the_moon",
+          "killmessages_woof_woof",
+          "killmessages_glorious",
+          "figurine_bridge_egg",
+          "killeffect_balloons",
+          "figurine_the_pit",
+          "figurine_zombie",
+          "figurine_grass_block",
+          "figurine_tic_tac_toe",
+          "figurine_golden_apple",
+          "figurine_sky_island",
+          "figurine_knockback",
+          "figurine_portal",
+          "figurine_housing",
+          "figurine_steve",
+          "figurine_missing_bed",
+          "figurine_iron_punch",
+          "figurine_shears",
+          "figurine_groopo",
+          "figurine_fishing_rod",
+          "figurine_hot_air_balloon",
+          "figurine_crossed_swords",
+          "bw_challenge_slow_generator_collected",
+          "killeffect_raining_gold",
+          "islandtopper_assassin",
+          "bw_challenge_assassin_collected",
+          "npcskin_warrior",
+          "bw_challenge_no_utilities_collected",
+          "beddestroy_pigsplosion",
+          "favoritemap_solace",
+          "favoritemap_hollow",
+          "favoritemap_glacier",
+          "favoritemap_vigilante",
+          "favoritemap_orbit",
+          "favoritemap_nostalgia",
+          "favoritemap_beeeee",
+          "favoritemap_dreamgrove",
+          "favoritemap_invasion",
+          "favoritemap_bio-hazard",
+          "favoritemap_lotus",
+          "favoritemap_pernicious",
+          "favoritemap_archway",
+          "deathcry_howl",
+          "favoritemap_airshow",
+          "favoritemap_lighthouse",
+          "favoritemap_crypt",
+          "favoritemap_speedway",
+          "favoritemap_amazon",
+          "favoritemap_meso",
+          "favoritemap_playground",
+          "favoritemap_polygon",
+          "favoritemap_acropolis",
+          "favoritemap_arcade",
+          "favoritemap_lightstone",
+          "favoritemap_siege",
+          "favoritemap_yue",
+          "favoritemap_cascade",
+          "favoritemap_nebuc",
+          "figurine_hypixel",
+          "figurine_guardian",
+          "figurine_sheep",
+          "victorydance_dragon_fire",
+          "favoritemap_apollo",
+          "favoritemap_lost temple",
+          "favoritemap_raze",
+          "figurine_enderman",
+          "favoritemap_shark attack",
+          "figurine_dante",
+          "islandtopper_broken_pumpkin"
+        ],
+        "coins": 3861182,
+        "Experience": 1513482,
+        "first_join_7": true,
+        "practice": {
+          "selected": "BRIDGING",
+          "records": {
+            "bridging_distance_30:elevation_NONE:angle_STRAIGHT:": 8935,
+            "bridging_distance_30:elevation_NONE:angle_DIAGONAL:": 8635
+          },
+          "bridging": {
+            "blocks_placed": 18045,
+            "successful_attempts": 127,
+            "failed_attempts": 1719
+          },
+          "mlg": {
+            "failed_attempts": 26,
+            "successful_attempts": 77
+          },
+          "pearl_clutching": {
+            "failed_attempts": 7,
+            "successful_attempts": 51
+          },
+          "fireball_jumping": {
+            "failed_attempts": 13,
+            "successful_attempts": 30
+          }
+        },
+        "slumber": {
+          "fredgie": {
+            "should_update_index": false,
+            "dialogue_index": 12
+          },
+          "quest": {
+            "gambler_george": {
+              "bet_amount": 200,
+              "gamble_games_won": 0,
+              "won_last_game": false,
+              "lost_bet": true,
+              "lost_bet_time": 1713263248298
+            },
+            "lastStarted": {
+              "npc_reception_start": 1712046859690,
+              "npc_general_daku": 1712056794154,
+              "npc_john_pireso": 1712153160241,
+              "npc_lady_saichi": 1712153901904,
+              "phase_two_asc": 1712154439878,
+              "npc_john_indigos_hammer": 1712154492532,
+              "npc_laundry": 1712158866529,
+              "npc_blacksmith": 1712158900118,
+              "npc_king_flut": 1712159200822,
+              "npc_oasis": 1712215102881,
+              "npc_blacksmith_apprentice": 1712327413845,
+              "npc_hammer": 1712389388964,
+              "phase_three_asc": 1713109514367,
+              "npc_jimmy_bimmy": 1713110068565,
+              "npc_hermes": 1713174354978,
+              "npc_skyblock_player": 1713174626294,
+              "npc_quiz_show_host": 1713174722567,
+              "npc_the_ratman": 1713174813450,
+              "npc_arcade_player": 1713175014118,
+              "npc_executives": 1713175115700,
+              "npc_hammer_part_two": 1713191659332,
+              "npc_gambler_george": 1713261012599,
+              "npc_jeremy_jagger": 1713342220933,
+              "npc_spaceman": 1713342298549,
+              "npc_jets_mcturbo": 1713342521628,
+              "npc_bill_starr": 1713342625771,
+              "npc_don_espresso": 1713342633572,
+              "npc_wally": 1713346815860,
+              "npc_inspector": 1713438775522,
+              "npc_peter": 1713438941572,
+              "npc_laundry_gal": 1713439047473,
+              "npc_combat_artist_sally": 1713439095343,
+              "staff_wallet_upgrade": 1714020408403,
+              "phase_four_ascension_q1": 1714028291721,
+              "npc_master_meyer": 1714040081409,
+              "npc_lester_brody": 1714103104728,
+              "npc_gizzy_moonpowder": 1714103163954,
+              "npc_bucky": 1714103244114,
+              "npc_electrician_russel": 1714103546708,
+              "phase_four_ascension_q2": 1714103739420,
+              "phase_four_ascension_q3": 1714103786522,
+              "phase_four_ascension_q4": 1714103811837,
+              "phase_four_ascension_q5": 1715177445882,
+              "phase_four_ascension_wallet_q": 1715177470392,
+              "npc_meet_the_sandman": 1715178929195
+            },
+            "started": {
+              "npc_reception_start": true,
+              "npc_general_daku": true,
+              "npc_john_pireso": true,
+              "npc_lady_saichi": true,
+              "phase_two_asc": true,
+              "npc_john_indigos_hammer": true,
+              "npc_laundry": true,
+              "npc_blacksmith": true,
+              "npc_king_flut": true,
+              "npc_oasis": true,
+              "npc_blacksmith_apprentice": true,
+              "npc_hammer": true,
+              "phase_three_asc": true,
+              "npc_jimmy_bimmy": true,
+              "npc_hermes": true,
+              "npc_skyblock_player": true,
+              "npc_quiz_show_host": true,
+              "npc_the_ratman": true,
+              "npc_arcade_player": true,
+              "npc_executives": true,
+              "npc_hammer_part_two": true,
+              "npc_gambler_george": true,
+              "npc_jeremy_jagger": true,
+              "npc_spaceman": true,
+              "npc_jets_mcturbo": true,
+              "npc_bill_starr": true,
+              "npc_don_espresso": true,
+              "npc_wally": true,
+              "npc_inspector": true,
+              "npc_peter": true,
+              "npc_laundry_gal": true,
+              "npc_combat_artist_sally": true,
+              "staff_wallet_upgrade": true,
+              "phase_four_ascension_q1": true,
+              "npc_master_meyer": true,
+              "npc_lester_brody": true,
+              "npc_gizzy_moonpowder": true,
+              "npc_bucky": true,
+              "npc_electrician_russel": true,
+              "phase_four_ascension_q2": true,
+              "phase_four_ascension_q3": true,
+              "phase_four_ascension_q4": true,
+              "phase_four_ascension_q5": true,
+              "phase_four_ascension_wallet_q": true,
+              "npc_meet_the_sandman": true
+            },
+            "npc": {
+              "talk": {
+                "DoorManNpc": true,
+                "TicketMachineNpc": true,
+                "HotelReceptionistNpc": true,
+                "HostessKatrinaNpc": true,
+                "FredericFerntonNpc": true,
+                "GeneralDakuNpc": true,
+                "JohnIndigosNpc": true,
+                "LadySaichiNpc": true,
+                "JohnIndigosPhaseTwoNpc": true,
+                "LaundryGuyNpc": true,
+                "BlackSmithNpc": true,
+                "KingFlutNpc": true,
+                "OasisSpiritNpc": true,
+                "BlackSmithRobertoNpc": true,
+                "HammerNpc": true,
+                "JimmyNpc": true,
+                "BimmyNpc": true,
+                "HermesNpc": true,
+                "SkyBlockPlayerNpc": true,
+                "QuizShowHostNpc": true,
+                "RatmanNpc": true,
+                "ArcadePlayerNpc": true,
+                "CEONpc": true,
+                "HammerPartTwoNpc": true,
+                "GamblerGeorgeNpc": true,
+                "JeremyJaggerNpc": true,
+                "SpaceManNpc": true,
+                "JetsMcTurboNpc": true,
+                "BillStarrNpc": true,
+                "DonEspressoNpc": true,
+                "WallyNpc": true,
+                "InspectorMyaSterlingNpc": true,
+                "PeterNpc": true,
+                "LaundryGalNpc": true,
+                "CombatArtistSallyNpc": true,
+                "JohnIndigosPhaseThreeNpc": true,
+                "MasterMeyerNpc": true,
+                "LesterBrodyNpc": true,
+                "GizzyMoonpowderNpc": true,
+                "ChefBuckyNpc": true,
+                "ElectricianRusselNpc": true,
+                "SlumberVillagerNpc": true,
+                "SandmanNpc": true
+              }
+            },
+            "objective": {
+              "receptionist_introduction": true,
+              "general_daku_tea": true,
+              "john_pireso_map": true,
+              "lady_saichi_mattress": true,
+              "phase_two_recp": true,
+              "blacksmith_iron_bars": true,
+              "laundry_manager_sheets": true,
+              "blacksmith_apprentice_iron": true,
+              "blacksmith_apprentice_coins": true,
+              "blacksmith_apprentice_iron_repeat": false,
+              "blacksmith_apprentice_coins_repeat": true,
+              "king_flut_pillow": true,
+              "blacksmith_golden_ticket": true,
+              "hammer_coins": true,
+              "oasis_souls": true,
+              "king_flut_amulet": true,
+              "blacksmith_water": true,
+              "blacksmith_mold": true,
+              "blacksmith_amulet": true,
+              "john_indigos_hammer": true,
+              "phase_three_recp": true,
+              "chess_tickets": true,
+              "chess_wool_cables": true,
+              "chess_tokens_of_ferocity": true,
+              "ratman_pillow": true,
+              "ratman_bedsheets": true,
+              "ratman_iron_bars": true,
+              "ratman_spark_plug": true,
+              "arcade_quarters": true,
+              "arcade_quarters_repeat": true,
+              "hammer_part_two_silver_blade": true,
+              "gambler_george_win": true,
+              "executives_meeting_numbers": true,
+              "jagger_wool": true,
+              "jagger_iron": true,
+              "jets_iron_bars": true,
+              "hermes_mystery_boxes": true,
+              "don_espresso_gold": true,
+              "jets_nether_stars": true,
+              "wally_bed_sheets": true,
+              "jets_emeralds": true,
+              "skyblock_player_leaves": true,
+              "jagger_gold": true,
+              "jagger_diamond": true,
+              "jagger_emerald": true,
+              "bill_starr_blitz": true,
+              "wally_nether_stars": true,
+              "peter_escape": true,
+              "combat_artist_sally": true,
+              "jets_cables": true,
+              "spaceman_nether_stars": true,
+              "laundry_manager_sheets_repeat": true,
+              "master_meyer": true,
+              "master_meyer_repeat": false,
+              "lester_brody": true,
+              "inspector_gloves": true,
+              "inspector_air_freshener": true,
+              "inspector_work_boots": true,
+              "gizzy_moonpowder": true,
+              "gizzy_moonpowder_repeat": false,
+              "bucky_sky_tea_leaves": true,
+              "bucky_fragments": true,
+              "bucky_sky_tea_leaves_repeat": false,
+              "bucky_fragments_repeat": false,
+              "electrician_russel": true,
+              "electrician_russel_repeat": false,
+              "phase_four_ascension_o1": true,
+              "phase_four_ascension_o2": true,
+              "phase_four_ascension_o3": true,
+              "laundry_gal_pillows": true,
+              "inspector_photo": true,
+              "inspector_clue_weapon": true,
+              "phase_four_ascension_o4": true,
+              "phase_four_ascension_o5": true,
+              "meet_the_sandman": true,
+              "lester_brody_repeat": false
+            },
+            "completed": {
+              "npc_reception_start": true,
+              "npc_general_daku": true,
+              "npc_john_pireso": true,
+              "npc_lady_saichi": true,
+              "phase_two_asc": true,
+              "npc_laundry": true,
+              "npc_blacksmith_apprentice": true,
+              "npc_hammer": true,
+              "npc_oasis": true,
+              "npc_king_flut": true,
+              "npc_blacksmith": true,
+              "npc_john_indigos_hammer": true,
+              "phase_three_asc": true,
+              "npc_jimmy_bimmy": true,
+              "npc_quiz_show_host": true,
+              "npc_the_ratman": true,
+              "npc_arcade_player": true,
+              "npc_hammer_part_two": true,
+              "npc_gambler_george": true,
+              "npc_executives": true,
+              "npc_hermes": true,
+              "npc_don_espresso": true,
+              "npc_skyblock_player": true,
+              "npc_jeremy_jagger": true,
+              "npc_bill_starr": true,
+              "npc_wally": true,
+              "npc_peter": true,
+              "npc_combat_artist_sally": true,
+              "npc_jets_mcturbo": true,
+              "npc_spaceman": true,
+              "staff_wallet_upgrade": true,
+              "npc_master_meyer": true,
+              "npc_lester_brody": true,
+              "npc_gizzy_moonpowder": true,
+              "npc_bucky": true,
+              "npc_electrician_russel": true,
+              "phase_four_ascension_q1": true,
+              "phase_four_ascension_q2": true,
+              "phase_four_ascension_q3": true,
+              "npc_laundry_gal": true,
+              "npc_inspector": true,
+              "phase_four_ascension_q4": true,
+              "phase_four_ascension_q5": true,
+              "phase_four_ascension_wallet_q": true,
+              "npc_meet_the_sandman": true
+            },
+            "lastCompleted": {
+              "npc_reception_start": 1712056749665,
+              "npc_general_daku": 1712153120010,
+              "npc_john_pireso": 1712153854299,
+              "npc_lady_saichi": 1712154431827,
+              "phase_two_asc": 1712154444778,
+              "npc_laundry": 1712327466237,
+              "npc_blacksmith_apprentice": 1712384894852,
+              "npc_hammer": 1712389391617,
+              "npc_oasis": 1713083963380,
+              "npc_king_flut": 1713088846817,
+              "npc_blacksmith": 1713109468363,
+              "npc_john_indigos_hammer": 1713109514366,
+              "phase_three_asc": 1713109533292,
+              "npc_jimmy_bimmy": 1713173835045,
+              "npc_quiz_show_host": 1713174749369,
+              "npc_the_ratman": 1713174946502,
+              "npc_arcade_player": 1713175017330,
+              "npc_hammer_part_two": 1713260971472,
+              "npc_gambler_george": 1713262394587,
+              "npc_executives": 1713342039777,
+              "npc_hermes": 1713342743953,
+              "npc_don_espresso": 1713346728702,
+              "npc_skyblock_player": 1713364414622,
+              "npc_jeremy_jagger": 1713438724504,
+              "npc_bill_starr": 1713438752355,
+              "npc_wally": 1713438931721,
+              "npc_peter": 1713438993298,
+              "npc_combat_artist_sally": 1713796846953,
+              "npc_jets_mcturbo": 1713949268408,
+              "npc_spaceman": 1714020400440,
+              "staff_wallet_upgrade": 1714028251217,
+              "npc_master_meyer": 1714040087209,
+              "npc_lester_brody": 1714103107578,
+              "npc_gizzy_moonpowder": 1714103165504,
+              "npc_bucky": 1714103248864,
+              "npc_electrician_russel": 1714103548008,
+              "phase_four_ascension_q1": 1714103685810,
+              "phase_four_ascension_q2": 1714103768921,
+              "phase_four_ascension_q3": 1714103788421,
+              "npc_laundry_gal": 1714730122333,
+              "npc_inspector": 1715177348111,
+              "phase_four_ascension_q4": 1715177440981,
+              "phase_four_ascension_q5": 1715177462732,
+              "phase_four_ascension_wallet_q": 1715177505489,
+              "npc_meet_the_sandman": 1715178929195
+            },
+            "item": {
+              "slumber_item_ender_dust": 500,
+              "slumber_item_imperial_leather": 1,
+              "slumber_item_indigos_map": 0,
+              "slumber_item_trusty_rope": 1,
+              "slumber_item_bed_sheets": 500,
+              "slumber_item_perfume": 1,
+              "slumber_item_iron_nugget": 500,
+              "slumber_item_comfy_pillow": 125,
+              "slumber_item_soul": 500,
+              "slumber_item_golden_ticket": 0,
+              "slumber_item_silver_coins": 500,
+              "slumber_item_weapon_mold": 0,
+              "slumber_item_oasis_water": 1,
+              "slumber_item_missing_amulet": 0,
+              "slumber_item_amulet": 0,
+              "slumber_item_enchanted_hammer": 0,
+              "slumber_item_token_of_ferocity": 500,
+              "slumber_item_cable": 500,
+              "slumber_item_spark_plug": 0,
+              "slumber_item_ratman_mask": 0,
+              "slumber_item_timeworn_mystery_box": 500,
+              "slumber_item_proof_of_success": 500,
+              "slumber_item_silver_blade_replay": 0,
+              "slumber_item_limbo_dust": 0,
+              "slumber_item_gold_bar": 500,
+              "slumber_item_nether_star": 500,
+              "slumber_item_diamond_fragment": 500,
+              "slumber_item_dwarven_mithril": 1,
+              "slumber_item_emerald_shard": 500,
+              "slumber_item_blitz_star": 0,
+              "slumber_item_unused_bomb_materials": 0,
+              "slumber_item_faded_blitz_star": 1,
+              "slumber_item_block_of_mega_walls_obsidian": 1,
+              "slumber_item_gloves": 17,
+              "slumber_item_discarded_kart_wheel": 1,
+              "slumber_item_boots": 7,
+              "slumber_item_moon_stone_nugget": 1,
+              "slumber_item_glowing_sand_paper": 1,
+              "slumber_item_air_freshener": 0,
+              "slumber_item_victim_photo": 3,
+              "slumber_item_murder_weapon": 0,
+              "slumber_item_cleaned_up_murder_knife": 0
+            }
+          },
+          "bag_type": "PLATINUM_MEMBERSHIP_WALLET",
+          "total_tickets_earned": 171188,
+          "tickets": 100008,
+          "tickets_given_doorman": 25,
+          "tickets_requirement_met": true,
+          "wallet_full_warning": false,
+          "phase": {
+            "current": 2
+          },
+          "room": {
+            "room_1": true,
+            "room_3": true,
+            "room_2": true,
+            "room_4": true,
+            "room_5": true,
+            "room_6": true,
+            "room_7": true,
+            "room_8": true,
+            "room_10": true,
+            "room_11": true,
+            "room_12": true,
+            "room_9": true,
+            "owners_office": true
+          },
+          "boon_multiplier": 0.5,
+          "phasethree": {
+            "completed_quests": 16
+          },
+          "minion": {
+            "ender_dust_collected": 0,
+            "ender_dust": 300,
+            "games": 3469,
+            "tickets": 64
+          },
+          "sandman": {
+            "exp_multiplier": 0.05,
+            "ticket_multiplier": 0.2
+          },
+          "doublers": 0
+        },
+        "games_played_bedwars_1": 3648,
+        "eight_one_winstreak": 0,
+        "_items_purchased_bedwars": 110746,
+        "beds_broken_bedwars": 3056,
+        "beds_lost_bedwars": 2339,
+        "eight_one__items_purchased_bedwars": 25085,
+        "eight_one_beds_broken_bedwars": 1147,
+        "eight_one_beds_lost_bedwars": 684,
+        "eight_one_entity_attack_final_kills_bedwars": 589,
+        "eight_one_final_deaths_bedwars": 646,
+        "eight_one_final_kills_bedwars": 1018,
+        "eight_one_games_played_bedwars": 792,
+        "eight_one_gold_resources_collected_bedwars": 22311,
+        "eight_one_iron_resources_collected_bedwars": 185063,
+        "eight_one_items_purchased_bedwars": 26916,
+        "eight_one_losses_bedwars": 647,
+        "eight_one_resources_collected_bedwars": 214750,
+        "eight_one_void_final_deaths_bedwars": 198,
+        "entity_attack_final_kills_bedwars": 2916,
+        "final_deaths_bedwars": 2226,
+        "final_kills_bedwars": 5154,
+        "games_played_bedwars": 3515,
+        "gold_resources_collected_bedwars": 87094,
+        "iron_resources_collected_bedwars": 765796,
+        "items_purchased_bedwars": 117935,
+        "losses_bedwars": 2123,
+        "resources_collected_bedwars": 874618,
+        "void_final_deaths_bedwars": 742,
+        "selected_challenge_type": "COLLECTOR",
+        "favorite_slots": "Melee,Pickaxe,Utility,Axe,Potions,Potions,Potions,Blocks,Shears",
+        "deaths_bedwars": 13778,
+        "eight_one_deaths_bedwars": 2335,
+        "eight_one_fall_kills_bedwars": 40,
+        "eight_one_kills_bedwars": 1115,
+        "eight_one_permanent_items_purchased_bedwars": 1831,
+        "eight_one_void_deaths_bedwars": 1259,
+        "fall_kills_bedwars": 351,
+        "kills_bedwars": 7266,
+        "permanent_items_purchased_bedwars": 7189,
+        "void_deaths_bedwars": 6765,
+        "winstreak": 1,
+        "diamond_resources_collected_bedwars": 13970,
+        "eight_one_diamond_resources_collected_bedwars": 4789,
+        "eight_one_emerald_resources_collected_bedwars": 2587,
+        "eight_one_entity_attack_deaths_bedwars": 969,
+        "eight_one_entity_attack_kills_bedwars": 615,
+        "eight_one_void_final_kills_bedwars": 337,
+        "eight_one_void_kills_bedwars": 434,
+        "eight_one_wins_bedwars": 145,
+        "emerald_resources_collected_bedwars": 7758,
+        "entity_attack_deaths_bedwars": 6259,
+        "entity_attack_kills_bedwars": 3647,
+        "void_final_kills_bedwars": 1774,
+        "void_kills_bedwars": 3196,
+        "wins_bedwars": 1392,
+        "two_four_winstreak": 20,
+        "entity_attack_final_deaths_bedwars": 1196,
+        "two_four__items_purchased_bedwars": 1653,
+        "two_four_beds_lost_bedwars": 24,
+        "two_four_entity_attack_final_deaths_bedwars": 8,
+        "two_four_entity_attack_kills_bedwars": 48,
+        "two_four_final_deaths_bedwars": 28,
+        "two_four_games_played_bedwars": 87,
+        "two_four_gold_resources_collected_bedwars": 842,
+        "two_four_iron_resources_collected_bedwars": 11917,
+        "two_four_items_purchased_bedwars": 1758,
+        "two_four_kills_bedwars": 95,
+        "two_four_losses_bedwars": 26,
+        "two_four_permanent_items_purchased_bedwars": 105,
+        "two_four_resources_collected_bedwars": 12820,
+        "favourites_2": "wool,wood,ladder,end_stone,chainmail_boots,iron_boots,diamond_boots,stone_sword,iron_sword,shears,wooden_pickaxe,wooden_axe,golden_apple,tnt,jump_v_potion_(45_seconds),invisibility_potion_(30_seconds),speed_ii_potion_(45_seconds),ender_pearl,dream_defender,bridge_egg,fireball",
+        "four_four_winstreak": 1,
+        "four_four__items_purchased_bedwars": 24765,
+        "four_four_beds_broken_bedwars": 365,
+        "four_four_beds_lost_bedwars": 430,
+        "four_four_deaths_bedwars": 3225,
+        "four_four_emerald_resources_collected_bedwars": 813,
+        "four_four_entity_attack_deaths_bedwars": 1470,
+        "four_four_entity_attack_final_kills_bedwars": 694,
+        "four_four_entity_attack_kills_bedwars": 846,
+        "four_four_final_deaths_bedwars": 395,
+        "four_four_final_kills_bedwars": 1233,
+        "four_four_games_played_bedwars": 799,
+        "four_four_gold_resources_collected_bedwars": 17931,
+        "four_four_iron_resources_collected_bedwars": 168667,
+        "four_four_items_purchased_bedwars": 26388,
+        "four_four_kills_bedwars": 1788,
+        "four_four_losses_bedwars": 349,
+        "four_four_permanent_items_purchased_bedwars": 1623,
+        "four_four_resources_collected_bedwars": 189112,
+        "four_four_void_deaths_bedwars": 1523,
+        "four_four_void_final_deaths_bedwars": 150,
+        "four_four_void_final_kills_bedwars": 411,
+        "four_four_void_kills_bedwars": 816,
+        "eight_one_entity_attack_final_deaths_bedwars": 360,
+        "eight_one_magic_deaths_bedwars": 40,
+        "magic_deaths_bedwars": 167,
+        "eight_one_fall_deaths_bedwars": 60,
+        "fall_deaths_bedwars": 505,
+        "leaderboardSettings": {
+          "resetType": "DAILY",
+          "mode": "EIGHT_ONE"
+        },
+        "eight_one_entity_explosion_kills_bedwars": 8,
+        "eight_one_magic_final_kills_bedwars": 45,
+        "entity_explosion_kills_bedwars": 30,
+        "magic_final_kills_bedwars": 271,
+        "eight_one_fall_final_kills_bedwars": 38,
+        "fall_final_kills_bedwars": 151,
+        "four_four_entity_attack_final_deaths_bedwars": 199,
+        "quickbuy_privacy": "NONE",
+        "eight_two_winstreak": 1,
+        "eight_two__items_purchased_bedwars": 45494,
+        "eight_two_beds_broken_bedwars": 1193,
+        "eight_two_beds_lost_bedwars": 941,
+        "eight_two_deaths_bedwars": 5881,
+        "eight_two_diamond_resources_collected_bedwars": 6539,
+        "eight_two_entity_attack_deaths_bedwars": 2692,
+        "eight_two_entity_attack_final_deaths_bedwars": 499,
+        "eight_two_entity_attack_final_kills_bedwars": 1170,
+        "eight_two_final_deaths_bedwars": 913,
+        "eight_two_final_kills_bedwars": 2060,
+        "eight_two_games_played_bedwars": 1296,
+        "eight_two_gold_resources_collected_bedwars": 32827,
+        "eight_two_iron_resources_collected_bedwars": 316071,
+        "eight_two_items_purchased_bedwars": 48166,
+        "eight_two_losses_bedwars": 873,
+        "eight_two_permanent_items_purchased_bedwars": 2672,
+        "eight_two_resources_collected_bedwars": 359278,
+        "eight_two_void_deaths_bedwars": 2924,
+        "eight_two_void_final_kills_bedwars": 729,
+        "four_three_winstreak": 0,
+        "four_three__items_purchased_bedwars": 13749,
+        "four_three_beds_lost_bedwars": 260,
+        "four_three_deaths_bedwars": 2129,
+        "four_three_diamond_resources_collected_bedwars": 895,
+        "four_three_entity_attack_final_deaths_bedwars": 130,
+        "four_three_entity_attack_kills_bedwars": 540,
+        "four_three_fall_kills_bedwars": 53,
+        "four_three_final_deaths_bedwars": 244,
+        "four_three_final_kills_bedwars": 781,
+        "four_three_games_played_bedwars": 541,
+        "four_three_gold_resources_collected_bedwars": 13183,
+        "four_three_iron_resources_collected_bedwars": 84078,
+        "four_three_items_purchased_bedwars": 14707,
+        "four_three_kills_bedwars": 1102,
+        "four_three_losses_bedwars": 228,
+        "four_three_permanent_items_purchased_bedwars": 958,
+        "four_three_resources_collected_bedwars": 98658,
+        "four_three_void_deaths_bedwars": 976,
+        "four_three_void_final_kills_bedwars": 280,
+        "eight_two_entity_attack_kills_bedwars": 1598,
+        "eight_two_kills_bedwars": 3166,
+        "eight_two_void_final_deaths_bedwars": 315,
+        "eight_two_void_kills_bedwars": 1414,
+        "eight_two_emerald_resources_collected_bedwars": 3841,
+        "eight_two_fall_deaths_bedwars": 171,
+        "eight_one_fire_tick_final_kills_bedwars": 2,
+        "fire_tick_final_kills_bedwars": 9,
+        "eight_one_magic_kills_bedwars": 13,
+        "magic_kills_bedwars": 23,
+        "four_three_magic_deaths_bedwars": 23,
+        "eight_two_fall_kills_bedwars": 125,
+        "eight_one_fire_tick_kills_bedwars": 5,
+        "fire_tick_kills_bedwars": 19,
+        "four_four_diamond_resources_collected_bedwars": 1701,
+        "four_four_fire_tick_kills_bedwars": 2,
+        "four_four_wins_bedwars": 450,
+        "four_four_projectile_final_kills_bedwars": 3,
+        "projectile_final_kills_bedwars": 4,
+        "four_four_fall_deaths_bedwars": 168,
+        "four_four_magic_deaths_bedwars": 34,
+        "four_four_magic_kills_bedwars": 2,
+        "four_four_magic_final_kills_bedwars": 72,
+        "fall_final_deaths_bedwars": 62,
+        "four_four_fall_final_deaths_bedwars": 14,
+        "four_four_magic_final_deaths_bedwars": 16,
+        "magic_final_deaths_bedwars": 103,
+        "four_four_fall_final_kills_bedwars": 41,
+        "activeVictoryDance": "victorydance_dragon_fire",
+        "two_four_deaths_bedwars": 208,
+        "two_four_final_kills_bedwars": 62,
+        "two_four_magic_deaths_bedwars": 8,
+        "two_four_void_deaths_bedwars": 83,
+        "two_four_void_final_kills_bedwars": 17,
+        "two_four_wins_bedwars": 61,
+        "two_four_beds_broken_bedwars": 21,
+        "two_four_entity_attack_final_kills_bedwars": 34,
+        "two_four_void_kills_bedwars": 33,
+        "two_four_entity_attack_deaths_bedwars": 99,
+        "two_four_fall_deaths_bedwars": 18,
+        "four_three_void_final_deaths_bedwars": 73,
+        "four_three_emerald_resources_collected_bedwars": 502,
+        "four_three_entity_attack_deaths_bedwars": 1029,
+        "entity_explosion_deaths_bedwars": 51,
+        "four_four_entity_explosion_deaths_bedwars": 16,
+        "four_four_fire_tick_final_kills_bedwars": 3,
+        "eight_one_fall_final_deaths_bedwars": 11,
+        "two_four_emerald_resources_collected_bedwars": 15,
+        "eight_one_entity_explosion_deaths_bedwars": 5,
+        "eight_two_fire_deaths_bedwars": 1,
+        "eight_two_fire_tick_final_kills_bedwars": 3,
+        "eight_two_magic_final_kills_bedwars": 93,
+        "eight_two_wins_bedwars": 423,
+        "fire_deaths_bedwars": 1,
+        "two_four_fall_kills_bedwars": 13,
+        "two_four_magic_final_kills_bedwars": 8,
+        "eight_one_magic_final_deaths_bedwars": 34,
+        "four_four_fall_kills_bedwars": 120,
+        "eight_one_entity_explosion_final_kills_bedwars": 7,
+        "entity_explosion_final_kills_bedwars": 29,
+        "four_three_entity_attack_final_kills_bedwars": 429,
+        "four_three_void_kills_bedwars": 499,
+        "four_three_wins_bedwars": 313,
+        "four_three_fall_deaths_bedwars": 88,
+        "four_three_beds_broken_bedwars": 330,
+        "eight_one_projectile_deaths_bedwars": 2,
+        "projectile_deaths_bedwars": 20,
+        "four_four_projectile_deaths_bedwars": 9,
+        "four_three_fall_final_kills_bedwars": 16,
+        "four_three_entity_explosion_deaths_bedwars": 9,
+        "eight_two_fall_final_deaths_bedwars": 23,
+        "eight_two_entity_explosion_deaths_bedwars": 21,
+        "eight_two_entity_explosion_kills_bedwars": 14,
+        "four_three_magic_final_kills_bedwars": 53,
+        "understands_resource_bank": true,
+        "castle__items_purchased_bedwars": 763,
+        "castle_beds_lost_bedwars": 48,
+        "castle_deaths_bedwars": 61,
+        "castle_diamond_resources_collected_bedwars": 48,
+        "castle_emerald_resources_collected_bedwars": 29,
+        "castle_entity_attack_deaths_bedwars": 15,
+        "castle_entity_attack_kills_bedwars": 14,
+        "castle_entity_explosion_deaths_bedwars": 1,
+        "castle_gold_resources_collected_bedwars": 748,
+        "castle_iron_resources_collected_bedwars": 5028,
+        "castle_items_purchased_bedwars": 825,
+        "castle_kills_bedwars": 24,
+        "castle_permanent_items_purchased_bedwars": 62,
+        "castle_resources_collected_bedwars": 5853,
+        "castle_void_deaths_bedwars": 39,
+        "castle_void_kills_bedwars": 8,
+        "castle_wins_bedwars": 11,
+        "castle_winstreak": 3,
+        "shop_sort": "rarity_descending",
+        "figurines": {
+          "active": "figurine_executives_meeting",
+          "featured": {
+            "RARE": [
+              "figurine_ratman",
+              "figurine_hammer_vs_heatwave",
+              "figurine_blitz_star"
+            ]
+          }
+        },
+        "four_three_fire_tick_final_kills_bedwars": 1,
+        "four_three_entity_explosion_kills_bedwars": 6,
+        "activeKillEffect": "killeffect_balloons",
+        "shop_sort_enable_owned_first": true,
+        "castle_entity_attack_final_deaths_bedwars": 5,
+        "castle_final_deaths_bedwars": 13,
+        "castle_losses_bedwars": 15,
+        "entity_explosion_final_deaths_bedwars": 15,
+        "four_four_entity_explosion_final_deaths_bedwars": 4,
+        "four_four_entity_explosion_kills_bedwars": 2,
+        "fire_tick_deaths_bedwars": 10,
+        "four_four_fire_tick_deaths_bedwars": 5,
+        "eight_two_magic_deaths_bedwars": 62,
+        "eight_one_entity_explosion_final_deaths_bedwars": 4,
+        "four_four_voidless_winstreak": 0,
+        "four_four_voidless__items_purchased_bedwars": 102,
+        "four_four_voidless_beds_lost_bedwars": 5,
+        "four_four_voidless_deaths_bedwars": 8,
+        "four_four_voidless_entity_attack_final_deaths_bedwars": 4,
+        "four_four_voidless_entity_attack_kills_bedwars": 6,
+        "four_four_voidless_fall_deaths_bedwars": 3,
+        "four_four_voidless_final_deaths_bedwars": 5,
+        "four_four_voidless_games_played_bedwars": 6,
+        "four_four_voidless_gold_resources_collected_bedwars": 70,
+        "four_four_voidless_iron_resources_collected_bedwars": 689,
+        "four_four_voidless_items_purchased_bedwars": 113,
+        "four_four_voidless_kills_bedwars": 7,
+        "four_four_voidless_losses_bedwars": 5,
+        "four_four_voidless_permanent_items_purchased_bedwars": 11,
+        "four_four_voidless_resources_collected_bedwars": 760,
+        "four_three_fire_tick_kills_bedwars": 3,
+        "four_three_fall_final_deaths_bedwars": 14,
+        "eight_two_magic_final_deaths_bedwars": 34,
+        "eight_two_magic_kills_bedwars": 6,
+        "eight_two_fall_final_kills_bedwars": 53,
+        "eight_two_projectile_deaths_bedwars": 5,
+        "four_four_lucky_winstreak": 0,
+        "four_four_lucky__items_purchased_bedwars": 139,
+        "four_four_lucky_deaths_bedwars": 22,
+        "four_four_lucky_diamond_resources_collected_bedwars": 3,
+        "four_four_lucky_games_played_bedwars": 8,
+        "four_four_lucky_gold_resources_collected_bedwars": 76,
+        "four_four_lucky_iron_resources_collected_bedwars": 888,
+        "four_four_lucky_items_purchased_bedwars": 143,
+        "four_four_lucky_losses_bedwars": 6,
+        "four_four_lucky_magic_deaths_bedwars": 2,
+        "four_four_lucky_resources_collected_bedwars": 969,
+        "four_four_lucky_entity_attack_deaths_bedwars": 9,
+        "four_four_lucky_entity_attack_final_kills_bedwars": 3,
+        "four_four_lucky_entity_attack_kills_bedwars": 5,
+        "four_four_lucky_final_kills_bedwars": 6,
+        "four_four_lucky_fire_tick_deaths_bedwars": 2,
+        "four_four_lucky_kills_bedwars": 9,
+        "four_four_lucky_permanent_items_purchased_bedwars": 4,
+        "four_four_lucky_void_deaths_bedwars": 8,
+        "four_four_lucky_void_final_kills_bedwars": 2,
+        "four_four_lucky_void_kills_bedwars": 3,
+        "four_four_lucky_wins_bedwars": 2,
+        "four_four_lucky_beds_broken_bedwars": 1,
+        "four_four_lucky_entity_explosion_deaths_bedwars": 1,
+        "four_four_lucky_magic_final_kills_bedwars": 1,
+        "four_four_lucky_magic_kills_bedwars": 1,
+        "four_four_entity_explosion_final_kills_bedwars": 9,
+        "eight_two_swap_winstreak": 0,
+        "eight_two_swap__items_purchased_bedwars": 467,
+        "eight_two_swap_beds_broken_bedwars": 9,
+        "eight_two_swap_beds_lost_bedwars": 13,
+        "eight_two_swap_deaths_bedwars": 53,
+        "eight_two_swap_emerald_resources_collected_bedwars": 31,
+        "eight_two_swap_entity_attack_deaths_bedwars": 14,
+        "eight_two_swap_entity_attack_final_deaths_bedwars": 9,
+        "eight_two_swap_entity_attack_final_kills_bedwars": 3,
+        "eight_two_swap_entity_attack_kills_bedwars": 15,
+        "eight_two_swap_final_deaths_bedwars": 14,
+        "eight_two_swap_final_kills_bedwars": 11,
+        "eight_two_swap_games_played_bedwars": 16,
+        "eight_two_swap_gold_resources_collected_bedwars": 410,
+        "eight_two_swap_iron_resources_collected_bedwars": 3812,
+        "eight_two_swap_items_purchased_bedwars": 495,
+        "eight_two_swap_kills_bedwars": 23,
+        "eight_two_swap_losses_bedwars": 15,
+        "eight_two_swap_permanent_items_purchased_bedwars": 28,
+        "eight_two_swap_resources_collected_bedwars": 4279,
+        "eight_two_swap_void_deaths_bedwars": 35,
+        "eight_two_swap_void_kills_bedwars": 8,
+        "eight_two_swap_magic_final_kills_bedwars": 2,
+        "eight_two_swap_void_final_kills_bedwars": 6,
+        "eight_two_swap_wins_bedwars": 1,
+        "four_three_entity_explosion_final_deaths_bedwars": 2,
+        "four_four_swap__items_purchased_bedwars": 318,
+        "four_four_swap_deaths_bedwars": 21,
+        "four_four_swap_emerald_resources_collected_bedwars": 8,
+        "four_four_swap_games_played_bedwars": 12,
+        "four_four_swap_gold_resources_collected_bedwars": 252,
+        "four_four_swap_iron_resources_collected_bedwars": 2539,
+        "four_four_swap_items_purchased_bedwars": 336,
+        "four_four_swap_resources_collected_bedwars": 2804,
+        "four_four_swap_void_deaths_bedwars": 11,
+        "four_four_swap_wins_bedwars": 1,
+        "four_four_swap_winstreak": 0,
+        "four_three_magic_final_deaths_bedwars": 13,
+        "eight_two_fire_tick_kills_bedwars": 9,
+        "eight_two_entity_explosion_final_kills_bedwars": 11,
+        "eight_one_projectile_final_deaths_bedwars": 1,
+        "projectile_final_deaths_bedwars": 3,
+        "four_four_rush_winstreak": 0,
+        "four_four_rush__items_purchased_bedwars": 345,
+        "four_four_rush_deaths_bedwars": 58,
+        "four_four_rush_diamond_resources_collected_bedwars": 66,
+        "four_four_rush_emerald_resources_collected_bedwars": 46,
+        "four_four_rush_entity_attack_deaths_bedwars": 12,
+        "four_four_rush_entity_attack_kills_bedwars": 17,
+        "four_four_rush_final_kills_bedwars": 8,
+        "four_four_rush_games_played_bedwars": 24,
+        "four_four_rush_gold_resources_collected_bedwars": 237,
+        "four_four_rush_iron_resources_collected_bedwars": 2492,
+        "four_four_rush_items_purchased_bedwars": 366,
+        "four_four_rush_kills_bedwars": 20,
+        "four_four_rush_losses_bedwars": 24,
+        "four_four_rush_magic_deaths_bedwars": 4,
+        "four_four_rush_magic_final_kills_bedwars": 1,
+        "four_four_rush_permanent_items_purchased_bedwars": 21,
+        "four_four_rush_resources_collected_bedwars": 2841,
+        "four_four_rush_void_deaths_bedwars": 41,
+        "eight_two_rush_winstreak": 0,
+        "four_four_rush_beds_broken_bedwars": 2,
+        "four_four_rush_beds_lost_bedwars": 17,
+        "four_four_rush_entity_attack_final_deaths_bedwars": 7,
+        "four_four_rush_final_deaths_bedwars": 17,
+        "eight_two_rush__items_purchased_bedwars": 108,
+        "eight_two_rush_beds_lost_bedwars": 9,
+        "eight_two_rush_deaths_bedwars": 19,
+        "eight_two_rush_emerald_resources_collected_bedwars": 18,
+        "eight_two_rush_entity_attack_deaths_bedwars": 8,
+        "eight_two_rush_final_deaths_bedwars": 9,
+        "eight_two_rush_games_played_bedwars": 11,
+        "eight_two_rush_gold_resources_collected_bedwars": 53,
+        "eight_two_rush_iron_resources_collected_bedwars": 721,
+        "eight_two_rush_items_purchased_bedwars": 111,
+        "eight_two_rush_losses_bedwars": 11,
+        "eight_two_rush_magic_final_deaths_bedwars": 2,
+        "eight_two_rush_resources_collected_bedwars": 796,
+        "eight_two_rush_void_deaths_bedwars": 8,
+        "four_four_rush_magic_final_deaths_bedwars": 3,
+        "selected_ultimate": "SWORDSMAN",
+        "four_four_ultimate_winstreak": 0,
+        "four_four_ultimate__items_purchased_bedwars": 335,
+        "four_four_ultimate_beds_broken_bedwars": 2,
+        "four_four_ultimate_deaths_bedwars": 40,
+        "four_four_ultimate_entity_attack_deaths_bedwars": 12,
+        "four_four_ultimate_entity_attack_final_kills_bedwars": 13,
+        "four_four_ultimate_final_kills_bedwars": 19,
+        "four_four_ultimate_games_played_bedwars": 17,
+        "four_four_ultimate_gold_resources_collected_bedwars": 214,
+        "four_four_ultimate_iron_resources_collected_bedwars": 2200,
+        "four_four_ultimate_items_purchased_bedwars": 356,
+        "four_four_ultimate_kills_bedwars": 15,
+        "four_four_ultimate_permanent_items_purchased_bedwars": 21,
+        "four_four_ultimate_resources_collected_bedwars": 2425,
+        "four_four_ultimate_void_deaths_bedwars": 28,
+        "four_four_ultimate_void_final_kills_bedwars": 5,
+        "four_four_ultimate_void_kills_bedwars": 8,
+        "four_four_ultimate_wins_bedwars": 5,
+        "four_four_ultimate_beds_lost_bedwars": 13,
+        "four_four_ultimate_entity_attack_final_deaths_bedwars": 5,
+        "four_four_ultimate_entity_attack_kills_bedwars": 7,
+        "four_four_ultimate_final_deaths_bedwars": 12,
+        "four_four_ultimate_losses_bedwars": 12,
+        "four_four_ultimate_emerald_resources_collected_bedwars": 11,
+        "four_four_ultimate_magic_final_kills_bedwars": 1,
+        "four_four_ultimate_void_final_deaths_bedwars": 6,
+        "four_four_ultimate_fire_tick_final_deaths_bedwars": 1,
+        "castle_projectile_final_deaths_bedwars": 1,
+        "understands_streaks": true,
+        "castle_void_final_deaths_bedwars": 6,
+        "castle_magic_deaths_bedwars": 3,
+        "castle_fall_kills_bedwars": 1,
+        "castle_games_played_bedwars": 17,
+        "castle_fall_deaths_bedwars": 3,
+        "two_four_void_final_deaths_bedwars": 6,
+        "two_four_fall_final_kills_bedwars": 3,
+        "two_four_diamond_resources_collected_bedwars": 46,
+        "two_four_magic_final_deaths_bedwars": 6,
+        "eight_two_voidless_winstreak": 0,
+        "eight_two_voidless__items_purchased_bedwars": 5,
+        "eight_two_voidless_deaths_bedwars": 2,
+        "eight_two_voidless_entity_attack_deaths_bedwars": 1,
+        "eight_two_voidless_fall_deaths_bedwars": 1,
+        "eight_two_voidless_fall_final_kills_bedwars": 1,
+        "eight_two_voidless_final_kills_bedwars": 1,
+        "eight_two_voidless_games_played_bedwars": 1,
+        "eight_two_voidless_gold_resources_collected_bedwars": 4,
+        "eight_two_voidless_iron_resources_collected_bedwars": 22,
+        "eight_two_voidless_items_purchased_bedwars": 5,
+        "eight_two_voidless_losses_bedwars": 1,
+        "eight_two_voidless_resources_collected_bedwars": 26,
+        "four_four_voidless_beds_broken_bedwars": 4,
+        "four_four_voidless_emerald_resources_collected_bedwars": 1,
+        "four_four_voidless_entity_attack_final_kills_bedwars": 5,
+        "four_four_voidless_final_kills_bedwars": 5,
+        "four_four_voidless_entity_attack_deaths_bedwars": 5,
+        "four_four_voidless_fall_kills_bedwars": 1,
+        "four_four_voidless_wins_bedwars": 1,
+        "total_challenges_completed": 19,
+        "bw_challenge_no_team_upgrades": 14,
+        "challenges": {
+          "bw_challenge_no_team_upgrades_best_time": 185623,
+          "bw_challenge_slow_generator_best_time": 735114,
+          "bw_challenge_assassin_best_time": 411124,
+          "bw_challenge_no_utilities_best_time": 556649,
+          "bw_challenge_selfish_best_time": 392926
+        },
+        "bw_unique_challenges_completed": 5,
+        "four_four_armed_winstreak": 1,
+        "four_four_armed__items_purchased_bedwars": 157,
+        "four_four_armed_beds_broken_bedwars": 1,
+        "four_four_armed_deaths_bedwars": 25,
+        "four_four_armed_diamond_resources_collected_bedwars": 1,
+        "four_four_armed_emerald_resources_collected_bedwars": 1,
+        "four_four_armed_entity_attack_final_kills_bedwars": 3,
+        "four_four_armed_final_kills_bedwars": 4,
+        "four_four_armed_games_played_bedwars": 4,
+        "four_four_armed_gold_resources_collected_bedwars": 103,
+        "four_four_armed_iron_resources_collected_bedwars": 994,
+        "four_four_armed_items_purchased_bedwars": 165,
+        "four_four_armed_kills_bedwars": 9,
+        "four_four_armed_permanent_items_purchased_bedwars": 8,
+        "four_four_armed_projectile_deaths_bedwars": 13,
+        "four_four_armed_projectile_kills_bedwars": 7,
+        "four_four_armed_resources_collected_bedwars": 1099,
+        "four_four_armed_void_deaths_bedwars": 7,
+        "four_four_armed_wins_bedwars": 2,
+        "eight_two_armed_winstreak": 0,
+        "eight_two_armed__items_purchased_bedwars": 5,
+        "eight_two_armed_deaths_bedwars": 3,
+        "eight_two_armed_games_played_bedwars": 1,
+        "eight_two_armed_gold_resources_collected_bedwars": 4,
+        "eight_two_armed_iron_resources_collected_bedwars": 22,
+        "eight_two_armed_items_purchased_bedwars": 5,
+        "eight_two_armed_losses_bedwars": 1,
+        "eight_two_armed_projectile_deaths_bedwars": 2,
+        "eight_two_armed_resources_collected_bedwars": 26,
+        "eight_two_armed_void_deaths_bedwars": 1,
+        "eight_two_lucky_winstreak": 0,
+        "eight_two_lucky__items_purchased_bedwars": 222,
+        "eight_two_lucky_beds_broken_bedwars": 1,
+        "eight_two_lucky_beds_lost_bedwars": 6,
+        "eight_two_lucky_deaths_bedwars": 24,
+        "eight_two_lucky_diamond_resources_collected_bedwars": 10,
+        "eight_two_lucky_entity_attack_deaths_bedwars": 10,
+        "eight_two_lucky_entity_attack_final_deaths_bedwars": 5,
+        "eight_two_lucky_final_deaths_bedwars": 6,
+        "eight_two_lucky_final_kills_bedwars": 2,
+        "eight_two_lucky_games_played_bedwars": 7,
+        "eight_two_lucky_gold_resources_collected_bedwars": 115,
+        "eight_two_lucky_iron_resources_collected_bedwars": 1194,
+        "eight_two_lucky_items_purchased_bedwars": 232,
+        "eight_two_lucky_losses_bedwars": 7,
+        "eight_two_lucky_permanent_items_purchased_bedwars": 10,
+        "eight_two_lucky_resources_collected_bedwars": 1319,
+        "eight_two_lucky_void_deaths_bedwars": 13,
+        "eight_two_lucky_void_final_kills_bedwars": 2,
+        "four_four_lucky_beds_lost_bedwars": 4,
+        "four_four_lucky_final_deaths_bedwars": 4,
+        "four_four_lucky_magic_final_deaths_bedwars": 2,
+        "eight_two_fire_tick_deaths_bedwars": 5,
+        "four_four_lucky_entity_attack_final_deaths_bedwars": 1,
+        "four_four_lucky_emerald_resources_collected_bedwars": 2,
+        "four_four_lucky_void_final_deaths_bedwars": 1,
+        "eight_two_lucky_entity_attack_kills_bedwars": 3,
+        "eight_two_lucky_kills_bedwars": 3,
+        "eight_two_lucky_magic_deaths_bedwars": 1,
+        "eight_two_lucky_magic_final_deaths_bedwars": 1,
+        "activeWoodType": "woodSkin_spruce",
+        "activeKillMessages": "killmessages_glorious",
+        "eight_two_swap_magic_deaths_bedwars": 3,
+        "eight_two_swap_diamond_resources_collected_bedwars": 26,
+        "four_four_swap_losses_bedwars": 11,
+        "four_four_swap_magic_deaths_bedwars": 1,
+        "four_four_swap_permanent_items_purchased_bedwars": 18,
+        "four_four_swap_beds_lost_bedwars": 10,
+        "four_four_swap_entity_attack_deaths_bedwars": 7,
+        "four_four_swap_entity_attack_final_deaths_bedwars": 6,
+        "four_four_swap_final_deaths_bedwars": 10,
+        "four_four_swap_kills_bedwars": 16,
+        "four_four_swap_void_kills_bedwars": 6,
+        "four_four_swap_entity_attack_kills_bedwars": 9,
+        "four_four_swap_void_final_deaths_bedwars": 4,
+        "four_four_swap_diamond_resources_collected_bedwars": 5,
+        "eight_two_swap_fall_deaths_bedwars": 1,
+        "eight_two_swap_fall_final_deaths_bedwars": 2,
+        "four_four_swap_fall_kills_bedwars": 1,
+        "four_four_swap_beds_broken_bedwars": 2,
+        "four_four_swap_fall_deaths_bedwars": 1,
+        "four_four_swap_final_kills_bedwars": 4,
+        "four_four_swap_fire_tick_deaths_bedwars": 1,
+        "four_four_swap_void_final_kills_bedwars": 3,
+        "eight_two_swap_void_final_deaths_bedwars": 2,
+        "four_four_swap_entity_attack_final_kills_bedwars": 1,
+        "eight_two_rush_void_final_deaths_bedwars": 3,
+        "eight_two_rush_entity_attack_final_deaths_bedwars": 4,
+        "eight_two_rush_kills_bedwars": 4,
+        "eight_two_rush_magic_deaths_bedwars": 3,
+        "eight_two_rush_void_kills_bedwars": 2,
+        "four_four_rush_entity_attack_final_kills_bedwars": 5,
+        "four_four_rush_void_final_deaths_bedwars": 7,
+        "four_four_rush_void_kills_bedwars": 3,
+        "four_four_rush_fall_deaths_bedwars": 1,
+        "four_three_projectile_deaths_bedwars": 4,
+        "eight_two_rush_diamond_resources_collected_bedwars": 4,
+        "eight_two_rush_permanent_items_purchased_bedwars": 3,
+        "eight_two_fire_tick_final_deaths_bedwars": 3,
+        "fire_tick_final_deaths_bedwars": 6,
+        "four_four_rush_void_final_kills_bedwars": 2,
+        "eight_two_rush_beds_broken_bedwars": 1,
+        "eight_two_rush_entity_attack_final_kills_bedwars": 1,
+        "eight_two_rush_final_kills_bedwars": 1,
+        "bw_challenge_slow_generator": 1,
+        "bw_challenge_assassin": 1,
+        "bw_challenge_no_utilities": 1,
+        "bw_challenge_selfish": 2,
+        "eight_two_ultimate_winstreak": 0,
+        "eight_two_ultimate__items_purchased_bedwars": 122,
+        "eight_two_ultimate_beds_lost_bedwars": 7,
+        "eight_two_ultimate_deaths_bedwars": 15,
+        "eight_two_ultimate_entity_attack_deaths_bedwars": 5,
+        "eight_two_ultimate_entity_attack_kills_bedwars": 3,
+        "eight_two_ultimate_final_deaths_bedwars": 6,
+        "eight_two_ultimate_games_played_bedwars": 9,
+        "eight_two_ultimate_gold_resources_collected_bedwars": 76,
+        "eight_two_ultimate_iron_resources_collected_bedwars": 779,
+        "eight_two_ultimate_items_purchased_bedwars": 132,
+        "eight_two_ultimate_kills_bedwars": 5,
+        "eight_two_ultimate_losses_bedwars": 7,
+        "eight_two_ultimate_resources_collected_bedwars": 868,
+        "eight_two_ultimate_void_deaths_bedwars": 9,
+        "eight_two_ultimate_void_final_deaths_bedwars": 2,
+        "eight_two_ultimate_magic_deaths_bedwars": 1,
+        "eight_two_ultimate_beds_broken_bedwars": 4,
+        "eight_two_ultimate_diamond_resources_collected_bedwars": 6,
+        "eight_two_ultimate_emerald_resources_collected_bedwars": 7,
+        "eight_two_ultimate_entity_attack_final_kills_bedwars": 8,
+        "eight_two_ultimate_final_kills_bedwars": 11,
+        "eight_two_ultimate_permanent_items_purchased_bedwars": 10,
+        "eight_two_ultimate_wins_bedwars": 2,
+        "eight_two_ultimate_entity_attack_final_deaths_bedwars": 4,
+        "eight_two_ultimate_magic_final_kills_bedwars": 1,
+        "eight_two_ultimate_void_final_kills_bedwars": 2,
+        "activeNPCSkin": "npcskin_blacksmith",
+        "activeBedDestroy": "beddestroy_pigsplosion",
+        "eight_two_fire_final_deaths_bedwars": 1,
+        "fire_final_deaths_bedwars": 3,
+        "eight_two_entity_explosion_final_deaths_bedwars": 5,
+        "eight_two_ultimate_void_kills_bedwars": 1,
+        "eight_two_ultimate_magic_kills_bedwars": 1,
+        "castle_entity_attack_final_kills_bedwars": 6,
+        "castle_final_kills_bedwars": 9,
+        "castle_void_final_kills_bedwars": 2,
+        "castle_magic_final_deaths_bedwars": 1,
+        "four_four_voidless_magic_final_deaths_bedwars": 1,
+        "eight_one_fire_tick_final_deaths_bedwars": 2,
+        "four_four_armed_beds_lost_bedwars": 2,
+        "four_four_armed_final_deaths_bedwars": 2,
+        "four_four_armed_losses_bedwars": 2,
+        "four_four_armed_void_final_deaths_bedwars": 1,
+        "four_three_entity_explosion_final_kills_bedwars": 2,
+        "eight_two_projectile_final_kills_bedwars": 1,
+        "activeDeathCry": "deathcry_none",
+        "four_four_projectile_final_deaths_bedwars": 1,
+        "two_four_magic_kills_bedwars": 1,
+        "four_four_armed_fall_deaths_bedwars": 1,
+        "four_four_armed_magic_kills_bedwars": 1,
+        "four_four_armed_projectile_final_deaths_bedwars": 1,
+        "four_four_armed_void_kills_bedwars": 1,
+        "four_four_armed_entity_attack_deaths_bedwars": 1,
+        "four_four_armed_magic_deaths_bedwars": 3,
+        "four_four_armed_void_final_kills_bedwars": 1,
+        "eight_one_fire_final_deaths_bedwars": 1,
+        "eight_two_rush_entity_attack_kills_bedwars": 2,
+        "castle_fall_final_kills_bedwars": 1,
+        "castle_entity_explosion_kills_bedwars": 1,
+        "four_three_fire_final_deaths_bedwars": 1,
+        "four_three_magic_kills_bedwars": 1,
+        "four_three_fire_tick_final_deaths_bedwars": 1,
+        "eight_two_projectile_final_deaths_bedwars": 1,
+        "halloween": {
+          "pumpkin_milestone": {
+            "2025": 59,
+            "rewards": {
+              "2025": {
+                "I": true,
+                "II": true
+              }
+            }
+          }
+        },
+        "seasonal": {
+          "christmas": {
+            "2025": {
+              "happy_holidays": {
+                "progression": 1,
+                "claimed": 1764806720225
+              },
+              "talked_to_npc": true,
+              "two_week_phase": {
+                "progression": 3
+              },
+              "gift_exchange": {
+                "progression": 16
+              },
+              "season_of_giving": {
+                "progression": 10
+              },
+              "sneaky_santa": {
+                "progression": 1,
+                "claimed": 1766904406112
+              },
+              "winter_vacation": {
+                "progression": [
+                  "bedwars_acropolis_doubles"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Arcade": {
+        "coins": 1918627,
+        "animal_slaughter_best_score_party": 29,
+        "animal_slaughter_kills_party": 32,
+        "anvil_spleef_best_time_party": 14654,
+        "avalanche_round_wins_party": 1,
+        "round_wins_party": 1,
+        "total_stars_party": 4,
+        "dropper": {
+          "fails": 77,
+          "games_played": 4,
+          "map_stats": {
+            "boardgames": {
+              "best_time": 9262,
+              "completions": 1
+            },
+            "vintage": {
+              "best_time": 75263,
+              "completions": 1
+            },
+            "lavafall": {
+              "best_time": 38845,
+              "completions": 1
+            },
+            "lily": {
+              "best_time": 9163,
+              "completions": 1
+            },
+            "mushroom": {
+              "best_time": 17584,
+              "completions": 1
+            },
+            "ravine": {
+              "best_time": 17543,
+              "completions": 1
+            },
+            "castle": {
+              "best_time": 50515,
+              "completions": 1
+            },
+            "maelstrom": {
+              "best_time": 10399,
+              "completions": 1
+            },
+            "tangle": {
+              "best_time": 18692,
+              "completions": 1
+            },
+            "well": {
+              "best_time": 8690,
+              "completions": 1
+            },
+            "drainage": {
+              "best_time": 8873,
+              "completions": 1
+            }
+          },
+          "maps_completed": 11
+        },
+        "round_wins_simon_says": 8,
+        "rounds_simon_says": 3,
+        "hoe_hoe_hoe_best_score_party": 66,
+        "hoe_hoe_hoe_total_score_party": 66
+      },
+      "Duels": {
+        "moved_to_redis_3": true,
+        "show_lb_option": "on",
+        "games_played_duels": 2394,
+        "chat_enabled": "on",
+        "boxing_rookie_title_prestige": 1,
+        "all_modes_rookie_title_prestige": 5,
+        "uhc_rookie_title_prestige": 1,
+        "skywars_rookie_title_prestige": 1,
+        "mega_walls_rookie_title_prestige": 1,
+        "blitz_rookie_title_prestige": 1,
+        "op_rookie_title_prestige": 1,
+        "classic_rookie_title_prestige": 5,
+        "bow_rookie_title_prestige": 1,
+        "no_debuff_rookie_title_prestige": 1,
+        "combo_rookie_title_prestige": 1,
+        "tnt_games_rookie_title_prestige": 1,
+        "sumo_rookie_title_prestige": 5,
+        "bridge_rookie_title_prestige": 5,
+        "parkour_rookie_title_prestige": 1,
+        "boxing_duel_melee_hits": 1491,
+        "boxing_duel_melee_swings": 4319,
+        "boxing_duel_rounds_played": 24,
+        "melee_hits": 25652,
+        "melee_swings": 83596,
+        "rounds_played": 2386,
+        "selected_1_new": "sumo",
+        "selected_2_new": "blitz",
+        "classic_duel_damage_dealt": 9347,
+        "classic_duel_health_regenerated": 888,
+        "classic_duel_melee_hits": 5017,
+        "classic_duel_melee_swings": 10820,
+        "classic_duel_rounds_played": 608,
+        "damage_dealt": 72625,
+        "health_regenerated": 2994,
+        "duels_recently_played2": "BRIDGE_DUEL#BEDWARS_TWO_ONE_DUELS#SUMO_DUEL#BRIDGE_DUEL#UHC_DUEL",
+        "bow_hits": 2498,
+        "bow_shots": 7723,
+        "classic_duel_bow_hits": 177,
+        "classic_duel_bow_shots": 735,
+        "classic_duel_deaths": 283,
+        "classic_duel_losses": 283,
+        "deaths": 807,
+        "losses": 1298,
+        "maps_won_on": [
+          "Skyport",
+          "Reef",
+          "White Crystal",
+          "Fight Night",
+          "Backwood",
+          "Space Mine",
+          "Fort Royale",
+          "Highset",
+          "Sorcery",
+          "Ponsen",
+          "Hyperfrost",
+          "Aquatica",
+          "Sumo",
+          "Museum",
+          "Fractal",
+          "Spikerock Bay",
+          "Arena",
+          "Ashgate",
+          "Neon",
+          "Dojo",
+          "Lighthouse v2",
+          "Rocky",
+          "Treehouse",
+          "Stumped",
+          "Tundra v2",
+          "Palaestra",
+          "Atlantis",
+          "Licorice",
+          "Chronon v2",
+          "Mister Cheesy",
+          "Condo v2",
+          "Urban",
+          "Fortress v2",
+          "Sunstone",
+          "Boo v2",
+          "Galaxy v2",
+          "Outpost",
+          "Bashe",
+          "Huaxi",
+          "Agni Temple",
+          "Zhulong",
+          "Santa's Workshop",
+          "Christmas Town",
+          "Monolith",
+          "Crater",
+          "Vivere",
+          "Digit"
+        ],
+        "best_overall_winstreak": 5,
+        "current_winstreak": 0,
+        "best_all_modes_winstreak": 5,
+        "best_uhc_winstreak": 0,
+        "best_skywars_winstreak": 1,
+        "best_mega_walls_winstreak": 0,
+        "best_blitz_winstreak": 0,
+        "best_parkour_winstreak": 0,
+        "best_op_winstreak": 0,
+        "best_classic_winstreak": 6,
+        "best_bow_winstreak": 0,
+        "best_no_debuff_winstreak": 0,
+        "best_combo_winstreak": 0,
+        "best_tnt_games_winstreak": 0,
+        "best_sumo_winstreak": 6,
+        "best_bridge_winstreak": 5,
+        "best_boxing_winstreak": 2,
+        "best_arena_winstreak": 0,
+        "best_winstreak_mode_classic_duel": 6,
+        "classic_duel_kills": 160,
+        "classic_duel_wins": 165,
+        "coins": 179176,
+        "kills": 293,
+        "wins": 570,
+        "best_winstreak_mode_sumo_duel": 6,
+        "sumo_duel_kills": 118,
+        "sumo_duel_melee_hits": 6522,
+        "sumo_duel_melee_swings": 15540,
+        "sumo_duel_rounds_played": 792,
+        "sumo_duel_wins": 129,
+        "sumo_duel_deaths": 492,
+        "sumo_duel_losses": 492,
+        "boxing_duel_losses": 7,
+        "leaderboardPage_win_streak": 1,
+        "blocks_placed": 81116,
+        "bridge_duel_blocks_placed": 71549,
+        "bridge_duel_bow_hits": 2132,
+        "bridge_duel_bow_shots": 6001,
+        "bridge_duel_damage_dealt": 55457,
+        "bridge_duel_golden_apples_eaten": 1365,
+        "bridge_duel_melee_hits": 10241,
+        "bridge_duel_melee_swings": 43741,
+        "bridge_duel_rounds_played": 801,
+        "golden_apples_eaten": 1556,
+        "rematch_option_1": "default",
+        "sw_duels_kit_new3": "kit_ranked_ranked_paladin",
+        "kit_menu_option": "on",
+        "toggle_proj_trail": "on",
+        "layout_bridge_duel_layout": {
+          "0": "iron_sword",
+          "1": "diamond_pickaxe",
+          "35": "glyph_menu",
+          "3": "golden_apple",
+          "4": "bow",
+          "6": "stained_clay_1",
+          "7": "stained_clay_2",
+          "8": "arrow"
+        },
+        "bridge_deaths": 3863,
+        "bridge_duel_bridge_deaths": 3426,
+        "bridge_duel_bridge_kills": 2458,
+        "bridge_duel_losses": 461,
+        "bridge_kills": 2744,
+        "bridgeMapWins": [
+          "Sorcery",
+          "Hyperfrost",
+          "Aquatica",
+          "Ashgate",
+          "Dojo",
+          "Lighthouse v2",
+          "Treehouse",
+          "Stumped",
+          "Tundra v2",
+          "Palaestra",
+          "Atlantis",
+          "Licorice",
+          "Chronon v2",
+          "Mister Cheesy",
+          "Condo v2",
+          "Urban",
+          "Fortress v2",
+          "Sunstone",
+          "Boo v2",
+          "Galaxy v2",
+          "Outpost",
+          "Bashe"
+        ],
+        "best_winstreak_mode_bridge_duel": 5,
+        "bridge_duel_goals": 1011,
+        "bridge_duel_wins": 237,
+        "goals": 1092,
+        "uhc_duel_blocks_placed": 1249,
+        "uhc_duel_bow_shots": 54,
+        "uhc_duel_damage_dealt": 1039,
+        "uhc_duel_health_regenerated": 976,
+        "uhc_duel_melee_hits": 690,
+        "uhc_duel_melee_swings": 2132,
+        "uhc_duel_rounds_played": 41,
+        "heal_pots_used": 47,
+        "potion_duel_damage_dealt": 181,
+        "potion_duel_heal_pots_used": 47,
+        "potion_duel_health_regenerated": 328,
+        "potion_duel_melee_hits": 140,
+        "potion_duel_melee_swings": 565,
+        "potion_duel_rounds_played": 3,
+        "op_duel_damage_dealt": 60,
+        "op_duel_health_regenerated": 89,
+        "op_duel_melee_hits": 41,
+        "op_duel_melee_swings": 201,
+        "op_duel_rounds_played": 2,
+        "combo_duel_damage_dealt": 126,
+        "combo_duel_golden_apples_eaten": 5,
+        "combo_duel_health_regenerated": 315,
+        "combo_duel_melee_hits": 140,
+        "combo_duel_melee_swings": 316,
+        "combo_duel_rounds_played": 4,
+        "bow_duel_bow_hits": 21,
+        "bow_duel_bow_shots": 112,
+        "bow_duel_damage_dealt": 65,
+        "bow_duel_rounds_played": 5,
+        "sw_duel_blocks_placed": 152,
+        "sw_duel_damage_dealt": 132,
+        "sw_duel_health_regenerated": 26,
+        "sw_duel_melee_hits": 70,
+        "sw_duel_melee_swings": 280,
+        "sw_duel_rounds_played": 10,
+        "bowspleef_duel_bow_shots": 361,
+        "bowspleef_duel_rounds_played": 7,
+        "uhc_duel_golden_apples_eaten": 80,
+        "bridge_doubles_blocks_placed": 6670,
+        "bridge_doubles_damage_dealt": 5461,
+        "bridge_doubles_golden_apples_eaten": 103,
+        "bridge_doubles_melee_hits": 1018,
+        "bridge_doubles_melee_swings": 4552,
+        "bridge_doubles_rounds_played": 62,
+        "uhc_doubles_blocks_placed": 37,
+        "uhc_doubles_bow_hits": 1,
+        "uhc_doubles_bow_shots": 2,
+        "uhc_doubles_damage_dealt": 93,
+        "uhc_doubles_golden_apples_eaten": 1,
+        "uhc_doubles_health_regenerated": 57,
+        "uhc_doubles_melee_hits": 60,
+        "uhc_doubles_melee_swings": 172,
+        "uhc_doubles_rounds_played": 3,
+        "mw_duels_class": "Golem",
+        "mw_doubles_blocks_placed": 26,
+        "mw_doubles_bow_shots": 1,
+        "mw_doubles_damage_dealt": 116,
+        "mw_doubles_health_regenerated": 77,
+        "mw_doubles_melee_hits": 38,
+        "mw_doubles_melee_swings": 140,
+        "mw_doubles_rounds_played": 2,
+        "sw_doubles_blocks_placed": 59,
+        "sw_doubles_bow_hits": 1,
+        "sw_doubles_bow_shots": 3,
+        "sw_doubles_damage_dealt": 7,
+        "sw_doubles_melee_swings": 16,
+        "sw_doubles_rounds_played": 3,
+        "layout_classic_duel_layout": {
+          "0": "iron_sword",
+          "3": "bow",
+          "4": "fishing_rod",
+          "9": "arrow"
+        },
+        "blitz_duels_kit": "Reaper",
+        "blitz_duel_blocks_placed": 137,
+        "blitz_duel_deaths": 3,
+        "blitz_duel_health_regenerated": 43,
+        "blitz_duel_losses": 3,
+        "blitz_duel_rounds_played": 8,
+        "blitz_duel_melee_swings": 126,
+        "blitz_duel_damage_dealt": 109,
+        "blitz_duel_melee_hits": 31,
+        "uhc_duel_bow_hits": 16,
+        "uhc_duel_deaths": 11,
+        "uhc_duel_losses": 11,
+        "layout_uhc_duel_layout": {
+          "33": "lava_bucket_2",
+          "34": "water_bucket_2",
+          "35": "wood_2",
+          "0": "diamond_sword",
+          "1": "golden_apple",
+          "2": "diamond_axe",
+          "3": "fishing_rod",
+          "4": "bow",
+          "5": "lava_bucket_1",
+          "6": "water_bucket_1",
+          "7": "wood_1",
+          "8": "golden_head",
+          "9": "arrow"
+        },
+        "current_winstreak_mode_sw_duel": 1,
+        "best_winstreak_mode_sw_duel": 1,
+        "blacksmith_kit_wins": 1,
+        "kit_wins": 3,
+        "sw_duel_blacksmith_kit_wins": 1,
+        "sw_duel_kit_wins": 2,
+        "sw_duel_wins": 2,
+        "sw_duel_deaths": 1,
+        "sw_duel_losses": 1,
+        "status_field": "Looking to 1v1",
+        "packages": [
+          "rookie_classic",
+          "iron_classic",
+          "iron_bridge",
+          "gold_bridge",
+          "title_division_sumo",
+          "title_division_all_modes",
+          "title_division_bridge",
+          "title_division_classic",
+          "hat_pirate",
+          "goal_team_pride",
+          "glyph_burn",
+          "goal_crayon",
+          "goal_hearts",
+          "cage_cheeseburger",
+          "goal_nicolas",
+          "projectile_trail_let_there_be_leather",
+          "cage_temple",
+          "goal_water",
+          "duelists_odyssey_migration_v1"
+        ],
+        "active_cosmetictitle": "gold_bridge",
+        "progress_mode": "BRIDGE",
+        "bridge_doubles_bow_hits": 150,
+        "bridge_doubles_bow_shots": 443,
+        "bridge_doubles_bridge_deaths": 437,
+        "bridge_doubles_bridge_kills": 286,
+        "bridge_doubles_goals": 81,
+        "bridge_doubles_losses": 32,
+        "best_winstreak_mode_bridge_doubles": 5,
+        "bridge_doubles_wins": 28,
+        "current_boxing_winstreak": 1,
+        "best_winstreak_mode_boxing_duel": 2,
+        "current_winstreak_mode_boxing_duel": 1,
+        "boxing_duel_wins": 4,
+        "parkour_eight_losses": 2,
+        "parkour_eight_rounds_played": 2,
+        "classic_iron_title_prestige": 3,
+        "leaderboardPage_goals": 2,
+        "all_modes_iron_title_prestige": 5,
+        "leaderboardPage_wins": 0,
+        "pingPreference": 200,
+        "active_goal": "goal_default",
+        "active_cage": "cage_flower",
+        "bridge_iron_title_prestige": 5,
+        "combo_duel_deaths": 1,
+        "combo_duel_losses": 1,
+        "mw_duel_blocks_placed": 1,
+        "mw_duel_bow_shots": 11,
+        "mw_duel_health_regenerated": 31,
+        "mw_duel_rounds_played": 1,
+        "bridge_gold_title_prestige": 1,
+        "all_modes_gold_title_prestige": 1,
+        "scout_kit_wins": 1,
+        "sw_duel_kills": 1,
+        "sw_duel_scout_kit_wins": 1,
+        "current_all_modes_winstreak": 1,
+        "redis_to_player_data_sync": true,
+        "sumo_iron_title_prestige": 1,
+        "sw_doubles_deaths": 1,
+        "sw_doubles_health_regenerated": 4,
+        "sw_doubles_losses": 1,
+        "sw_doubles_melee_hits": 1,
+        "current_skywars_winstreak": 1,
+        "current_winstreak_mode_sw_doubles": 1,
+        "best_winstreak_mode_sw_doubles": 1,
+        "paladin_kit_wins": 1,
+        "sw_doubles_kit_wins": 1,
+        "sw_doubles_paladin_kit_wins": 1,
+        "sw_doubles_wins": 1,
+        "current_winstreak_mode_bridge_doubles": 1,
+        "best_bedwars_winstreak": 3,
+        "best_winstreak_mode_bedwars_two_one_duels": 1,
+        "_items_purchased_bedwars": 51,
+        "beds_broken_bedwars": 5,
+        "bedwars_two_one_duels_blocks_broken": 14,
+        "bedwars_two_one_duels_blocks_placed": 672,
+        "bedwars_two_one_duels_coins": 114,
+        "bedwars_two_one_duels_damage_dealt": 68,
+        "bedwars_two_one_duels_deaths": 5,
+        "bedwars_two_one_duels_golden_apples_eaten": 2,
+        "bedwars_two_one_duels_health_regenerated": 50,
+        "bedwars_two_one_duels_kills": 1,
+        "bedwars_two_one_duels_melee_hits": 18,
+        "bedwars_two_one_duels_melee_swings": 212,
+        "bedwars_two_one_duels_rounds_played": 3,
+        "bedwars_two_one_duels_wins": 1,
+        "blocks_broken": 56,
+        "deaths_bedwars": 17,
+        "fall_final_kills_bedwars": 1,
+        "final_kills_bedwars": 4,
+        "games_played_bedwars": 8,
+        "items_purchased_bedwars": 55,
+        "permanent_items_purchased_bedwars": 4,
+        "void_deaths_bedwars": 9,
+        "wins_bedwars": 4,
+        "beds_lost_bedwars": 2,
+        "bedwars_two_one_duels_rush_blocks_placed": 564,
+        "bedwars_two_one_duels_rush_coins": 210,
+        "bedwars_two_one_duels_rush_damage_dealt": 364,
+        "bedwars_two_one_duels_rush_deaths": 10,
+        "bedwars_two_one_duels_rush_health_regenerated": 110,
+        "bedwars_two_one_duels_rush_kills": 13,
+        "bedwars_two_one_duels_rush_losses": 2,
+        "bedwars_two_one_duels_rush_melee_hits": 134,
+        "bedwars_two_one_duels_rush_melee_swings": 464,
+        "bedwars_two_one_duels_rush_rounds_played": 5,
+        "entity_attack_deaths_bedwars": 4,
+        "entity_attack_kills_bedwars": 6,
+        "final_deaths_bedwars": 2,
+        "kills_bedwars": 13,
+        "losses_bedwars": 4,
+        "void_final_deaths_bedwars": 1,
+        "bedwars_two_one_duels_rush_blocks_broken": 42,
+        "entity_attack_final_deaths_bedwars": 1,
+        "fall_deaths_bedwars": 4,
+        "fall_kills_bedwars": 1,
+        "void_kills_bedwars": 6,
+        "sumo_duel_coins": 936,
+        "sumo_duel_coins_gained": 936,
+        "current_winstreak_mode_bedwars_two_one_duels_rush": 3,
+        "best_winstreak_mode_bedwars_two_one_duels_rush": 3,
+        "bedwars_two_one_duels_rush_wins": 3,
+        "entity_attack_final_kills_bedwars": 2,
+        "void_final_kills_bedwars": 1,
+        "classic_duel_coins": 168,
+        "classic_duel_coins_gained": 168,
+        "bedwars_two_one_duels_losses": 2,
+        "bridge_duel_coins": 12,
+        "bridge_duel_coins_gained": 12,
+        "current_sumo_winstreak": 2,
+        "current_winstreak_mode_sumo_duel": 2,
+        "currentStreak": 2
+      },
+      "SkyWars": {
+        "cosmetic_tokens": 15500,
+        "perkslot": {
+          "normal": {
+            "2": "solo_savior",
+            "3": "solo_fat",
+            "1": "solo_resistance_boost",
+            "5": "solo_knowledge",
+            "4": "solo_lucky_charm",
+            "6": "solo_speed_boost"
+          },
+          "insane": {
+            "1": "team_resistance_boost",
+            "3": "team_fat",
+            "2": "team_savior",
+            "6": "team_speed_boost",
+            "5": "team_knowledge",
+            "4": "team_lucky_charm"
+          },
+          "mega": {
+            "1": "mega_bridger",
+            "3": "mega_rusher",
+            "2": "mega_lucky_charm",
+            "5": "mega_blazing_arrows",
+            "6": "mega_tank",
+            "4": "mega_arrow_recovery"
+          }
+        },
+        "levelFormatted": "§74",
+        "souls": 121,
+        "packages": [
+          "update_solo_team_kits_and_perks",
+          "update_solo_team_kits2",
+          "update_solo_team_perk_levels",
+          "update_opals_prestige",
+          "update_shard_removal",
+          "convertedstatstoexp",
+          "update_shard_removal_bedrock",
+          "angels_descent_tree_2022",
+          "kit_supporting_team_ecologist",
+          "kit_attacking_team_grenade",
+          "kit_basic_solo_baseball-player",
+          "kit_attacking_team_pig-rider",
+          "kit_supporting_team_warlock",
+          "kit_supporting_team_zookeeper",
+          "scheme_stone_prestige",
+          "merged_souls_shards",
+          "more_default_perks_update"
+        ],
+        "toggle_mega_arrow_recovery": false,
+        "toggle_mega_blazing_arrows": false,
+        "toggle_mega_mining_expertise": false,
+        "toggle_mega_rusher": false,
+        "toggle_mega_tank": false,
+        "toggle_mega_notoriety": false,
+        "toggle_mega_nourishment": false,
+        "toggle_mega_marksmanship": false,
+        "toggle_mega_bridger": false,
+        "toggle_mega_environmental_expert": false,
+        "toggle_mega_lucky_charm": false,
+        "toggle_mega_necromancer": false,
+        "toggle_mega_black_magic": false,
+        "toggle_solo_arrow_recovery": false,
+        "toggle_solo_blazing_arrows": false,
+        "toggle_solo_marksmanship": false,
+        "toggle_solo_mining_expertise": false,
+        "solo_resistance_boost": 0,
+        "toggle_solo_resistance_boost": true,
+        "toggle_solo_speed_boost": false,
+        "toggle_solo_knowledge": false,
+        "toggle_solo_annoy-o-mite": false,
+        "solo_savior": 0,
+        "toggle_solo_savior": true,
+        "toggle_solo_nourishment": false,
+        "toggle_solo_revenge": false,
+        "solo_fat": 0,
+        "toggle_solo_fat": true,
+        "toggle_solo_bridger": false,
+        "toggle_solo_environmental_expert": false,
+        "toggle_solo_lucky_charm": false,
+        "toggle_solo_necromancer": false,
+        "toggle_solo_black_magic": false,
+        "toggle_solo_robbery": false,
+        "toggle_solo_frost": false,
+        "toggle_solo_barbarian": false,
+        "toggle_team_arrow_recovery": false,
+        "toggle_team_blazing_arrows": false,
+        "toggle_team_mining_expertise": false,
+        "team_resistance_boost": 0,
+        "toggle_team_resistance_boost": true,
+        "toggle_team_speed_boost": false,
+        "toggle_team_knowledge": false,
+        "toggle_team_annoy-o-mite": false,
+        "team_savior": 0,
+        "toggle_team_savior": true,
+        "toggle_team_nourishment": false,
+        "toggle_team_marksmanship": false,
+        "team_fat": 0,
+        "toggle_team_fat": true,
+        "toggle_team_bridger": false,
+        "toggle_team_environmental_expert": false,
+        "toggle_team_lucky_charm": false,
+        "toggle_team_necromancer": false,
+        "toggle_team_black_magic": false,
+        "toggle_team_robbery": false,
+        "toggle_team_frost": false,
+        "toggle_team_diamondpiercer": false,
+        "toggle_team_barbarian": false,
+        "toggle_ranked_armorer_perk": false,
+        "toggle_ranked_bowman_perk": false,
+        "toggle_ranked_champion_perk": false,
+        "toggle_ranked_magician_perk": false,
+        "toggle_ranked_scout_perk": false,
+        "toggle_ranked_athlete_perk": false,
+        "toggle_ranked_blacksmith_perk": false,
+        "toggle_ranked_healer_perk": false,
+        "toggle_ranked_pyromancer_perk": false,
+        "toggle_ranked_hound_perk": false,
+        "toggle_ranked_paladin_perk": false,
+        "toggle_ranked_arrow_recovery": false,
+        "toggle_ranked_blazing_arrows": false,
+        "toggle_ranked_last_stand": false,
+        "toggle_ranked_mining_expertise": false,
+        "toggle_ranked_rusher": false,
+        "toggle_ranked_tough_skin": false,
+        "toggle_ranked_bridger": false,
+        "toggle_ranked_environmental_expert": false,
+        "activeKit_SOLO": "kit_basic_solo_baseball-player",
+        "activeKit_SOLO_random": false,
+        "games_played_skywars": 130,
+        "skywars_experience": 139,
+        "arrows_hit": 3,
+        "arrows_hit_kit_basic_solo_default": 2,
+        "arrows_hit_team": 2,
+        "arrows_shot": 18,
+        "arrows_shot_kit_basic_solo_default": 13,
+        "arrows_shot_team": 13,
+        "blocks_broken": 25,
+        "blocks_placed": 984,
+        "chests_opened": 143,
+        "chests_opened_kit_basic_solo_default": 45,
+        "chests_opened_team": 33,
+        "coins": 276334,
+        "fastest_win": 177,
+        "fastest_win_kit_basic_solo_default": 159,
+        "fastest_win_team": 159,
+        "games": 19,
+        "games_kit_basic_solo_default": 10,
+        "games_team": 6,
+        "kills": 31,
+        "kills_kit_basic_solo_default": 10,
+        "kills_monthly_a": 15,
+        "kills_team": 14,
+        "kills_team_normal": 14,
+        "kills_weekly_b": 10,
+        "killstreak": 7,
+        "killstreak_kit_basic_solo_default": 1,
+        "killstreak_team": 2,
+        "lastMode": "TEAMS",
+        "longest_bow_kill": 4,
+        "longest_bow_kill_kit_basic_solo_default": 4,
+        "longest_bow_kill_team": 4,
+        "longest_bow_shot": 10,
+        "longest_bow_shot_kit_basic_solo_default": 48,
+        "longest_bow_shot_team": 48,
+        "melee_kills": 23,
+        "melee_kills_kit_basic_solo_default": 8,
+        "melee_kills_team": 9,
+        "most_kills_game": 5,
+        "most_kills_game_kit_basic_solo_default": 2,
+        "most_kills_game_team": 1,
+        "souls_gathered": 33,
+        "survived_players": 515,
+        "survived_players_kit_basic_solo_default": 189,
+        "survived_players_team": 247,
+        "time_played": 4093,
+        "time_played_kit_basic_solo_default": 1470,
+        "time_played_team": 1587,
+        "win_streak": 0,
+        "wins": 4,
+        "wins_kit_basic_solo_default": 2,
+        "wins_team": 3,
+        "wins_team_normal": 3,
+        "levelFormattedWithBrackets": "§7[§74§7✯§7]§r ",
+        "deaths": 76,
+        "deaths_kit_basic_solo_default": 23,
+        "deaths_team": 25,
+        "deaths_team_normal": 25,
+        "egg_thrown": 93,
+        "losses": 74,
+        "losses_kit_basic_solo_default": 22,
+        "losses_team": 23,
+        "losses_team_normal": 23,
+        "refill_chest_destroy": 2,
+        "void_kills": 7,
+        "void_kills_kit_basic_solo_default": 2,
+        "void_kills_team": 4,
+        "assists": 11,
+        "assists_kit_basic_solo_default": 4,
+        "assists_team": 6,
+        "chests_opened_solo": 110,
+        "deaths_solo": 51,
+        "deaths_solo_normal": 38,
+        "losses_solo": 51,
+        "losses_solo_normal": 38,
+        "quits": 59,
+        "survived_players_solo": 268,
+        "time_played_solo": 2506,
+        "assists_solo": 5,
+        "games_solo": 13,
+        "heads": 3,
+        "heads_kit_basic_solo_default": 3,
+        "heads_salty": 1,
+        "heads_salty_kit_basic_solo_default": 1,
+        "heads_salty_solo": 1,
+        "heads_solo": 3,
+        "heads_succulent": 1,
+        "heads_succulent_kit_basic_solo_default": 1,
+        "heads_succulent_solo": 1,
+        "kills_monthly_b": 16,
+        "kills_solo": 17,
+        "kills_solo_normal": 17,
+        "longest_bow_kill_solo": 4,
+        "melee_kills_solo": 14,
+        "mobs_killed": 2,
+        "mobs_killed_kit_basic_solo_default": 1,
+        "mobs_killed_solo": 1,
+        "most_kills_game_solo": 5,
+        "head_collection": {
+          "recent": [
+            {
+              "timestamp": 1714733109213,
+              "mode": "solo_normal",
+              "sacrifice": "SALTY"
+            },
+            {
+              "timestamp": 1714733142474,
+              "mode": "solo_normal",
+              "sacrifice": "SUCCULENT"
+            },
+            {
+              "timestamp": 1715253629395,
+              "mode": "solo_normal",
+              "sacrifice": "YUCKY"
+            }
+          ],
+          "prestigious": [
+            {
+              "timestamp": 1714733109213,
+              "mode": "solo_normal",
+              "sacrifice": "SALTY"
+            },
+            {
+              "timestamp": 1714733142474,
+              "mode": "solo_normal",
+              "sacrifice": "SUCCULENT"
+            }
+          ]
+        },
+        "soul_well": 17,
+        "usedSoulWell": true,
+        "kills_weekly_a": 21,
+        "heads_yucky": 1,
+        "heads_yucky_kit_basic_solo_default": 1,
+        "heads_yucky_solo": 1,
+        "lastTourneyAd": 1719136009334,
+        "mega_mining_expertise": 0,
+        "soul_well_rares": 3,
+        "soul_well_legendaries": 2,
+        "assists_kit_basic_solo_baseball-player": 7,
+        "chests_opened_kit_basic_solo_baseball-player": 74,
+        "deaths_kit_basic_solo_baseball-player": 40,
+        "losses_kit_basic_solo_baseball-player": 39,
+        "survived_players_kit_basic_solo_baseball-player": 279,
+        "time_played_kit_basic_solo_baseball-player": 2119,
+        "kills_kit_basic_solo_baseball-player": 21,
+        "void_kills_kit_basic_solo_baseball-player": 5,
+        "mobs_killed_kit_basic_solo_baseball-player": 1,
+        "mobs_killed_team": 1,
+        "activeKit_TEAMS": "kit_supporting_team_ecologist",
+        "activeKit_TEAMS_random": false,
+        "blocks_placed_tourney": 591,
+        "chests_opened_tourney": 52,
+        "chests_opened_tourney_kit_basic_solo_frog": 6,
+        "chests_opened_tourney_teams_tourney": 52,
+        "coins_gained_tourney": 90346,
+        "deaths_tourney": 43,
+        "deaths_tourney_kit_basic_solo_frog": 4,
+        "deaths_tourney_teams_tourney": 43,
+        "kills_tourney": 28,
+        "kills_tourney_kit_basic_solo_frog": 3,
+        "kills_tourney_teams_tourney": 28,
+        "losses_tourney": 43,
+        "losses_tourney_kit_basic_solo_frog": 4,
+        "losses_tourney_teams_tourney": 43,
+        "most_kills_game_tourney": 1,
+        "most_kills_game_tourney_kit_basic_solo_frog": 2,
+        "most_kills_game_tourney_teams_tourney": 1,
+        "quits_tourney": 39,
+        "souls_gathered_tourney": 28,
+        "survived_players_tourney": 436,
+        "survived_players_tourney_kit_basic_solo_frog": 42,
+        "survived_players_tourney_teams_tourney": 436,
+        "time_played_tourney": 2897,
+        "time_played_tourney_kit_basic_solo_frog": 335,
+        "time_played_tourney_teams_tourney": 2897,
+        "tourney_sw_normal_doubles_0_blocks_placed": 591,
+        "tourney_sw_normal_doubles_0_chests_opened": 52,
+        "tourney_sw_normal_doubles_0_coins": 90346,
+        "tourney_sw_normal_doubles_0_coins_gained": 90346,
+        "tourney_sw_normal_doubles_0_deaths": 43,
+        "tourney_sw_normal_doubles_0_kills": 28,
+        "tourney_sw_normal_doubles_0_losses": 43,
+        "tourney_sw_normal_doubles_0_most_kills_game": 28,
+        "tourney_sw_normal_doubles_0_quits": 39,
+        "tourney_sw_normal_doubles_0_souls": 28,
+        "tourney_sw_normal_doubles_0_souls_gathered": 28,
+        "tourney_sw_normal_doubles_0_survived_players": 436,
+        "tourney_sw_normal_doubles_0_time_played": 2897,
+        "tourney_sw_normal_doubles_0_void_kills": 12,
+        "tourney_sw_normal_doubles_0_win_streak": 1,
+        "void_kills_tourney": 12,
+        "void_kills_tourney_kit_basic_solo_frog": 1,
+        "void_kills_tourney_teams_tourney": 12,
+        "win_streak_tourney": 0,
+        "games_tourney": 5,
+        "games_tourney_kit_basic_solo_frog": 1,
+        "games_tourney_teams_tourney": 5,
+        "longest_bow_kill_tourney": 1,
+        "longest_bow_kill_tourney_kit_basic_solo_frog": 1,
+        "longest_bow_kill_tourney_teams_tourney": 1,
+        "melee_kills_tourney": 14,
+        "melee_kills_tourney_kit_basic_solo_frog": 2,
+        "melee_kills_tourney_teams_tourney": 14,
+        "mobs_killed_tourney": 21,
+        "mobs_killed_tourney_kit_basic_solo_frog": 3,
+        "mobs_killed_tourney_teams_tourney": 21,
+        "tourney_sw_normal_doubles_0_games": 5,
+        "tourney_sw_normal_doubles_0_longest_bow_kill": 26,
+        "tourney_sw_normal_doubles_0_melee_kills": 14,
+        "tourney_sw_normal_doubles_0_mobs_killed": 21,
+        "chests_opened_tourney_kit_advanced_solo_farmer": 41,
+        "deaths_tourney_kit_advanced_solo_farmer": 32,
+        "losses_tourney_kit_advanced_solo_farmer": 32,
+        "mobs_killed_tourney_kit_advanced_solo_farmer": 17,
+        "survived_players_tourney_kit_advanced_solo_farmer": 355,
+        "time_played_tourney_kit_advanced_solo_farmer": 2282,
+        "kills_tourney_kit_advanced_solo_farmer": 23,
+        "longest_bow_kill_tourney_kit_advanced_solo_farmer": 4,
+        "melee_kills_tourney_kit_advanced_solo_farmer": 11,
+        "most_kills_game_tourney_kit_advanced_solo_farmer": 1,
+        "assists_tourney": 5,
+        "assists_tourney_kit_advanced_solo_farmer": 4,
+        "assists_tourney_teams_tourney": 5,
+        "egg_thrown_tourney": 144,
+        "tourney_sw_normal_doubles_0_assists": 5,
+        "tourney_sw_normal_doubles_0_egg_thrown": 144,
+        "void_kills_tourney_kit_advanced_solo_farmer": 11,
+        "enderpearls_thrown_tourney": 2,
+        "tourney_sw_normal_doubles_0_enderpearls_thrown": 2,
+        "games_tourney_kit_advanced_solo_farmer": 4,
+        "blocks_broken_tourney": 17,
+        "tourney_sw_normal_doubles_0_blocks_broken": 17,
+        "arrows_hit_tourney": 2,
+        "arrows_hit_tourney_kit_advanced_solo_farmer": 2,
+        "arrows_hit_tourney_teams_tourney": 2,
+        "arrows_shot_tourney": 10,
+        "arrows_shot_tourney_kit_advanced_solo_farmer": 10,
+        "arrows_shot_tourney_teams_tourney": 10,
+        "longest_bow_shot_tourney": 14,
+        "longest_bow_shot_tourney_kit_advanced_solo_farmer": 14,
+        "longest_bow_shot_tourney_teams_tourney": 14,
+        "tourney_sw_normal_doubles_0_arrows_hit": 2,
+        "tourney_sw_normal_doubles_0_arrows_shot": 10,
+        "tourney_sw_normal_doubles_0_longest_bow_shot": 14,
+        "fastest_win_tourney": 142,
+        "fastest_win_tourney_kit_advanced_solo_farmer": 142,
+        "fastest_win_tourney_teams_tourney": 142,
+        "killstreak_tourney": 2,
+        "killstreak_tourney_kit_advanced_solo_farmer": 2,
+        "killstreak_tourney_teams_tourney": 2,
+        "tourney_sw_normal_doubles_0_fastest_win": 142,
+        "tourney_sw_normal_doubles_0_killstreak": 2,
+        "tourney_sw_normal_doubles_0_wins": 1,
+        "wins_tourney": 1,
+        "wins_tourney_kit_advanced_solo_farmer": 1,
+        "wins_tourney_teams_tourney": 1,
+        "deaths_tourney_kit_basic_solo_rookie": 2,
+        "kills_tourney_kit_basic_solo_rookie": 1,
+        "losses_tourney_kit_basic_solo_rookie": 2,
+        "mob_kills_tourney": 1,
+        "mob_kills_tourney_kit_basic_solo_rookie": 1,
+        "mob_kills_tourney_teams_tourney": 1,
+        "most_kills_game_tourney_kit_basic_solo_rookie": 1,
+        "survived_players_tourney_kit_basic_solo_rookie": 13,
+        "time_played_tourney_kit_basic_solo_rookie": 76,
+        "tourney_sw_normal_doubles_0_mob_kills": 1,
+        "chests_opened_tourney_kit_advanced_solo_armorer": 2,
+        "deaths_tourney_kit_advanced_solo_armorer": 2,
+        "losses_tourney_kit_advanced_solo_armorer": 2,
+        "time_played_tourney_kit_advanced_solo_armorer": 115,
+        "longest_bow_kill_kit_basic_solo_baseball-player": 4,
+        "melee_kills_kit_basic_solo_baseball-player": 15,
+        "most_kills_game_kit_basic_solo_baseball-player": 5,
+        "void_kills_solo": 3,
+        "chests_opened_tourney_kit_basic_solo_rookie": 1,
+        "chests_opened_kit_supporting_team_ecologist": 16,
+        "deaths_kit_supporting_team_ecologist": 8,
+        "deaths_solo_insane": 13,
+        "losses_kit_supporting_team_ecologist": 8,
+        "losses_solo_insane": 13,
+        "survived_players_kit_supporting_team_ecologist": 27,
+        "time_played_kit_supporting_team_ecologist": 285,
+        "deaths_tourney_kit_advanced_solo_knight": 1,
+        "losses_tourney_kit_advanced_solo_knight": 1,
+        "time_played_tourney_kit_advanced_solo_knight": 15,
+        "assists_tourney_kit_advanced_solo_armorer": 1,
+        "survived_players_tourney_kit_advanced_solo_armorer": 15,
+        "chests_opened_tourney_kit_mythical_nether-lord": 1,
+        "deaths_tourney_kit_mythical_nether-lord": 1,
+        "kills_tourney_kit_mythical_nether-lord": 1,
+        "longest_bow_kill_tourney_kit_mythical_nether-lord": 1,
+        "losses_tourney_kit_mythical_nether-lord": 1,
+        "melee_kills_tourney_kit_mythical_nether-lord": 1,
+        "mobs_killed_tourney_kit_mythical_nether-lord": 1,
+        "most_kills_game_tourney_kit_mythical_nether-lord": 1,
+        "survived_players_tourney_kit_mythical_nether-lord": 8,
+        "time_played_tourney_kit_mythical_nether-lord": 46,
+        "chests_opened_tourney_kit_mythical_thundermeister": 1,
+        "deaths_tourney_kit_mythical_thundermeister": 1,
+        "losses_tourney_kit_mythical_thundermeister": 1,
+        "survived_players_tourney_kit_mythical_thundermeister": 3,
+        "time_played_tourney_kit_mythical_thundermeister": 28,
+        "team_knowledge": 0,
+        "games_kit_basic_solo_baseball-player": 9,
+        "arrows_shot_kit_basic_solo_baseball-player": 4,
+        "arrows_shot_solo": 5,
+        "fastest_win_kit_basic_solo_baseball-player": 177,
+        "fastest_win_solo": 177,
+        "killstreak_kit_basic_solo_baseball-player": 6,
+        "killstreak_solo": 5,
+        "wins_kit_basic_solo_baseball-player": 2,
+        "wins_solo": 1,
+        "wins_solo_normal": 1,
+        "arrows_hit_kit_basic_solo_baseball-player": 1,
+        "arrows_hit_solo": 1,
+        "longest_bow_shot_kit_basic_solo_baseball-player": 10,
+        "longest_bow_shot_solo": 10,
+        "solo_mining_expertise": 0,
+        "chests_opened_kit_mining_team_default": 5,
+        "deaths_kit_mining_team_default": 4,
+        "losses_kit_mining_team_default": 4,
+        "time_played_kit_mining_team_default": 134,
+        "survived_players_kit_mining_team_default": 12,
+        "arrows_shot_kit_supporting_team_warlock": 1,
+        "chests_opened_kit_supporting_team_warlock": 3,
+        "deaths_kit_supporting_team_warlock": 1,
+        "losses_kit_supporting_team_warlock": 1,
+        "survived_players_kit_supporting_team_warlock": 8,
+        "time_played_kit_supporting_team_warlock": 85,
+        "xp_kit_basic_solo_baseball-player": 62,
+        "solo_speed_boost": 1,
+        "solo_knowledge": 1,
+        "mega_bridger": 1,
+        "solo_lucky_charm": 1,
+        "team_lucky_charm": 1,
+        "mega_blazing_arrows": 5,
+        "mega_tank": 5,
+        "mega_arrow_recovery": 5,
+        "active_scheme": "scheme_stone_prestige",
+        "last_prestige_unlocked": "NONE",
+        "mega_lucky_charm": 1,
+        "kitsMaxPrestige": "§2[§a0/131§d⚔§2]",
+        "team_speed_boost": 1,
+        "mega_rusher": 5,
+        "lowest_level_rewards_received": 4,
+        "fall_kills": 1,
+        "fall_kills_kit_basic_solo_baseball-player": 1,
+        "fall_kills_team": 1,
+        "lucky_explained_last": 1749906643703,
+        "lucky_explained": 1
+      },
+      "SkyBlock": {
+        "profiles": {
+          "547e00f7af444536b0eaf46df8fb83b4": {
+            "profile_id": "547e00f7af444536b0eaf46df8fb83b4",
+            "cute_name": "Grapes"
+          }
+        }
+      },
+      "MurderMystery": {
+        "murdermystery_books": [
+          "innocent",
+          "murderer",
+          "detective"
+        ],
+        "coins": 12799,
+        "coins_pickedup": 104,
+        "coins_pickedup_MURDER_DOUBLE_UP": 39,
+        "coins_pickedup_cruise_ship": 18,
+        "coins_pickedup_cruise_ship_MURDER_DOUBLE_UP": 18,
+        "deaths": 15,
+        "deaths_MURDER_DOUBLE_UP": 7,
+        "deaths_cruise_ship": 4,
+        "deaths_cruise_ship_MURDER_DOUBLE_UP": 4,
+        "games": 23,
+        "games_MURDER_DOUBLE_UP": 10,
+        "games_cruise_ship": 4,
+        "games_cruise_ship_MURDER_DOUBLE_UP": 4,
+        "wins": 12,
+        "wins_MURDER_DOUBLE_UP": 6,
+        "wins_cruise_ship": 2,
+        "wins_cruise_ship_MURDER_DOUBLE_UP": 2,
+        "coins_pickedup_spooky_mansion": 6,
+        "coins_pickedup_spooky_mansion_MURDER_DOUBLE_UP": 6,
+        "detective_wins": 1,
+        "detective_wins_MURDER_DOUBLE_UP": 1,
+        "detective_wins_spooky_mansion": 1,
+        "detective_wins_spooky_mansion_MURDER_DOUBLE_UP": 1,
+        "games_spooky_mansion": 2,
+        "games_spooky_mansion_MURDER_DOUBLE_UP": 2,
+        "quickest_detective_win_time_seconds": 98,
+        "quickest_detective_win_time_seconds_MURDER_DOUBLE_UP": 98,
+        "quickest_detective_win_time_seconds_spooky_mansion": 98,
+        "quickest_detective_win_time_seconds_spooky_mansion_MURDER_DOUBLE_UP": 98,
+        "was_hero": 1,
+        "was_hero_MURDER_DOUBLE_UP": 1,
+        "was_hero_spooky_mansion": 1,
+        "was_hero_spooky_mansion_MURDER_DOUBLE_UP": 1,
+        "wins_spooky_mansion": 2,
+        "wins_spooky_mansion_MURDER_DOUBLE_UP": 2,
+        "packages": [
+          "sep2021achievementsync"
+        ],
+        "coins_pickedup_MURDER_CLASSIC": 47,
+        "coins_pickedup_skyway_pier": 3,
+        "coins_pickedup_skyway_pier_MURDER_CLASSIC": 3,
+        "deaths_MURDER_CLASSIC": 7,
+        "deaths_skyway_pier": 1,
+        "deaths_skyway_pier_MURDER_CLASSIC": 1,
+        "games_MURDER_CLASSIC": 10,
+        "games_skyway_pier": 1,
+        "games_skyway_pier_MURDER_CLASSIC": 1,
+        "wins_MURDER_CLASSIC": 5,
+        "wins_skyway_pier": 1,
+        "wins_skyway_pier_MURDER_CLASSIC": 1,
+        "coins_pickedup_aquarium": 3,
+        "coins_pickedup_aquarium_MURDER_CLASSIC": 3,
+        "deaths_aquarium": 1,
+        "deaths_aquarium_MURDER_CLASSIC": 1,
+        "games_aquarium": 1,
+        "games_aquarium_MURDER_CLASSIC": 1,
+        "wins_aquarium": 1,
+        "wins_aquarium_MURDER_CLASSIC": 1,
+        "deaths_mountain": 1,
+        "deaths_mountain_MURDER_CLASSIC": 1,
+        "games_mountain": 1,
+        "games_mountain_MURDER_CLASSIC": 1,
+        "coins_pickedup_hypixel_world": 3,
+        "coins_pickedup_hypixel_world_MURDER_CLASSIC": 3,
+        "deaths_hypixel_world": 2,
+        "deaths_hypixel_world_MURDER_CLASSIC": 2,
+        "games_hypixel_world": 2,
+        "games_hypixel_world_MURDER_CLASSIC": 2,
+        "wins_hypixel_world": 1,
+        "wins_hypixel_world_MURDER_CLASSIC": 1,
+        "games_widow's_den": 2,
+        "games_widow's_den_MURDER_CLASSIC": 1,
+        "wins_widow's_den": 1,
+        "wins_widow's_den_MURDER_CLASSIC": 1,
+        "knifeSkinPrestiges": {
+          "xp": {
+            "none": 3
+          }
+        },
+        "coins_pickedup_widow's_den": 4,
+        "coins_pickedup_widow's_den_MURDER_DOUBLE_UP": 4,
+        "games_widow's_den_MURDER_DOUBLE_UP": 1,
+        "kills": 3,
+        "kills_MURDER_DOUBLE_UP": 2,
+        "kills_as_murderer": 2,
+        "kills_as_murderer_MURDER_DOUBLE_UP": 2,
+        "kills_as_murderer_widow's_den": 2,
+        "kills_as_murderer_widow's_den_MURDER_DOUBLE_UP": 2,
+        "kills_widow's_den": 2,
+        "kills_widow's_den_MURDER_DOUBLE_UP": 2,
+        "knife_kills": 3,
+        "knife_kills_MURDER_DOUBLE_UP": 2,
+        "knife_kills_widow's_den": 2,
+        "knife_kills_widow's_den_MURDER_DOUBLE_UP": 2,
+        "coins_pickedup_ancient_tomb": 27,
+        "coins_pickedup_ancient_tomb_MURDER_CLASSIC": 27,
+        "deaths_ancient_tomb": 1,
+        "deaths_ancient_tomb_MURDER_CLASSIC": 1,
+        "games_ancient_tomb": 2,
+        "games_ancient_tomb_MURDER_CLASSIC": 2,
+        "deaths_subway": 1,
+        "deaths_subway_MURDER_CLASSIC": 1,
+        "games_subway": 1,
+        "games_subway_MURDER_CLASSIC": 1,
+        "descent": {
+          "Firststeps": {
+            "progress": 1
+          },
+          "Highroller": {
+            "progress": 4
+          }
+        },
+        "coins_pickedup_archives_top_floor": 1,
+        "coins_pickedup_archives_top_floor_MURDER_DOUBLE_UP": 1,
+        "deaths_archives_top_floor": 1,
+        "deaths_archives_top_floor_MURDER_DOUBLE_UP": 1,
+        "games_archives_top_floor": 1,
+        "games_archives_top_floor_MURDER_DOUBLE_UP": 1,
+        "coins_pickedup_gold_rush": 13,
+        "coins_pickedup_gold_rush_MURDER_DOUBLE_UP": 2,
+        "deaths_gold_rush": 1,
+        "deaths_gold_rush_MURDER_DOUBLE_UP": 1,
+        "games_gold_rush": 2,
+        "games_gold_rush_MURDER_DOUBLE_UP": 1,
+        "wins_gold_rush": 2,
+        "wins_gold_rush_MURDER_DOUBLE_UP": 1,
+        "coins_pickedup_hollywood": 8,
+        "coins_pickedup_hollywood_MURDER_DOUBLE_UP": 8,
+        "games_hollywood": 1,
+        "games_hollywood_MURDER_DOUBLE_UP": 1,
+        "wins_hollywood": 1,
+        "wins_hollywood_MURDER_DOUBLE_UP": 1,
+        "deaths_spooky_mansion": 1,
+        "deaths_spooky_mansion_MURDER_DOUBLE_UP": 1,
+        "coins_pickedup_MURDER_INFECTION": 9,
+        "coins_pickedup_snowglobe": 3,
+        "coins_pickedup_snowglobe_MURDER_INFECTION": 3,
+        "games_MURDER_INFECTION": 2,
+        "games_snowglobe": 1,
+        "games_snowglobe_MURDER_INFECTION": 1,
+        "longest_time_as_survivor_seconds": 81,
+        "longest_time_as_survivor_seconds_MURDER_INFECTION": 81,
+        "longest_time_as_survivor_seconds_snowglobe": 81,
+        "longest_time_as_survivor_seconds_snowglobe_MURDER_INFECTION": 81,
+        "total_time_survived_seconds": 81,
+        "total_time_survived_seconds_MURDER_INFECTION": 81,
+        "total_time_survived_seconds_snowglobe": 81,
+        "total_time_survived_seconds_snowglobe_MURDER_INFECTION": 81,
+        "wins_MURDER_INFECTION": 1,
+        "wins_snowglobe": 1,
+        "wins_snowglobe_MURDER_INFECTION": 1,
+        "coins_pickedup_transport": 6,
+        "coins_pickedup_transport_MURDER_INFECTION": 6,
+        "games_transport": 1,
+        "games_transport_MURDER_INFECTION": 1,
+        "kills_as_infected": 2,
+        "kills_as_infected_MURDER_INFECTION": 2,
+        "kills_as_infected_transport": 2,
+        "kills_as_infected_transport_MURDER_INFECTION": 2,
+        "coins_pickedup_gold_rush_MURDER_CLASSIC": 11,
+        "games_gold_rush_MURDER_CLASSIC": 1,
+        "wins_gold_rush_MURDER_CLASSIC": 1,
+        "coins_pickedup_MURDER_ASSASSINS": 9,
+        "coins_pickedup_headquarters": 9,
+        "coins_pickedup_headquarters_MURDER_ASSASSINS": 9,
+        "deaths_MURDER_ASSASSINS": 1,
+        "deaths_headquarters": 1,
+        "deaths_headquarters_MURDER_ASSASSINS": 1,
+        "games_MURDER_ASSASSINS": 1,
+        "games_headquarters": 1,
+        "games_headquarters_MURDER_ASSASSINS": 1,
+        "kills_MURDER_ASSASSINS": 1,
+        "kills_headquarters": 1,
+        "kills_headquarters_MURDER_ASSASSINS": 1,
+        "knife_kills_MURDER_ASSASSINS": 1,
+        "knife_kills_headquarters": 1,
+        "knife_kills_headquarters_MURDER_ASSASSINS": 1
+      },
+      "MainLobby": {
+        "questNPCTutorials": {
+          "zone_spawn": true,
+          "zone_village": true,
+          "zone_mines": true,
+          "lava_fisherman": true,
+          "dockmaster": true
+        },
+        "discoveredZones": {
+          "village": true,
+          "mines": true
+        },
+        "packages": [
+          "apr_5_23_ench_reset"
+        ],
+        "fishing": {
+          "stats": {
+            "permanent": {
+              "water": {
+                "fish": 24,
+                "junk": 1,
+                "treasure": 2
+              },
+              "individual": {
+                "fish": {
+                  "clownfish": 9,
+                  "cod": 4,
+                  "pufferfish": 5,
+                  "salmon": 6
+                },
+                "junk": {
+                  "bowl": 1
+                },
+                "treasure": {
+                  "compass": 1,
+                  "enchanted_bow": 1
+                }
+              }
+            },
+            "2025": {
+              "summer": {
+                "water": {
+                  "fish": 24,
+                  "junk": 1,
+                  "treasure": 2
+                }
+              }
+            }
+          },
+          "fireproofing": {
+            "scales": 6
+          }
+        }
+      },
+      "HungerGames": {
+        "packages": [
+          "fixachievements3",
+          "new_stats_02_2019"
+        ],
+        "wins_backup": 0,
+        "wins": 0,
+        "wins_solo_normal": 0,
+        "wins_teams_normal": 0,
+        "autoarmor": true,
+        "leaderboardSettings": {
+          "resetType": "NEVER"
+        },
+        "coins": 111340
+      },
+      "UHC": {
+        "saved_stats": true,
+        "clearup_achievement": true,
+        "coins": 106435
+      },
+      "Walls3": {
+        "classes": {
+          "herobrine": {
+            "skill_level_dChecked5": true,
+            "skill_level_d": 1,
+            "checked4": true,
+            "unlocked": false
+          },
+          "skeleton": {
+            "skill_level_dChecked5": true,
+            "skill_level_d": 1,
+            "checked4": true,
+            "unlocked": false
+          },
+          "zombie": {
+            "skill_level_dChecked5": true,
+            "skill_level_d": 1,
+            "checked4": true,
+            "unlocked": false
+          },
+          "enderman": {
+            "skill_level_dChecked5": true,
+            "skill_level_d": 1,
+            "checked4": true,
+            "unlocked": false
+          }
+        },
+        "packages": [
+          "legacy_achievement_a",
+          "achievement_fix_flag",
+          "cakes_fix_flag_2",
+          "cakes_count_fix_flag",
+          "convertedstats"
+        ],
+        "coins": 107405
+      },
+      "Arena": {
+        "coins": 102610
+      },
+      "GingerBread": {
+        "coins": 102610,
+        "packages": [
+          "achievementsupdatedc",
+          "achievementsupdatedd",
+          "helmet_1_2_unlocked"
+        ],
+        "shoes_active": "GOLD_SHOES",
+        "engine_active": "{GingerbreadPart:{PartType:ENGINE,PartRarity:BASIC}}",
+        "frame_active": "{GingerbreadPart:{PartType:FRAME,PartRarity:BASIC}}",
+        "booster_active": "{GingerbreadPart:{PartType:TURBOCHARGER,PartRarity:BASIC}}",
+        "helmet_active": "HELMET_1_2",
+        "jacket_active": "GOLD_JACKET",
+        "pants_active": "GOLD_PANTS",
+        "skin_active": "RED_KART;DEFAULT"
+      },
+      "Paintball": {
+        "coins": 102610,
+        "packages": [
+          "achievement_flag_2"
+        ],
+        "favorite_slots": "null,null,null"
+      },
+      "Quake": {
+        "coins": 102610,
+        "packages": [
+          "achievement_flag_3"
+        ]
+      },
+      "VampireZ": {
+        "coins": 102610,
+        "updated_stats": true
+      },
+      "Walls": {
+        "coins": 102610
+      },
+      "MCGO": {
+        "coins": 102305,
+        "level": 1,
+        "score": 0,
+        "packages": [
+          "achievement_flag_8"
+        ]
+      },
+      "Battleground": {
+        "coins": 107145
+      },
+      "SuperSmash": {
+        "coins": 104440,
+        "lastLevel_THE_BULK": 0
+      },
+      "Pit": {
+        "profile": {
+          "moved_achievements_1": true,
+          "outgoing_offers": [],
+          "moved_achievements_2": true,
+          "leaderboard_stats": {
+
+          },
+          "last_save": 1726482384681,
+          "inv_armor": {
+            "type": 0,
+            "data": [31, -117, 8, 0, 0, 0, 0, 0, 0, 0, -29, 98, 96, -32, 100, 96, -52, -28, 98, 96, 96, 96, 97, 98, 96, -54, 76, 97, 52, 100, 100, 96, 117, -50, 47, -51, 43, 97, -28, 98, 96, 46, 73, 76, 103, 100, -32, 14, -51, 75, 42, 74, 77, -52, 78, 76, -54, 73, 101, 100, 96, 98, 96, 115, 73, -52, 77, 76, 79, 5, 106, -127, -24, 48, 32, 89, -121, 49, 9, 58, 24, 24, 0, 70, -74, 77, -75, -92, 0, 0, 0]
+          },
+          "item_stash": {
+            "type": 0,
+            "data": [31, -117, 8, 0, 0, 0, 0, 0, 0, 0, -29, 98, 96, -32, 100, 96, -52, 100, 0, 3, 0, -58, 2, -70, 27, 13, 0, 0, 0]
+          },
+          "login_messages": [],
+          "spire_stash_inv": {
+            "type": 0,
+            "data": [31, -117, 8, 0, 0, 0, 0, 0, 0, 0, -29, 98, 96, -32, 100, 96, -52, 100, 0, 3, 0, -58, 2, -70, 27, 13, 0, 0, 0]
+          },
+          "inv_contents": {
+            "type": 0,
+            "data": [31, -117, 8, 0, 0, 0, 0, 0, 0, 0, -29, 98, 96, -32, 100, 96, -52, -28, 98, 96, 96, 80, 97, 98, 96, -54, 76, 97, -28, 102, 100, 96, 117, -50, 47, -51, 43, 97, -28, 98, 96, 46, 73, 76, 103, 100, -32, 14, -51, 75, 42, 74, 77, -52, 78, 76, -54, 73, 101, 100, 96, 98, 96, 115, 73, -52, 77, 76, 79, 5, 106, -127, -24, 96, 37, 65, 7, 4, 64, -12, -79, -63, -12, 41, 96, -86, -64, 14, 0, -127, 123, -123, -107, -82, 0, 0, 0]
+          },
+          "zero_point_three_gold_transfer": true,
+          "bounties": [],
+          "spire_stash_armor": {
+            "type": 0,
+            "data": [31, -117, 8, 0, 0, 0, 0, 0, 0, 0, -29, 98, 96, -32, 100, 96, -52, 100, 0, 3, 0, -58, 2, -70, 27, 13, 0, 0, 0]
+          },
+          "cash_during_prestige_0": 0
+        },
+        "pit_stats_ptl": {
+          "arrow_hits": 2,
+          "arrows_fired": 4,
+          "bow_damage_dealt": 1,
+          "bow_damage_received": 6,
+          "damage_dealt": 3,
+          "damage_received": 52,
+          "deaths": 2,
+          "joins": 2,
+          "jumped_into_pit": 3,
+          "left_clicks": 11,
+          "melee_damage_received": 42,
+          "melee_damage_dealt": 2,
+          "sword_hits": 1
+        }
+      },
+      "BuildBattle": {
+        "coins": 6830,
+        "correct_guesses": 21,
+        "games_played": 10,
+        "monthly_coins_b": 750,
+        "score": 50,
+        "weekly_coins_a": 1230,
+        "monthly_coins_a": 1080,
+        "weekly_coins_b": 600
+      },
+      "WoolGames": {
+        "data_migration_version": 13,
+        "sheep_wars": {
+          "stats": {
+            "sheep_thrown": 325,
+            "kills": 19,
+            "deaths": 16,
+            "losses": 10,
+            "games_played": 24,
+            "damage_dealt": 396,
+            "deaths_explosive": 3,
+            "kills_void": 16,
+            "wins": 14,
+            "deaths_void": 10,
+            "kills_explosive": 2
+          },
+          "layout": {
+            "opened": true,
+            "slot": {
+              "0": "sword",
+              "1": "BOW",
+              "7": "WOOL",
+              "8": "PINK_SHEEP",
+              "2": "ORANGE_SHEEP",
+              "4": "GREEN_SHEEP"
+            }
+          },
+          "default_kit": "RAIDER"
+        },
+        "progression": {
+          "available_layers": 18,
+          "experience": 2186.25
+        },
+        "playtime": 3015,
+        "coins": 40
+      },
+      "Legacy": {
+        "tokens": 50
+      }
+    },
+    "achievementPoints": 2100,
+    "achievementTracking": [],
+    "achievements": {
+      "bedwars_level": 313,
+      "bedwars_beds": 3059,
+      "bedwars_bedwars_killer": 5154,
+      "bedwars_collectors_edition": 5178,
+      "general_challenger": 1589,
+      "bedwars_wins": 1393,
+      "general_wins": 1970,
+      "general_quest_master": 889,
+      "skywars_you_re_a_star": 4,
+      "skyblock_minion_lover": 11,
+      "duels_duels_traveller": 47,
+      "duels_duels_win_streak": 5,
+      "duels_duels_winner": 570,
+      "murdermystery_hoarder": 95,
+      "murdermystery_countermeasures": 1,
+      "murdermystery_wins_as_survivor": 4,
+      "skywars_kills_team": 14,
+      "skywars_wins_team": 3,
+      "easter_throw_eggs": 52,
+      "bedwars_slumber_ticket_master": 114855,
+      "duels_goals": 1092,
+      "duels_bridge_duels_wins": 237,
+      "duels_bridge_win_streak": 5,
+      "duels_bridge_wins": 265,
+      "duels_unique_map_wins": 22,
+      "arcade_party_super_star": 4,
+      "arcade_arcade_banker": 213,
+      "general_coins": 1143,
+      "tntgames_clinic": 16,
+      "tntgames_tnt_banker": 930,
+      "tntgames_the_upper_hand": 2,
+      "tntgames_tnt_triathlon": 16,
+      "tntgames_block_runner": 914,
+      "duels_duels_mastery": 4,
+      "skywars_heads": 3,
+      "skywars_kills_solo": 17,
+      "walls3_jack_of_all_trades": 3,
+      "duels_bridge_doubles_wins": 28,
+      "bedwars_bedwars_challenger": 5,
+      "duels_duels_division": 3,
+      "skywars_kits_team": 5,
+      "skywars_kits_solo": 1,
+      "summer_shopaholic": 500911,
+      "skyblock_treasury": 12,
+      "buildbattle_guess_the_build_guesses": 21,
+      "buildbattle_build_battle_score": 50,
+      "skywars_wins_solo": 1,
+      "woolgames_sheep_wars_slayer": 19,
+      "woolgames_sheep_wars_winner": 14,
+      "woolgames_mountain_of_wool": 10,
+      "woolgames_sheep_wars_sheep_slayer": 15,
+      "arena_climb_the_ranks": 1000,
+      "gingerbread_banker": 68980,
+      "halloween2017_pumpkinator": 173,
+      "murdermystery_kills_as_murderer": 2,
+      "copsandcrims_promising_recruit": 1,
+      "skyblock_excavator": 12,
+      "general_master_lure": 24,
+      "general_trashiest_diver": 1,
+      "general_luckiest_of_the_sea": 2,
+      "summer_gone_fishing": 2,
+      "murdermystery_brainiac": 2,
+      "murdermystery_hitman": 1,
+      "duels_bed_wars_duels_winner": 4,
+      "duels_boxing_duels_winner": 4,
+      "duels_classic_duels_winner": 165,
+      "duels_skywars_duels_winner": 3,
+      "duels_sumo_duels_winner": 129,
+      "christmas2017_advent_2025": 3,
+      "christmas2017_present_collector": 16,
+      "skyblock_harvester": 10,
+      "skyblock_sb_levels": 2
+    },
+    "leveling": {
+      "claimedRewards": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98]
+    },
+    "seasonal": {
+      "easter": {
+        "2024": {
+          "bingo": {
+            "easy": {
+              "objectives": {
+                "Bedwarseatthis": 1,
+                "Bedwarssunshining": 1,
+                "Murdergoldensun": 5,
+                "Pitmmrobinhood": 1,
+                "Skywarsfunwithfriends": 1
+              }
+            }
+          },
+          "levelling": {
+            "experience": 275747
+          },
+          "bedWarsWinsAchievement": 2,
+          "duelsWinsAchievement": 2
+        },
+        "2025": {
+          "bingo": {
+            "pvp_easy": {
+              "objectives": {
+                "Duelseasykillsacrossmodes": 4,
+                "Bedwarsstaydead": 1,
+                "Duelssumowin": 1,
+                "Bedwarsshopoftraps": 1,
+                "Bedwarsnorest": 2,
+                "Bedwarsemerald": 2,
+                "Skywarsopenchests": 5
+              }
+            }
+          },
+          "duelsWinsAchievement": 2,
+          "levelling": {
+            "experience": 646585
+          },
+          "bedWarsWinsAchievement": 2
+        }
+      },
+      "silver": 6562,
+      "summer": {
+        "2024": {
+          "bingo": {
+            "easy": {
+              "objectives": {
+                "Bedwarsdiamond": 4,
+                "Skywarstrickortriumph": 15
+              }
+            }
+          },
+          "levelling": {
+            "experience": 1171221
+          }
+        },
+        "2025": {
+          "levelling": {
+            "experience": 3586449
+          }
+        }
+      },
+      "halloween": {
+        "2024": {
+          "bingo": {
+            "easy": {
+              "objectives": {
+                "Duelsvictor": 1,
+                "Bedwarseatthis": 1,
+                "Pitbwnoheart": 2,
+                "Bedwarsshopoftraps": 1
+              }
+            }
+          },
+          "levelling": {
+            "experience": 179350
+          }
+        },
+        "2025": {
+          "levelling": {
+            "experience": 96285
+          }
+        }
+      },
+      "christmas": {
+        "2025": {
+          "adventRewards": {
+            "day1": 1764806737345,
+            "day2": 1764806742104,
+            "day3": 1764806746365
+          },
+          "levelling": {
+            "experience": 73029
+          },
+          "completed_holiday_quests": 1
+        }
+      }
+    },
+    "challenges": {
+      "all_time": {
+        "BEDWARS__support": 440,
+        "BEDWARS__offensive": 704,
+        "DUELS__feed_the_void_challenge": 409,
+        "BEDWARS__defensive": 3,
+        "MURDER_MYSTERY__sherlock": 1,
+        "MURDER_MYSTERY__hero": 1,
+        "TNTGAMES__tnt_tag_challenge": 2,
+        "DUELS__teams_challenge": 24,
+        "SKYWARS__feeding_the_void_challenge": 3,
+        "BUILD_BATTLE__guesser_challenge": 2
+      }
+    },
+    "networkExp": 12879188,
+    "quests": {
+      "bedwars_daily_win": {
+        "completions": [
+          {
+            "time": 1710571029302
+          },
+          {
+            "time": 1710649747687
+          },
+          {
+            "time": 1710766290624
+          },
+          {
+            "time": 1710852855442
+          },
+          {
+            "time": 1711190065255
+          },
+          {
+            "time": 1711688561266
+          },
+          {
+            "time": 1711956537631
+          },
+          {
+            "time": 1712391824191
+          },
+          {
+            "time": 1712730779523
+          },
+          {
+            "time": 1712837813838
+          },
+          {
+            "time": 1713006243439
+          },
+          {
+            "time": 1713088608174
+          },
+          {
+            "time": 1713265445370
+          },
+          {
+            "time": 1713428584786
+          },
+          {
+            "time": 1713933327625
+          },
+          {
+            "time": 1714032871494
+          },
+          {
+            "time": 1714470110108
+          },
+          {
+            "time": 1714538408290
+          },
+          {
+            "time": 1714730054009
+          },
+          {
+            "time": 1714796552162
+          },
+          {
+            "time": 1714909300652
+          },
+          {
+            "time": 1714976168775
+          },
+          {
+            "time": 1715141495287
+          },
+          {
+            "time": 1715233256047
+          },
+          {
+            "time": 1715325326947
+          },
+          {
+            "time": 1715400953315
+          },
+          {
+            "time": 1716521301725
+          },
+          {
+            "time": 1717078936404
+          },
+          {
+            "time": 1717162347117
+          },
+          {
+            "time": 1717314320836
+          },
+          {
+            "time": 1718461588610
+          },
+          {
+            "time": 1718519596702
+          },
+          {
+            "time": 1719065456376
+          },
+          {
+            "time": 1719737438697
+          },
+          {
+            "time": 1719925366189
+          },
+          {
+            "time": 1720185255207
+          },
+          {
+            "time": 1720365238957
+          },
+          {
+            "time": 1721134044077
+          },
+          {
+            "time": 1722139820530
+          },
+          {
+            "time": 1722333931780
+          },
+          {
+            "time": 1722436096219
+          },
+          {
+            "time": 1722736066190
+          },
+          {
+            "time": 1722773516955
+          },
+          {
+            "time": 1722953385341
+          },
+          {
+            "time": 1723299968300
+          },
+          {
+            "time": 1723564375846
+          },
+          {
+            "time": 1723989235616
+          },
+          {
+            "time": 1724424264291
+          },
+          {
+            "time": 1724749306926
+          },
+          {
+            "time": 1725114065393
+          },
+          {
+            "time": 1725205799033
+          },
+          {
+            "time": 1725250515770
+          },
+          {
+            "time": 1725370104224
+          },
+          {
+            "time": 1725451409247
+          },
+          {
+            "time": 1725544095793
+          },
+          {
+            "time": 1725630356613
+          },
+          {
+            "time": 1725778094963
+          },
+          {
+            "time": 1725864814303
+          },
+          {
+            "time": 1725978594073
+          },
+          {
+            "time": 1726063432393
+          },
+          {
+            "time": 1726231306645
+          },
+          {
+            "time": 1726399997603
+          },
+          {
+            "time": 1726581511989
+          },
+          {
+            "time": 1726655307180
+          },
+          {
+            "time": 1726837966773
+          },
+          {
+            "time": 1727100606903
+          },
+          {
+            "time": 1727162181885
+          },
+          {
+            "time": 1727279590554
+          },
+          {
+            "time": 1728363163595
+          },
+          {
+            "time": 1728722841973
+          },
+          {
+            "time": 1728796335844
+          },
+          {
+            "time": 1736858602380
+          },
+          {
+            "time": 1737016766001
+          },
+          {
+            "time": 1739707157239
+          },
+          {
+            "time": 1744011266135
+          },
+          {
+            "time": 1744706678419
+          },
+          {
+            "time": 1744984752435
+          },
+          {
+            "time": 1745500946259
+          },
+          {
+            "time": 1745556793491
+          },
+          {
+            "time": 1745811620319
+          },
+          {
+            "time": 1745824263551
+          },
+          {
+            "time": 1745909267015
+          },
+          {
+            "time": 1745995193762
+          },
+          {
+            "time": 1746082565624
+          },
+          {
+            "time": 1746160264770
+          },
+          {
+            "time": 1746415296807
+          },
+          {
+            "time": 1746776888551
+          },
+          {
+            "time": 1746850859974
+          },
+          {
+            "time": 1746947570602
+          },
+          {
+            "time": 1747023027295
+          },
+          {
+            "time": 1747117558773
+          },
+          {
+            "time": 1747195668512
+          },
+          {
+            "time": 1747283035605
+          },
+          {
+            "time": 1747498943460
+          },
+          {
+            "time": 1747625748410
+          },
+          {
+            "time": 1747734774782
+          },
+          {
+            "time": 1747824368042
+          },
+          {
+            "time": 1747901054381
+          },
+          {
+            "time": 1747974779425
+          },
+          {
+            "time": 1748065614441
+          },
+          {
+            "time": 1748175154489
+          },
+          {
+            "time": 1748252071865
+          },
+          {
+            "time": 1748849614339
+          },
+          {
+            "time": 1749128376797
+          },
+          {
+            "time": 1749183444329
+          },
+          {
+            "time": 1749450709430
+          },
+          {
+            "time": 1749560865772
+          },
+          {
+            "time": 1749647380739
+          },
+          {
+            "time": 1749808068567
+          },
+          {
+            "time": 1749874978357
+          },
+          {
+            "time": 1749979484264
+          },
+          {
+            "time": 1750049575150
+          },
+          {
+            "time": 1750153956736
+          },
+          {
+            "time": 1750251827897
+          },
+          {
+            "time": 1750339667904
+          },
+          {
+            "time": 1750425852327
+          },
+          {
+            "time": 1750510992607
+          },
+          {
+            "time": 1750591069267
+          },
+          {
+            "time": 1750688258262
+          },
+          {
+            "time": 1750782154407
+          },
+          {
+            "time": 1750942782179
+          },
+          {
+            "time": 1751028531116
+          },
+          {
+            "time": 1751114479199
+          },
+          {
+            "time": 1751170194556
+          },
+          {
+            "time": 1751328585842
+          },
+          {
+            "time": 1751376487610
+          },
+          {
+            "time": 1751466006886
+          },
+          {
+            "time": 1751551618865
+          },
+          {
+            "time": 1751638477291
+          },
+          {
+            "time": 1751719871402
+          },
+          {
+            "time": 1751870659509
+          },
+          {
+            "time": 1752162302859
+          },
+          {
+            "time": 1752312662163
+          },
+          {
+            "time": 1752379722333
+          },
+          {
+            "time": 1752595721064
+          },
+          {
+            "time": 1752672158252
+          },
+          {
+            "time": 1753030362484
+          },
+          {
+            "time": 1753072127548
+          },
+          {
+            "time": 1753263250648
+          },
+          {
+            "time": 1753365840847
+          },
+          {
+            "time": 1753452991506
+          },
+          {
+            "time": 1753536997079
+          },
+          {
+            "time": 1753596122621
+          },
+          {
+            "time": 1753711843905
+          },
+          {
+            "time": 1753803702878
+          },
+          {
+            "time": 1753972966357
+          },
+          {
+            "time": 1754055708022
+          },
+          {
+            "time": 1754210299330
+          },
+          {
+            "time": 1754315068930
+          },
+          {
+            "time": 1754490860821
+          },
+          {
+            "time": 1754645916544
+          },
+          {
+            "time": 1754724865840
+          },
+          {
+            "time": 1754800244044
+          },
+          {
+            "time": 1754919342858
+          },
+          {
+            "time": 1755005612050
+          },
+          {
+            "time": 1755178098906
+          },
+          {
+            "time": 1755231012528
+          },
+          {
+            "time": 1755321935149
+          },
+          {
+            "time": 1755407267173
+          },
+          {
+            "time": 1755491711137
+          },
+          {
+            "time": 1755608659422
+          },
+          {
+            "time": 1755698918323
+          },
+          {
+            "time": 1755783412555
+          },
+          {
+            "time": 1755872233889
+          },
+          {
+            "time": 1755953807513
+          },
+          {
+            "time": 1756024903585
+          },
+          {
+            "time": 1756137357727
+          },
+          {
+            "time": 1756224142894
+          },
+          {
+            "time": 1756289270772
+          },
+          {
+            "time": 1756358019800
+          },
+          {
+            "time": 1756474122210
+          },
+          {
+            "time": 1756620051572
+          },
+          {
+            "time": 1756736018705
+          },
+          {
+            "time": 1756822313252
+          },
+          {
+            "time": 1757246298601
+          },
+          {
+            "time": 1757425165374
+          },
+          {
+            "time": 1757658538437
+          },
+          {
+            "time": 1758450150511
+          },
+          {
+            "time": 1759300120195
+          },
+          {
+            "time": 1760622900650
+          },
+          {
+            "time": 1761054300503
+          },
+          {
+            "time": 1766905708935
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1767254357482
+        }
+      },
+      "bedwars_daily_one_more": {
+        "completions": [
+          {
+            "time": 1710572315189
+          },
+          {
+            "time": 1710652035472
+          },
+          {
+            "time": 1710819153558
+          },
+          {
+            "time": 1710854050840
+          },
+          {
+            "time": 1710946081543
+          },
+          {
+            "time": 1711695796399
+          },
+          {
+            "time": 1711962184715
+          },
+          {
+            "time": 1712395870777
+          },
+          {
+            "time": 1712732787474
+          },
+          {
+            "time": 1712845566334
+          },
+          {
+            "time": 1713006243437
+          },
+          {
+            "time": 1713088608169
+          },
+          {
+            "time": 1713265445349
+          },
+          {
+            "time": 1713438271334
+          },
+          {
+            "time": 1713968744084
+          },
+          {
+            "time": 1714034517638
+          },
+          {
+            "time": 1714470110101
+          },
+          {
+            "time": 1714540188414
+          },
+          {
+            "time": 1714730935007
+          },
+          {
+            "time": 1714801121592
+          },
+          {
+            "time": 1714919074320
+          },
+          {
+            "time": 1715054099735
+          },
+          {
+            "time": 1715144139238
+          },
+          {
+            "time": 1715233712572
+          },
+          {
+            "time": 1715325326943
+          },
+          {
+            "time": 1715401841017
+          },
+          {
+            "time": 1716521769868
+          },
+          {
+            "time": 1717061919731
+          },
+          {
+            "time": 1717163144137
+          },
+          {
+            "time": 1717319697959
+          },
+          {
+            "time": 1718463026512
+          },
+          {
+            "time": 1719067093873
+          },
+          {
+            "time": 1719738862023
+          },
+          {
+            "time": 1719929871034
+          },
+          {
+            "time": 1720187934710
+          },
+          {
+            "time": 1720447859308
+          },
+          {
+            "time": 1721135207407
+          },
+          {
+            "time": 1722247818642
+          },
+          {
+            "time": 1722409484174
+          },
+          {
+            "time": 1722767881965
+          },
+          {
+            "time": 1723039544108
+          },
+          {
+            "time": 1723300622932
+          },
+          {
+            "time": 1723565001606
+          },
+          {
+            "time": 1723990324757
+          },
+          {
+            "time": 1724424264272
+          },
+          {
+            "time": 1724749683557
+          },
+          {
+            "time": 1725115047820
+          },
+          {
+            "time": 1725238404417
+          },
+          {
+            "time": 1725252025031
+          },
+          {
+            "time": 1725371447976
+          },
+          {
+            "time": 1725452022994
+          },
+          {
+            "time": 1725630080158
+          },
+          {
+            "time": 1725801274816
+          },
+          {
+            "time": 1725866612961
+          },
+          {
+            "time": 1726231306635
+          },
+          {
+            "time": 1726655307155
+          },
+          {
+            "time": 1726838620474
+          },
+          {
+            "time": 1727101798288
+          },
+          {
+            "time": 1727163109430
+          },
+          {
+            "time": 1728363747865
+          },
+          {
+            "time": 1728796335814
+          },
+          {
+            "time": 1737017309190
+          },
+          {
+            "time": 1744011266123
+          },
+          {
+            "time": 1744984752415
+          },
+          {
+            "time": 1745501904102
+          },
+          {
+            "time": 1745556793483
+          },
+          {
+            "time": 1745811958376
+          },
+          {
+            "time": 1745836606748
+          },
+          {
+            "time": 1745909886850
+          },
+          {
+            "time": 1746005432476
+          },
+          {
+            "time": 1746081781176
+          },
+          {
+            "time": 1746160680345
+          },
+          {
+            "time": 1746416566263
+          },
+          {
+            "time": 1746776888537
+          },
+          {
+            "time": 1746871396417
+          },
+          {
+            "time": 1746948563918
+          },
+          {
+            "time": 1747023475615
+          },
+          {
+            "time": 1747112802003
+          },
+          {
+            "time": 1747196956874
+          },
+          {
+            "time": 1747321511872
+          },
+          {
+            "time": 1747499930369
+          },
+          {
+            "time": 1747626249853
+          },
+          {
+            "time": 1747734774766
+          },
+          {
+            "time": 1747831446821
+          },
+          {
+            "time": 1747887744564
+          },
+          {
+            "time": 1747975313853
+          },
+          {
+            "time": 1748096809474
+          },
+          {
+            "time": 1748231748863
+          },
+          {
+            "time": 1748252988921
+          },
+          {
+            "time": 1748850080562
+          },
+          {
+            "time": 1749130963902
+          },
+          {
+            "time": 1749184007746
+          },
+          {
+            "time": 1749476371365
+          },
+          {
+            "time": 1749567402206
+          },
+          {
+            "time": 1749647810312
+          },
+          {
+            "time": 1749810057060
+          },
+          {
+            "time": 1749876292968
+          },
+          {
+            "time": 1749968883430
+          },
+          {
+            "time": 1750049575142
+          },
+          {
+            "time": 1750159671464
+          },
+          {
+            "time": 1750260235369
+          },
+          {
+            "time": 1750340593427
+          },
+          {
+            "time": 1750425852324
+          },
+          {
+            "time": 1750512387614
+          },
+          {
+            "time": 1750592793982
+          },
+          {
+            "time": 1750689479963
+          },
+          {
+            "time": 1750782154401
+          },
+          {
+            "time": 1750831504314
+          },
+          {
+            "time": 1750942782171
+          },
+          {
+            "time": 1751034206475
+          },
+          {
+            "time": 1751117649935
+          },
+          {
+            "time": 1751170871267
+          },
+          {
+            "time": 1751376995226
+          },
+          {
+            "time": 1751467950895
+          },
+          {
+            "time": 1751638477287
+          },
+          {
+            "time": 1751728143891
+          },
+          {
+            "time": 1751884693914
+          },
+          {
+            "time": 1752312662156
+          },
+          {
+            "time": 1752389678359
+          },
+          {
+            "time": 1752672158235
+          },
+          {
+            "time": 1753065816922
+          },
+          {
+            "time": 1753075486280
+          },
+          {
+            "time": 1753262474043
+          },
+          {
+            "time": 1753371303541
+          },
+          {
+            "time": 1753454104076
+          },
+          {
+            "time": 1753538709431
+          },
+          {
+            "time": 1753597107667
+          },
+          {
+            "time": 1753712149042
+          },
+          {
+            "time": 1753805166758
+          },
+          {
+            "time": 1753890461389
+          },
+          {
+            "time": 1753973618613
+          },
+          {
+            "time": 1754058067510
+          },
+          {
+            "time": 1754211649576
+          },
+          {
+            "time": 1754321767206
+          },
+          {
+            "time": 1754491131739
+          },
+          {
+            "time": 1754646704250
+          },
+          {
+            "time": 1754724865825
+          },
+          {
+            "time": 1754801244942
+          },
+          {
+            "time": 1754920560530
+          },
+          {
+            "time": 1755006761689
+          },
+          {
+            "time": 1755180256645
+          },
+          {
+            "time": 1755232498954
+          },
+          {
+            "time": 1755322591216
+          },
+          {
+            "time": 1755445739080
+          },
+          {
+            "time": 1755498852701
+          },
+          {
+            "time": 1755610246608
+          },
+          {
+            "time": 1755699672099
+          },
+          {
+            "time": 1755783682456
+          },
+          {
+            "time": 1755872599585
+          },
+          {
+            "time": 1755955984707
+          },
+          {
+            "time": 1756025657395
+          },
+          {
+            "time": 1756139377902
+          },
+          {
+            "time": 1756224142888
+          },
+          {
+            "time": 1756290429429
+          },
+          {
+            "time": 1756358882383
+          },
+          {
+            "time": 1756476474238
+          },
+          {
+            "time": 1756622380644
+          },
+          {
+            "time": 1756736018701
+          },
+          {
+            "time": 1756909399046
+          },
+          {
+            "time": 1757425567955
+          },
+          {
+            "time": 1758450150571
+          },
+          {
+            "time": 1759301348395
+          },
+          {
+            "time": 1760624945581
+          },
+          {
+            "time": 1761054829610
+          }
+        ],
+        "active": {
+          "objectives": {
+            "bedwars_daily_played": 2
+          },
+          "started": 1761139092360
+        }
+      },
+      "bedwars_daily_bed_breaker": {
+        "completions": [
+          {
+            "time": 1710570749176
+          },
+          {
+            "time": 1710649256193
+          },
+          {
+            "time": 1710766153940
+          },
+          {
+            "time": 1710852754362
+          },
+          {
+            "time": 1710943909022
+          },
+          {
+            "time": 1711689007434
+          },
+          {
+            "time": 1711956141166
+          },
+          {
+            "time": 1712395216723
+          },
+          {
+            "time": 1712731986716
+          },
+          {
+            "time": 1712838452534
+          },
+          {
+            "time": 1713005094928
+          },
+          {
+            "time": 1713075960364
+          },
+          {
+            "time": 1713263527627
+          },
+          {
+            "time": 1713437364124
+          },
+          {
+            "time": 1713967226327
+          },
+          {
+            "time": 1714032229654
+          },
+          {
+            "time": 1714453402784
+          },
+          {
+            "time": 1714537798553
+          },
+          {
+            "time": 1714729828085
+          },
+          {
+            "time": 1714797315981
+          },
+          {
+            "time": 1714909091431
+          },
+          {
+            "time": 1714976887007
+          },
+          {
+            "time": 1715141039568
+          },
+          {
+            "time": 1715239733221
+          },
+          {
+            "time": 1715322702804
+          },
+          {
+            "time": 1715435769244
+          },
+          {
+            "time": 1716523401999
+          },
+          {
+            "time": 1717059731370
+          },
+          {
+            "time": 1717163290928
+          },
+          {
+            "time": 1717313844962
+          },
+          {
+            "time": 1718463453903
+          },
+          {
+            "time": 1718518584360
+          },
+          {
+            "time": 1719066317119
+          },
+          {
+            "time": 1719737428432
+          },
+          {
+            "time": 1719925271605
+          },
+          {
+            "time": 1720185243810
+          },
+          {
+            "time": 1720365342606
+          },
+          {
+            "time": 1721134033425
+          },
+          {
+            "time": 1722139972972
+          },
+          {
+            "time": 1722333625880
+          },
+          {
+            "time": 1722435021631
+          },
+          {
+            "time": 1722763435009
+          },
+          {
+            "time": 1722954530317
+          },
+          {
+            "time": 1723342949936
+          },
+          {
+            "time": 1723642291670
+          },
+          {
+            "time": 1724162335948
+          },
+          {
+            "time": 1724422656623
+          },
+          {
+            "time": 1724766293248
+          },
+          {
+            "time": 1725110852947
+          },
+          {
+            "time": 1725238188660
+          },
+          {
+            "time": 1725256996822
+          },
+          {
+            "time": 1725370970696
+          },
+          {
+            "time": 1725451871785
+          },
+          {
+            "time": 1725544025238
+          },
+          {
+            "time": 1725630427258
+          },
+          {
+            "time": 1725799959193
+          },
+          {
+            "time": 1725866374127
+          },
+          {
+            "time": 1725978594041
+          },
+          {
+            "time": 1726063323786
+          },
+          {
+            "time": 1726231691147
+          },
+          {
+            "time": 1726399143593
+          },
+          {
+            "time": 1726579526778
+          },
+          {
+            "time": 1726667310020
+          },
+          {
+            "time": 1726836301524
+          },
+          {
+            "time": 1727100766629
+          },
+          {
+            "time": 1727278767752
+          },
+          {
+            "time": 1728363318361
+          },
+          {
+            "time": 1728722838376
+          },
+          {
+            "time": 1737020441129
+          },
+          {
+            "time": 1739706363124
+          },
+          {
+            "time": 1745501686938
+          },
+          {
+            "time": 1745567622367
+          },
+          {
+            "time": 1745653148411
+          },
+          {
+            "time": 1745894532435
+          },
+          {
+            "time": 1745909061386
+          },
+          {
+            "time": 1745994475442
+          },
+          {
+            "time": 1746073829337
+          },
+          {
+            "time": 1746160063742
+          },
+          {
+            "time": 1746416880981
+          },
+          {
+            "time": 1746776784584
+          },
+          {
+            "time": 1746872391588
+          },
+          {
+            "time": 1746955586799
+          },
+          {
+            "time": 1747023892748
+          },
+          {
+            "time": 1747110205011
+          },
+          {
+            "time": 1747197247705
+          },
+          {
+            "time": 1747282963415
+          },
+          {
+            "time": 1747500171411
+          },
+          {
+            "time": 1747624435273
+          },
+          {
+            "time": 1747730549489
+          },
+          {
+            "time": 1747823294499
+          },
+          {
+            "time": 1747887945804
+          },
+          {
+            "time": 1747974713778
+          },
+          {
+            "time": 1748066294744
+          },
+          {
+            "time": 1748174715494
+          },
+          {
+            "time": 1748237806824
+          },
+          {
+            "time": 1748849702255
+          },
+          {
+            "time": 1748954061544
+          },
+          {
+            "time": 1749128063249
+          },
+          {
+            "time": 1749204311364
+          },
+          {
+            "time": 1749475121202
+          },
+          {
+            "time": 1749566889632
+          },
+          {
+            "time": 1749647187529
+          },
+          {
+            "time": 1749732380361
+          },
+          {
+            "time": 1749808171902
+          },
+          {
+            "time": 1749874070689
+          },
+          {
+            "time": 1749964782439
+          },
+          {
+            "time": 1750048560251
+          },
+          {
+            "time": 1750158422295
+          },
+          {
+            "time": 1750250967686
+          },
+          {
+            "time": 1750340315743
+          },
+          {
+            "time": 1750426167275
+          },
+          {
+            "time": 1750510792469
+          },
+          {
+            "time": 1750592385375
+          },
+          {
+            "time": 1750689887226
+          },
+          {
+            "time": 1750779167672
+          },
+          {
+            "time": 1750826138331
+          },
+          {
+            "time": 1750942740826
+          },
+          {
+            "time": 1751035594353
+          },
+          {
+            "time": 1751116851311
+          },
+          {
+            "time": 1751170448486
+          },
+          {
+            "time": 1751376451969
+          },
+          {
+            "time": 1751467295664
+          },
+          {
+            "time": 1751641393622
+          },
+          {
+            "time": 1751720103475
+          },
+          {
+            "time": 1751869165874
+          },
+          {
+            "time": 1752162983463
+          },
+          {
+            "time": 1752312610258
+          },
+          {
+            "time": 1752390277815
+          },
+          {
+            "time": 1752595025249
+          },
+          {
+            "time": 1752674390333
+          },
+          {
+            "time": 1753012873829
+          },
+          {
+            "time": 1753074256617
+          },
+          {
+            "time": 1753258816298
+          },
+          {
+            "time": 1753370952545
+          },
+          {
+            "time": 1753535821951
+          },
+          {
+            "time": 1753598772262
+          },
+          {
+            "time": 1753712229226
+          },
+          {
+            "time": 1753803917065
+          },
+          {
+            "time": 1753884030958
+          },
+          {
+            "time": 1753973713270
+          },
+          {
+            "time": 1754055307854
+          },
+          {
+            "time": 1754210171877
+          },
+          {
+            "time": 1754490681276
+          },
+          {
+            "time": 1754646250531
+          },
+          {
+            "time": 1754726939212
+          },
+          {
+            "time": 1754800423793
+          },
+          {
+            "time": 1754920144940
+          },
+          {
+            "time": 1755179549496
+          },
+          {
+            "time": 1755230823901
+          },
+          {
+            "time": 1755322575538
+          },
+          {
+            "time": 1755407191454
+          },
+          {
+            "time": 1755492446816
+          },
+          {
+            "time": 1755609365970
+          },
+          {
+            "time": 1755699343387
+          },
+          {
+            "time": 1755785862415
+          },
+          {
+            "time": 1755872198033
+          },
+          {
+            "time": 1755956709731
+          },
+          {
+            "time": 1756024852407
+          },
+          {
+            "time": 1756139558742
+          },
+          {
+            "time": 1756224123128
+          },
+          {
+            "time": 1756289506140
+          },
+          {
+            "time": 1756358206930
+          },
+          {
+            "time": 1756474114805
+          },
+          {
+            "time": 1756619992353
+          },
+          {
+            "time": 1756717360438
+          },
+          {
+            "time": 1756909295003
+          },
+          {
+            "time": 1757425830945
+          },
+          {
+            "time": 1758449832459
+          },
+          {
+            "time": 1759301309874
+          },
+          {
+            "time": 1760622978315
+          },
+          {
+            "time": 1761052810530
+          },
+          {
+            "time": 1766904406125
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1767254357484
+        }
+      },
+      "bedwars_daily_final_killer": {
+        "completions": [
+          {
+            "time": 1710576006738
+          },
+          {
+            "time": 1710672962297
+          },
+          {
+            "time": 1710851186663
+          },
+          {
+            "time": 1710946993234
+          },
+          {
+            "time": 1711696337869
+          },
+          {
+            "time": 1711964039189
+          },
+          {
+            "time": 1712488907574
+          },
+          {
+            "time": 1712733015080
+          },
+          {
+            "time": 1712847053520
+          },
+          {
+            "time": 1713019361797
+          },
+          {
+            "time": 1713158635398
+          },
+          {
+            "time": 1713328800128
+          },
+          {
+            "time": 1713769977223
+          },
+          {
+            "time": 1714031757171
+          },
+          {
+            "time": 1714484405240
+          },
+          {
+            "time": 1714540011490
+          },
+          {
+            "time": 1714796346338
+          },
+          {
+            "time": 1714917831024
+          },
+          {
+            "time": 1715053709302
+          },
+          {
+            "time": 1715145533873
+          },
+          {
+            "time": 1715254918548
+          },
+          {
+            "time": 1715339241596
+          },
+          {
+            "time": 1715507622898
+          },
+          {
+            "time": 1716555171790
+          },
+          {
+            "time": 1717144665331
+          },
+          {
+            "time": 1717320896406
+          },
+          {
+            "time": 1718518465311
+          },
+          {
+            "time": 1719239731466
+          },
+          {
+            "time": 1719739787280
+          },
+          {
+            "time": 1720012156616
+          },
+          {
+            "time": 1720188399912
+          },
+          {
+            "time": 1720447635509
+          },
+          {
+            "time": 1721145487184
+          },
+          {
+            "time": 1722333903089
+          },
+          {
+            "time": 1722673264164
+          },
+          {
+            "time": 1722866886219
+          },
+          {
+            "time": 1723211987571
+          },
+          {
+            "time": 1723352149375
+          },
+          {
+            "time": 1723696283738
+          },
+          {
+            "time": 1724165522153
+          },
+          {
+            "time": 1724502362736
+          },
+          {
+            "time": 1724753357944
+          },
+          {
+            "time": 1725205697786
+          },
+          {
+            "time": 1725258274591
+          },
+          {
+            "time": 1725373792982
+          },
+          {
+            "time": 1725453328276
+          },
+          {
+            "time": 1725630699009
+          },
+          {
+            "time": 1725804180585
+          },
+          {
+            "time": 1725869936270
+          },
+          {
+            "time": 1726231149545
+          },
+          {
+            "time": 1726581511971
+          },
+          {
+            "time": 1726836364496
+          },
+          {
+            "time": 1727106742236
+          },
+          {
+            "time": 1728394777479
+          },
+          {
+            "time": 1736488615136
+          },
+          {
+            "time": 1739707089837
+          },
+          {
+            "time": 1745556751902
+          },
+          {
+            "time": 1745836185951
+          },
+          {
+            "time": 1745919173308
+          },
+          {
+            "time": 1746081047769
+          },
+          {
+            "time": 1746183189130
+          },
+          {
+            "time": 1746780867145
+          },
+          {
+            "time": 1746948563881
+          },
+          {
+            "time": 1747035120190
+          },
+          {
+            "time": 1747118600823
+          },
+          {
+            "time": 1747198820203
+          },
+          {
+            "time": 1747285402472
+          },
+          {
+            "time": 1747625394101
+          },
+          {
+            "time": 1747736450432
+          },
+          {
+            "time": 1747831268931
+          },
+          {
+            "time": 1747975313869
+          },
+          {
+            "time": 1748097925431
+          },
+          {
+            "time": 1748238064535
+          },
+          {
+            "time": 1748856529052
+          },
+          {
+            "time": 1749133159801
+          },
+          {
+            "time": 1749451025427
+          },
+          {
+            "time": 1749647378567
+          },
+          {
+            "time": 1749824232985
+          },
+          {
+            "time": 1749878357856
+          },
+          {
+            "time": 1750003608168
+          },
+          {
+            "time": 1750051279181
+          },
+          {
+            "time": 1750206128959
+          },
+          {
+            "time": 1750260411847
+          },
+          {
+            "time": 1750351596896
+          },
+          {
+            "time": 1750428037225
+          },
+          {
+            "time": 1750557074151
+          },
+          {
+            "time": 1750594613422
+          },
+          {
+            "time": 1750781944632
+          },
+          {
+            "time": 1750943212551
+          },
+          {
+            "time": 1751115279697
+          },
+          {
+            "time": 1751213659838
+          },
+          {
+            "time": 1751384913065
+          },
+          {
+            "time": 1751719401176
+          },
+          {
+            "time": 1751884291605
+          },
+          {
+            "time": 1752314560700
+          },
+          {
+            "time": 1752397737720
+          },
+          {
+            "time": 1752674888708
+          },
+          {
+            "time": 1753071781645
+          },
+          {
+            "time": 1753263390254
+          },
+          {
+            "time": 1753454814520
+          },
+          {
+            "time": 1753539299862
+          },
+          {
+            "time": 1753600718508
+          },
+          {
+            "time": 1753713711764
+          },
+          {
+            "time": 1753884042795
+          },
+          {
+            "time": 1754056469476
+          },
+          {
+            "time": 1754217290775
+          },
+          {
+            "time": 1754644826204
+          },
+          {
+            "time": 1754727062015
+          },
+          {
+            "time": 1754819781067
+          },
+          {
+            "time": 1754922678012
+          },
+          {
+            "time": 1755181088017
+          },
+          {
+            "time": 1755264387737
+          },
+          {
+            "time": 1755354596505
+          },
+          {
+            "time": 1755489053930
+          },
+          {
+            "time": 1755498734120
+          },
+          {
+            "time": 1755611287326
+          },
+          {
+            "time": 1755783332798
+          },
+          {
+            "time": 1755873496870
+          },
+          {
+            "time": 1755958791722
+          },
+          {
+            "time": 1756026842118
+          },
+          {
+            "time": 1756224296897
+          },
+          {
+            "time": 1756290703757
+          },
+          {
+            "time": 1756362040911
+          },
+          {
+            "time": 1756622501527
+          },
+          {
+            "time": 1756908292221
+          },
+          {
+            "time": 1757427682680
+          },
+          {
+            "time": 1760622624032
+          },
+          {
+            "time": 1766905613114
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1767254357486
+        }
+      },
+      "bedwars_weekly_bed_elims": {
+        "completions": [
+          {
+            "time": 1710581872701
+          },
+          {
+            "time": 1711702878164
+          },
+          {
+            "time": 1712417081475
+          },
+          {
+            "time": 1713158794384
+          },
+          {
+            "time": 1714039898397
+          },
+          {
+            "time": 1714537669665
+          },
+          {
+            "time": 1714909091437
+          },
+          {
+            "time": 1715574796181
+          },
+          {
+            "time": 1717163201420
+          },
+          {
+            "time": 1718604834330
+          },
+          {
+            "time": 1720105186995
+          },
+          {
+            "time": 1720274937720
+          },
+          {
+            "time": 1721193558145
+          },
+          {
+            "time": 1721915621554
+          },
+          {
+            "time": 1722691547126
+          },
+          {
+            "time": 1724553209708
+          },
+          {
+            "time": 1725257181006
+          },
+          {
+            "time": 1725804258052
+          },
+          {
+            "time": 1726667918895
+          },
+          {
+            "time": 1728363264003
+          },
+          {
+            "time": 1739706719168
+          },
+          {
+            "time": 1745652196876
+          },
+          {
+            "time": 1746776784587
+          },
+          {
+            "time": 1747750301449
+          },
+          {
+            "time": 1748097885084
+          },
+          {
+            "time": 1748874485730
+          },
+          {
+            "time": 1749485975630
+          },
+          {
+            "time": 1749880850928
+          },
+          {
+            "time": 1750593444275
+          },
+          {
+            "time": 1751214912779
+          },
+          {
+            "time": 1751895517845
+          },
+          {
+            "time": 1752338671168
+          },
+          {
+            "time": 1753262651891
+          },
+          {
+            "time": 1753607273027
+          },
+          {
+            "time": 1754221860437
+          },
+          {
+            "time": 1754824298199
+          },
+          {
+            "time": 1755406514081
+          },
+          {
+            "time": 1756024852412
+          },
+          {
+            "time": 1757424705376
+          }
+        ],
+        "active": {
+          "objectives": {
+            "bedwars_bed_elims": 22
+          },
+          "started": 1757657735533
+        }
+      },
+      "bedwars_weekly_final_killer": {
+        "completions": [
+          {
+            "time": 1710765661889
+          },
+          {
+            "time": 1712139230765
+          },
+          {
+            "time": 1712915446968
+          },
+          {
+            "time": 1714538530608
+          },
+          {
+            "time": 1715254430416
+          },
+          {
+            "time": 1717334368211
+          },
+          {
+            "time": 1719411908915
+          },
+          {
+            "time": 1720617592107
+          },
+          {
+            "time": 1722139820540
+          },
+          {
+            "time": 1723874643428
+          },
+          {
+            "time": 1724941644982
+          },
+          {
+            "time": 1725371653230
+          },
+          {
+            "time": 1727101165654
+          },
+          {
+            "time": 1745922177778
+          },
+          {
+            "time": 1747115702821
+          },
+          {
+            "time": 1748177918677
+          },
+          {
+            "time": 1749881510646
+          },
+          {
+            "time": 1751376378254
+          },
+          {
+            "time": 1752674891358
+          },
+          {
+            "time": 1753713382284
+          },
+          {
+            "time": 1754923001671
+          },
+          {
+            "time": 1755873062709
+          }
+        ],
+        "active": {
+          "objectives": {
+            "bedwars_weekly_final_killer": 95
+          },
+          "started": 1756472876323
+        }
+      },
+      "duels_player": {
+        "completions": [
+          {
+            "time": 1712415578619
+          },
+          {
+            "time": 1717902938425
+          },
+          {
+            "time": 1725279933816
+          },
+          {
+            "time": 1725450796148
+          },
+          {
+            "time": 1725540941097
+          },
+          {
+            "time": 1725620842775
+          },
+          {
+            "time": 1725788641509
+          },
+          {
+            "time": 1725979396831
+          },
+          {
+            "time": 1726150299123
+          },
+          {
+            "time": 1726222452447
+          },
+          {
+            "time": 1726291759492
+          },
+          {
+            "time": 1726396216688
+          },
+          {
+            "time": 1726474150647
+          },
+          {
+            "time": 1726580044203
+          },
+          {
+            "time": 1726649712651
+          },
+          {
+            "time": 1726745019147
+          },
+          {
+            "time": 1726809586040
+          },
+          {
+            "time": 1726907739119
+          },
+          {
+            "time": 1727089287806
+          },
+          {
+            "time": 1727164173049
+          },
+          {
+            "time": 1728365609149
+          },
+          {
+            "time": 1737090215711
+          },
+          {
+            "time": 1744953590495
+          },
+          {
+            "time": 1745744281223
+          },
+          {
+            "time": 1748241294832
+          },
+          {
+            "time": 1749533679768
+          },
+          {
+            "time": 1749873135606
+          },
+          {
+            "time": 1750120213527
+          },
+          {
+            "time": 1750152767552
+          },
+          {
+            "time": 1750347353419
+          },
+          {
+            "time": 1751168503195
+          },
+          {
+            "time": 1751502227452
+          },
+          {
+            "time": 1752364375667
+          },
+          {
+            "time": 1752499806022
+          },
+          {
+            "time": 1753039228079
+          },
+          {
+            "time": 1753710759577
+          },
+          {
+            "time": 1754753987746
+          },
+          {
+            "time": 1755240820511
+          },
+          {
+            "time": 1755387027182
+          },
+          {
+            "time": 1755498072508
+          },
+          {
+            "time": 1755698022122
+          },
+          {
+            "time": 1756480861989
+          },
+          {
+            "time": 1764562805960
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1766903557203
+        }
+      },
+      "duels_killer": {
+        "completions": [
+          {
+            "time": 1712491825924
+          },
+          {
+            "time": 1717902938430
+          },
+          {
+            "time": 1725109866063
+          },
+          {
+            "time": 1725279933824
+          },
+          {
+            "time": 1725447002904
+          },
+          {
+            "time": 1725534177753
+          },
+          {
+            "time": 1725620319363
+          },
+          {
+            "time": 1725715486900
+          },
+          {
+            "time": 1725788946020
+          },
+          {
+            "time": 1725969227709
+          },
+          {
+            "time": 1726064590240
+          },
+          {
+            "time": 1726140950246
+          },
+          {
+            "time": 1726216511797
+          },
+          {
+            "time": 1726287899551
+          },
+          {
+            "time": 1726400377230
+          },
+          {
+            "time": 1726462764787
+          },
+          {
+            "time": 1726580260611
+          },
+          {
+            "time": 1726646989684
+          },
+          {
+            "time": 1726731891772
+          },
+          {
+            "time": 1726808768945
+          },
+          {
+            "time": 1726906639228
+          },
+          {
+            "time": 1727078314992
+          },
+          {
+            "time": 1727154605140
+          },
+          {
+            "time": 1727280084375
+          },
+          {
+            "time": 1728361870170
+          },
+          {
+            "time": 1728726391554
+          },
+          {
+            "time": 1737090215719
+          },
+          {
+            "time": 1743067901652
+          },
+          {
+            "time": 1744706049401
+          },
+          {
+            "time": 1745578057946
+          },
+          {
+            "time": 1745927483621
+          },
+          {
+            "time": 1747124820364
+          },
+          {
+            "time": 1748182321622
+          },
+          {
+            "time": 1748240868889
+          },
+          {
+            "time": 1749031757287
+          },
+          {
+            "time": 1749115720688
+          },
+          {
+            "time": 1749452357755
+          },
+          {
+            "time": 1749536395395
+          },
+          {
+            "time": 1749728087030
+          },
+          {
+            "time": 1749971407974
+          },
+          {
+            "time": 1750417592673
+          },
+          {
+            "time": 1750527801054
+          },
+          {
+            "time": 1751472677878
+          },
+          {
+            "time": 1751543503600
+          },
+          {
+            "time": 1752418167565
+          },
+          {
+            "time": 1753039170500
+          },
+          {
+            "time": 1753100208363
+          },
+          {
+            "time": 1754718103235
+          },
+          {
+            "time": 1755241089332
+          },
+          {
+            "time": 1755498224163
+          },
+          {
+            "time": 1755698312458
+          }
+        ],
+        "active": {
+          "objectives": {
+            "kill": 3
+          },
+          "started": 1755787131101
+        }
+      },
+      "duels_winner": {
+        "completions": [
+          {
+            "time": 1712415513195
+          },
+          {
+            "time": 1717902437339
+          },
+          {
+            "time": 1725109866118
+          },
+          {
+            "time": 1725262736441
+          },
+          {
+            "time": 1725375392774
+          },
+          {
+            "time": 1725446930889
+          },
+          {
+            "time": 1725534177746
+          },
+          {
+            "time": 1725620060385
+          },
+          {
+            "time": 1725715780683
+          },
+          {
+            "time": 1725788641490
+          },
+          {
+            "time": 1725967211868
+          },
+          {
+            "time": 1726064928802
+          },
+          {
+            "time": 1726140863536
+          },
+          {
+            "time": 1726221383652
+          },
+          {
+            "time": 1726287899496
+          },
+          {
+            "time": 1726394224670
+          },
+          {
+            "time": 1726463032319
+          },
+          {
+            "time": 1726579939270
+          },
+          {
+            "time": 1726647273230
+          },
+          {
+            "time": 1726731891738
+          },
+          {
+            "time": 1726808768959
+          },
+          {
+            "time": 1726905472289
+          },
+          {
+            "time": 1727078314943
+          },
+          {
+            "time": 1727154605130
+          },
+          {
+            "time": 1727280084350
+          },
+          {
+            "time": 1728361870139
+          },
+          {
+            "time": 1728724084134
+          },
+          {
+            "time": 1737090215677
+          },
+          {
+            "time": 1743067901668
+          },
+          {
+            "time": 1744706049374
+          },
+          {
+            "time": 1744953615700
+          },
+          {
+            "time": 1745578057984
+          },
+          {
+            "time": 1747125082864
+          },
+          {
+            "time": 1748182321610
+          },
+          {
+            "time": 1748240868880
+          },
+          {
+            "time": 1749115847739
+          },
+          {
+            "time": 1749452140884
+          },
+          {
+            "time": 1749533646641
+          },
+          {
+            "time": 1749730551702
+          },
+          {
+            "time": 1749873135610
+          },
+          {
+            "time": 1749971709553
+          },
+          {
+            "time": 1750120156670
+          },
+          {
+            "time": 1750152750563
+          },
+          {
+            "time": 1750347271730
+          },
+          {
+            "time": 1750417592671
+          },
+          {
+            "time": 1750527624073
+          },
+          {
+            "time": 1751168503203
+          },
+          {
+            "time": 1751472677867
+          },
+          {
+            "time": 1751543302571
+          },
+          {
+            "time": 1752364409975
+          },
+          {
+            "time": 1752418128518
+          },
+          {
+            "time": 1752501420619
+          },
+          {
+            "time": 1753034230979
+          },
+          {
+            "time": 1753100208347
+          },
+          {
+            "time": 1753548367852
+          },
+          {
+            "time": 1753710759589
+          },
+          {
+            "time": 1754754005170
+          },
+          {
+            "time": 1755240786695
+          },
+          {
+            "time": 1755497960508
+          },
+          {
+            "time": 1755697931735
+          },
+          {
+            "time": 1756140127235
+          },
+          {
+            "time": 1764562805968
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1766903557204
+        }
+      },
+      "duels_weekly_kills": {
+        "completions": [
+          {
+            "time": 1715318679421
+          },
+          {
+            "time": 1718117678835
+          },
+          {
+            "time": 1725620060421
+          },
+          {
+            "time": 1726239190556
+          },
+          {
+            "time": 1726907085417
+          },
+          {
+            "time": 1749096240472
+          },
+          {
+            "time": 1755698022130
+          }
+        ],
+        "active": {
+          "objectives": {
+            "kill": 3
+          },
+          "started": 1756046098925
+        }
+      },
+      "duels_weekly_wins": {
+        "completions": [
+          {
+            "time": 1714658778948
+          },
+          {
+            "time": 1718615973480
+          },
+          {
+            "time": 1725979783291
+          },
+          {
+            "time": 1726671361820
+          },
+          {
+            "time": 1737090215688
+          },
+          {
+            "time": 1753710929850
+          }
+        ],
+        "active": {
+          "objectives": {
+            "win": 31
+          },
+          "started": 1754216688272
+        }
+      },
+      "bedwars_weekly_challenges_win": {
+        "completions": [
+          {
+            "time": 1720090897299
+          },
+          {
+            "time": 1720191590787
+          },
+          {
+            "time": 1745918408534
+          }
+        ],
+        "active": {
+          "objectives": {
+            "bedwars_weekly_challenge_wins": 3
+          },
+          "started": 1746159307781
+        }
+      },
+      "bedwars_weekly_dream_win": {
+        "completions": [
+          {
+            "time": 1720915661535
+          }
+        ],
+        "active": {
+          "objectives": {
+            "bedwars_dream_wins": 6
+          },
+          "started": 1721486923439
+        }
+      },
+      "build_battle_player": {
+        "completions": [
+          {
+            "time": 1751169176515
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1756391502528
+        }
+      },
+      "build_battle_winner": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725115109713
+        }
+      },
+      "build_battle_weekly": {
+        "active": {
+          "objectives": {
+            "play": 3
+          },
+          "started": 1725115109717
+        }
+      },
+      "arcade_gamer": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725115769592
+        }
+      },
+      "arcade_winner": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725115769604
+        }
+      },
+      "arcade_specialist": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725115769621
+        }
+      },
+      "skywars_solo_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725262851320
+        }
+      },
+      "skywars_solo_kills": {
+        "active": {
+          "objectives": {
+            "skywars_solo_kills": 4
+          },
+          "started": 1725262851322
+        }
+      },
+      "skywars_team_win": {
+        "completions": [
+          {
+            "time": 1746712552830
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746776302283
+        }
+      },
+      "skywars_team_kills": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725262851331
+        }
+      },
+      "skywars_arcade_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725262851334
+        }
+      },
+      "skywars_corrupt_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725262851340
+        }
+      },
+      "skywars_weekly_kills": {
+        "active": {
+          "objectives": {
+            "skywars_weekly_kills": 10
+          },
+          "started": 1725262851345
+        }
+      },
+      "skywars_weekly_arcade_win_all": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725262851350
+        }
+      },
+      "skywars_daily_tokens": {
+        "active": {
+          "objectives": {
+            "skywars_daily_tokens_wins": 4
+          },
+          "started": 1725262851356
+        }
+      },
+      "skywars_weekly_free_loot_chest": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1725262851364
+        }
+      },
+      "wool_wars_daily_play": {
+        "completions": [
+          {
+            "time": 1726481920802
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746782999731
+        }
+      },
+      "wool_wars_daily_wins": {
+        "completions": [
+          {
+            "time": 1726482369233
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746782999744
+        }
+      },
+      "wool_wars_daily_kills": {
+        "active": {
+          "objectives": {
+            "kill": 18
+          },
+          "started": 1726481779018
+        }
+      },
+      "wool_weekly_play": {
+        "active": {
+          "objectives": {
+            "kill": 18,
+            "win": 14
+          },
+          "started": 1726481779044
+        }
+      },
+      "wool_wars_weekly_shears": {
+        "active": {
+          "objectives": {
+            "wool_weekly_shears": 1
+          },
+          "started": 1726481779068
+        }
+      },
+      "pit_daily_kills": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726482371926
+        }
+      },
+      "pit_daily_contract": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726482371928
+        }
+      },
+      "pit_weekly_gold": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726482371929
+        }
+      },
+      "vampirez_daily_play": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670278447
+        }
+      },
+      "vampirez_daily_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670278452
+        }
+      },
+      "vampirez_daily_human_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670278458
+        }
+      },
+      "vampirez_daily_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670278462
+        }
+      },
+      "vampirez_weekly_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670278468
+        }
+      },
+      "vampirez_weekly_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670278474
+        }
+      },
+      "vampirez_weekly_human_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670278481
+        }
+      },
+      "quake_daily_play": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326896
+        }
+      },
+      "paintball_killer": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326904
+        }
+      },
+      "paintball_expert": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326908
+        }
+      },
+      "walls_daily_play": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326912
+        }
+      },
+      "walls_daily_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326915
+        }
+      },
+      "arena_daily_kills": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326919
+        }
+      },
+      "walls_daily_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326923
+        }
+      },
+      "walls_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326929
+        }
+      },
+      "gingerbread_bling_bling": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326933
+        }
+      },
+      "gingerbread_maps": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326937
+        }
+      },
+      "gingerbread_racer": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326940
+        }
+      },
+      "gingerbread_mastery": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326943
+        }
+      },
+      "arena_daily_play": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326948
+        }
+      },
+      "arena_daily_wins": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326952
+        }
+      },
+      "arena_weekly_play": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326955
+        }
+      },
+      "quake_daily_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326961
+        }
+      },
+      "quake_daily_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326967
+        }
+      },
+      "quake_weekly_play": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326969
+        }
+      },
+      "paintballer": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1726670326974
+        }
+      },
+      "bedwars_daily_nightmares": {
+        "completions": [
+          {
+            "time": 1728364670379
+          },
+          {
+            "time": 1728723493597
+          },
+          {
+            "time": 1760623318731
+          }
+        ]
+      },
+      "bedwars_weekly_pumpkinator": {
+        "completions": [
+          {
+            "time": 1728725226235
+          }
+        ]
+      },
+      "skywars_daily_mini_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1744900093751
+        }
+      },
+      "skywars_daily_mega_kills": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1744900093756
+        }
+      },
+      "skywars_weekly_wins": {
+        "active": {
+          "objectives": {
+            "skywars_weekly_wins": 1
+          },
+          "started": 1744900093769
+        }
+      },
+      "skywars_monthly_earn_opals": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1744900093860
+        }
+      },
+      "mm_daily_win": {
+        "completions": [
+          {
+            "time": 1753037584994
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1753551153825
+        }
+      },
+      "mm_daily_power_play": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1745898004395
+        }
+      },
+      "mm_daily_target_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1745898004398
+        }
+      },
+      "mm_daily_infector": {
+        "active": {
+          "objectives": {
+            "mm_infection_kills": 2
+          },
+          "started": 1745898004402
+        }
+      },
+      "mm_weekly_murderer_kills": {
+        "active": {
+          "objectives": {
+            "mm_weekly_kills_as_murderer": 5
+          },
+          "started": 1745898004405
+        }
+      },
+      "mm_weekly_wins": {
+        "active": {
+          "objectives": {
+            "mm_weekly_win": 6
+          },
+          "started": 1745898004408
+        }
+      },
+      "cvc_play_daily_gungame": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746786227952
+        }
+      },
+      "cvc_win_daily_normal": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746786227973
+        }
+      },
+      "cvc_kill_daily_normal": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746786227980
+        }
+      },
+      "cvc_kill": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746786227985
+        }
+      },
+      "cvc_win_daily_deathmatch": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746786227989
+        }
+      },
+      "cvc_kill_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1746786227994
+        }
+      },
+      "uhc_team": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749103856353
+        }
+      },
+      "uhc_solo": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749103856354
+        }
+      },
+      "uhc_dm": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749103856355
+        }
+      },
+      "uhc_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749103856356
+        }
+      },
+      "solo_brawler": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749103856357
+        }
+      },
+      "team_brawler": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749103856358
+        }
+      },
+      "uhc_madness": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749103856360
+        }
+      },
+      "tnt_daily_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825327
+        }
+      },
+      "tnt_tnttag_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825355
+        }
+      },
+      "tnt_weekly_play": {
+        "active": {
+          "objectives": {
+            "tnt_weekly_play": 1
+          },
+          "started": 1749900825394
+        }
+      },
+      "tnt_tntrun_daily": {
+        "active": {
+          "objectives": {
+            "tnt_tntrun_daily": 277
+          },
+          "started": 1749900825420
+        }
+      },
+      "tnt_tntrun_weekly": {
+        "active": {
+          "objectives": {
+            "tnt_tntrun_weekly": 277
+          },
+          "started": 1749900825433
+        }
+      },
+      "tnt_pvprun_daily": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825445
+        }
+      },
+      "tnt_pvprun_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825458
+        }
+      },
+      "tnt_bowspleef_daily": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825471
+        }
+      },
+      "tnt_bowspleef_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825482
+        }
+      },
+      "tnt_tnttag_daily": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825494
+        }
+      },
+      "tnt_wizards_daily": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825508
+        }
+      },
+      "tnt_wizards_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1749900825521
+        }
+      },
+      "blitz_game_of_the_day": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1750510145725
+        }
+      },
+      "blitz_win": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1750510145729
+        }
+      },
+      "blitz_loot_chest_daily": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1750510145733
+        }
+      },
+      "blitz_kills": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1750510145734
+        }
+      },
+      "blitz_weekly_master": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1750510145736
+        }
+      },
+      "blitz_loot_chest_weekly": {
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1750510145738
+        }
+      },
+      "bedwars_daily_gifts": {
+        "completions": [
+          {
+            "time": 1766904417225
+          }
+        ],
+        "active": {
+          "objectives": {
+
+          },
+          "started": 1767254357487
+        }
+      }
+    },
+    "monthlycrates": {
+      "3-2024": {
+        "NORMAL": true
+      },
+      "5-2024": {
+        "NORMAL": true,
+        "VIP": true
+      },
+      "9-2024": {
+        "MVP_PLUS": true,
+        "MVP": true,
+        "VIP_PLUS": true,
+        "VIP": true,
+        "NORMAL": true
+      },
+      "6-2025": {
+        "MVP_PLUS": true,
+        "MVP": true,
+        "VIP_PLUS": true,
+        "VIP": true,
+        "NORMAL": true
+      }
+    },
+    "lastAdsenseGenerateTime": 1727155163196,
+    "petConsumables": {
+      "APPLE": 42,
+      "BAKED_POTATO": 41,
+      "CAKE": 43,
+      "CARROT_ITEM": 41,
+      "COOKIE": 57,
+      "GOLD_RECORD": 141,
+      "HAY_BLOCK": 39,
+      "LAVA_BUCKET": 226,
+      "MILK_BUCKET": 268,
+      "PORK": 54,
+      "PUMPKIN_PIE": 51,
+      "ROTTEN_FLESH": 40,
+      "SLIME_BALL": 135,
+      "STICK": 117,
+      "WATER_BUCKET": 249,
+      "WHEAT": 39,
+      "WOOD_SWORD": 119,
+      "BREAD": 36,
+      "COOKED_BEEF": 46,
+      "FEATHER": 122,
+      "LEASH": 111,
+      "RAW_FISH": 32,
+      "BONE": 40,
+      "MAGMA_CREAM": 44,
+      "RED_ROSE": 46,
+      "MUSHROOM_SOUP": 49,
+      "MELON": 45
+    },
+    "lastClaimedReward": 1727155163191,
+    "rewardHighScore": 7,
+    "rewardScore": 7,
+    "rewardStreak": 7,
+    "totalDailyRewards": 10,
+    "totalRewards": 10,
+    "channel": "ALL",
+    "achievementRewardsNew": {
+      "for_points_200": 1710647824327,
+      "for_points_300": 1710736503730,
+      "for_points_400": 1710858777646,
+      "for_points_500": 1711895368368,
+      "for_points_600": 1712385149718,
+      "for_points_700": 1712645712697,
+      "for_points_800": 1712991894585,
+      "for_points_900": 1713261508027,
+      "for_points_1000": 1714200145775,
+      "for_points_1100": 1714731542816,
+      "for_points_1200": 1717312943492,
+      "for_points_1300": 1717770114029,
+      "for_points_1400": 1718532754320,
+      "for_points_1500": 1719410647831,
+      "for_points_1600": 1719738900433,
+      "for_points_1700": 1723476614374,
+      "for_points_1800": 1725777023866,
+      "for_points_1900": 1728395949087,
+      "for_points_2000": 1749464300851,
+      "for_points_2100": 1753038173956,
+      "for_points_2200": 1758450677666,
+      "for_points_2300": 1767265660353
+    },
+    "karma": 6173465,
+    "socialMedia": {
+      "links": {
+        "DISCORD": "va80_"
+      },
+      "prompt": true
+    },
+    "tourney": {
+      "first_join_lobby": 1710833360938,
+      "sw_normal_doubles_0": {
+        "games_played": 44,
+        "playtime": 52,
+        "tributes_earned": 100,
+        "first_win": 1719060112787
+      },
+      "total_tributes": 0,
+      "shop_sort": "oldest"
+    },
+    "disabledProjectileTrails": false,
+    "vanityMeta": {
+      "packages": [
+        "gadget_grappling_hook",
+        "rankcolor_gold",
+        "rankcolor_green",
+        "rankcolor_yellow",
+        "rankcolor_light_purple",
+        "gadget_tournament_banner",
+        "gadget_tournament_banner_bedwars4s_0",
+        "rankcolor_white",
+        "hat_vintage",
+        "rankcolor_blue",
+        "rankcolor_dark_green",
+        "hat_festive_zombie"
+      ]
+    },
+    "newPackageRank": "MVP_PLUS",
+    "housingMeta": {
+      "given_cookies_105265": [
+        "4826fb69-880b-4c46-993c-8052b8e326b7"
+      ],
+      "given_cookies_105266": [
+        "4826fb69-880b-4c46-993c-8052b8e326b7"
+      ],
+      "given_cookies_105273": [
+        "4826fb69-880b-4c46-993c-8052b8e326b7"
+      ],
+      "packages": [
+        "specialoccasion_reward_card_skull_jewelery_box"
+      ],
+      "given_cookies_105321": [
+        "f9b20eda-d0de-453d-bef3-65415d5c8bd4"
+      ]
+    },
+    "eugene": {
+      "dailyTwoKExp": 1751283120836
+    },
+    "questSettings": {
+      "autoActivate": true
+    },
+    "rankPlusColor": "DARK_GREEN",
+    "currentClickEffect": "SHOWOFF",
+    "monthlyPackageRank": "NONE",
+    "mostRecentMonthlyPackageRank": "SUPERSTAR",
+    "currentGadget": "TOURNAMENT_BANNER",
+    "achievementSync": {
+      "quake_tiered": 1
+    },
+    "parkourCheckpointBests": {
+      "mainLobby2022": {
+        "0": 18506,
+        "1": 11251,
+        "2": 23603,
+        "3": 18100,
+        "4": 22863
+      },
+      "Housing": {
+        "0": 7951
+      }
+    },
+    "parkourCompletions": {
+      "mainLobby2022": [
+        {
+          "timeStart": 1747122897355,
+          "timeTook": 94323
+        }
+      ]
+    },
+    "mostRecentGameType": "BEDWARS"
+  }
+}

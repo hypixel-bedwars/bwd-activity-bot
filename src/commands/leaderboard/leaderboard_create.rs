@@ -46,6 +46,15 @@ pub async fn leaderboard_create(
                 .delete_message(&ctx.http(), serenity::MessageId::new(msg_id))
                 .await;
         }
+        // Clean up old milestone message if present.
+        if existing.milestone_message_id != 0 {
+            let _ = old_channel
+                .delete_message(
+                    &ctx.http(),
+                    serenity::MessageId::new(existing.milestone_message_id as u64),
+                )
+                .await;
+        }
     }
 
     let persistent_players = ctx.data().config.persistent_leaderboard_players;
@@ -80,6 +89,21 @@ pub async fn leaderboard_create(
         message_ids.push(msg.id.get());
     }
 
+    // Send the standalone milestone card.
+    let milestone_png = helpers::generate_milestone_card(&ctx.data().db, guild_id.get() as i64)
+        .await
+        .unwrap_or_default();
+
+    let milestone_message_id = if !milestone_png.is_empty() {
+        let attachment = CreateAttachment::bytes(milestone_png, "milestones.png");
+        let milestone_msg = channel_id
+            .send_message(&ctx.http(), CreateMessage::new().add_file(attachment))
+            .await?;
+        milestone_msg.id.get() as i64
+    } else {
+        0
+    };
+
     let unix_time = time::OffsetDateTime::now_utc().unix_timestamp();
 
     let status_msg = channel_id
@@ -104,6 +128,7 @@ pub async fn leaderboard_create(
         channel_id.get() as i64,
         &message_ids_json,
         status_message_id as i64,
+        milestone_message_id,
         &now,
         &now,
     )

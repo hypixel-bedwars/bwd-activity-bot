@@ -1,12 +1,15 @@
 /// Shared leaderboard generation logic.
 ///
-/// Provides a helper that queries the database, fetches avatars, and renders
-/// a leaderboard page image. Used by both the `/leaderboard` user command and
-/// the persistent leaderboard background updater.
+/// Provides helpers that query the database, fetch avatars, and render
+/// leaderboard page images and the standalone milestone card.
+/// Used by both the `/leaderboard` user command and the persistent
+/// leaderboard background updater.
 use sqlx::PgPool;
 
 use crate::database::queries;
-use crate::leaderboard_card::{self, LeaderboardCardParams, LeaderboardRow, MilestoneEntry};
+use crate::leaderboard_card::{
+    self, LeaderboardCardParams, LeaderboardRow, MilestoneCardParams, MilestoneEntry,
+};
 
 /// Players per leaderboard page (fixed).
 pub const PAGE_SIZE: i64 = 10;
@@ -36,14 +39,13 @@ pub async fn generate_leaderboard_page(
     let avatar_futures: Vec<_> = entries
         .iter()
         .map(|entry| {
-            let url = format!(
-                "https://minotar.net/avatar/{}/{}",
-                entry.minecraft_uuid, 80
-            );
+            let url = format!("https://minotar.net/avatar/{}/{}", entry.minecraft_uuid, 80);
             let client = http.clone();
             async move {
                 match client.get(&url).send().await {
-                    Ok(resp) if resp.status().is_success() => resp.bytes().await.ok().map(|b| b.to_vec()),
+                    Ok(resp) if resp.status().is_success() => {
+                        resp.bytes().await.ok().map(|b| b.to_vec())
+                    }
                     _ => None,
                 }
             }
@@ -68,11 +70,30 @@ pub async fn generate_leaderboard_page(
                 level: entry.level,
                 total_xp: entry.total_xp,
                 avatar_bytes: avatar,
+                hypixel_rank: entry.hypixel_rank.clone(),
+                hypixel_rank_plus_color: entry.hypixel_rank_plus_color.clone(),
             }
         })
         .collect();
 
-    // Fetch milestones with user counts for the guild.
+    let params = LeaderboardCardParams {
+        rows,
+        page: clamped_page,
+        total_pages,
+    };
+
+    let png_bytes = leaderboard_card::render(&params);
+    Ok((png_bytes, total_pages))
+}
+
+/// Generate a standalone milestone card PNG for a guild.
+///
+/// Returns the PNG bytes. Non-fatal errors (e.g. empty milestone list) still
+/// produce a valid card with an appropriate empty-state message.
+pub async fn generate_milestone_card(
+    pool: &PgPool,
+    guild_id: i64,
+) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
     let milestone_data = queries::get_milestones_with_counts(pool, guild_id)
         .await
         .unwrap_or_default();
@@ -85,13 +106,12 @@ pub async fn generate_leaderboard_page(
         })
         .collect();
 
-    let params = LeaderboardCardParams {
-        rows,
-        page: clamped_page,
-        total_pages,
+    let total_users = queries::count_users_in_guild(pool, guild_id).await?;
+
+    let params = MilestoneCardParams {
         milestones,
+        total_users,
     };
 
-    let png_bytes = leaderboard_card::render(&params);
-    Ok((png_bytes, total_pages))
+    Ok(leaderboard_card::render_milestone_card(&params))
 }

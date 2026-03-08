@@ -53,6 +53,16 @@ pub struct DbUser {
     /// user in this guild. `None` means no stat command has been used since
     /// migration 008.
     pub last_command_activity: Option<DateTime<Utc>>,
+
+    /// The player's Hypixel rank package as a raw string (e.g. `"VIP"`,
+    /// `"VIP_PLUS"`, `"MVP"`, `"MVP_PLUS"`, `"SUPERSTAR"` for MVP++).
+    /// `None` means either no rank or not yet fetched (pre-migration 009).
+    pub hypixel_rank: Option<String>,
+
+    /// The colour of the `+` symbol in the player's rank badge, as returned
+    /// by the Hypixel API's `rankPlusColor` field (e.g. `"RED"`, `"GOLD"`,
+    /// `"DARK_GREEN"`). Only meaningful for MVP+ and MVP++; `None` otherwise.
+    pub hypixel_rank_plus_color: Option<String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -110,6 +120,9 @@ pub struct DbPersistentLeaderboard {
     /// JSON array of Discord message IDs (one per page).
     pub message_ids: Value,
     pub status_message_id: i64,
+    /// Discord message ID of the separate milestone card message.
+    /// `0` means no milestone message has been sent yet.
+    pub milestone_message_id: i64,
     pub created_at: DateTime<Utc>,
     pub last_updated: DateTime<Utc>,
 }
@@ -127,6 +140,10 @@ pub struct LeaderboardEntry {
     pub minecraft_uuid: Uuid,
     pub total_xp: f64,
     pub level: i32,
+    /// The player's Hypixel rank package string (e.g. `"VIP"`, `"MVP_PLUS"`, `"SUPERSTAR"`).
+    pub hypixel_rank: Option<String>,
+    /// The colour of the `+` symbol in the player's rank badge (e.g. `"GOLD"`, `"RED"`).
+    pub hypixel_rank_plus_color: Option<String>,
 }
 
 // ---------------------------------------------------------------------------

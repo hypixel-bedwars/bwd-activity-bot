@@ -15,6 +15,8 @@ use std::io::Cursor;
 use image::{DynamicImage, GenericImageView, ImageFormat, Rgba, RgbaImage};
 use tracing::debug;
 
+use crate::hypixel::models::{HypixelRank, plus_color_to_rgba};
+
 // ---------------------------------------------------------------------------
 // Embedded font sheet
 // ---------------------------------------------------------------------------
@@ -58,6 +60,11 @@ pub struct LevelCardParams {
     pub rank: Option<i64>,
 
     pub milestone_progress: Vec<(i32, bool)>, // (milestone level, achieved)
+
+    /// The player's Hypixel rank package string (e.g. `"VIP"`, `"MVP_PLUS"`, `"SUPERSTAR"`).
+    pub hypixel_rank: Option<String>,
+    /// The colour of the `+` symbol in the player's rank badge (e.g. `"GOLD"`, `"RED"`).
+    pub hypixel_rank_plus_color: Option<String>,
 }
 
 /// Render the level card and return the PNG bytes.
@@ -109,14 +116,96 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
     }
 
     // == TOP SECTION (Player Identity) =======================================
-    // Username: scale=3, WHITE
+    // Build the Hypixel rank from stored DB strings.
+    let raw_rank = params.hypixel_rank.as_deref();
+    let (new_pkg, monthly_pkg) = if raw_rank == Some("SUPERSTAR") {
+        (None, Some("SUPERSTAR"))
+    } else {
+        (raw_rank, None)
+    };
+    let hypixel_rank = HypixelRank::from_api(new_pkg, monthly_pkg);
+
+    // Render [RANK] badge followed by username on the same line.
+    // Each segment is rendered individually so we can colour them differently.
+    let name_y: u32 = 29;
+    let name_scale: u32 = 3;
+    let mut name_cursor_x: u32 = 124;
+
+    if hypixel_rank != HypixelRank::None {
+        let label = hypixel_rank.display_label();
+        let name_col = hypixel_rank.name_color();
+        let plus_color = plus_color_to_rgba(params.hypixel_rank_plus_color.as_deref());
+
+        if let Some(plus_pos) = label.find('+') {
+            let before = &label[..plus_pos];
+            let plus_count = label[plus_pos..].chars().take_while(|&c| c == '+').count();
+            let after_start = plus_pos + plus_count;
+            let after = &label[after_start..];
+
+            // "[RANK" part in rank colour
+            render_text(
+                &font,
+                &mut img,
+                name_cursor_x,
+                name_y,
+                before,
+                name_scale,
+                name_col,
+            );
+            name_cursor_x += measure_text(&font, before, name_scale);
+
+            // '+' / '++' in plus colour
+            let plus_str = &label[plus_pos..after_start];
+            render_text(
+                &font,
+                &mut img,
+                name_cursor_x,
+                name_y,
+                plus_str,
+                name_scale,
+                plus_color,
+            );
+            name_cursor_x += measure_text(&font, plus_str, name_scale);
+
+            // ']' in rank colour
+            if !after.is_empty() {
+                render_text(
+                    &font,
+                    &mut img,
+                    name_cursor_x,
+                    name_y,
+                    after,
+                    name_scale,
+                    name_col,
+                );
+                name_cursor_x += measure_text(&font, after, name_scale);
+            }
+        } else {
+            // No '+' (e.g. "[VIP]") — full label in rank colour
+            render_text(
+                &font,
+                &mut img,
+                name_cursor_x,
+                name_y,
+                label,
+                name_scale,
+                name_col,
+            );
+            name_cursor_x += measure_text(&font, label, name_scale);
+        }
+
+        // Small gap between badge and username
+        name_cursor_x += 8;
+    }
+
+    // Username in white
     render_text(
         &font,
         &mut img,
-        124,
-        29,
+        name_cursor_x,
+        name_y,
         &params.minecraft_username,
-        3,
+        name_scale,
         WHITE,
     );
 
@@ -232,7 +321,6 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
     let col2_x = milestones_x + 200;
     let base_y = milestones_y + 26;
     let row_step = 22;
-    
 
     // This part took me fucking ages bro
     // OMG I HATE THIS SO MUCH

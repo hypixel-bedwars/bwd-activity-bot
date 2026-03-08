@@ -1,7 +1,8 @@
 /// Persistent leaderboard background updater.
 ///
 /// Runs on a timer (matching the leaderboard cache interval) and edits all
-/// persistent leaderboard messages with fresh leaderboard images.
+/// persistent leaderboard messages with fresh leaderboard images, and updates
+/// the standalone milestone card message.
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -66,6 +67,7 @@ async fn update_all_leaderboards(
             lb.channel_id,
             &lb.message_ids,
             lb.status_message_id,
+            lb.milestone_message_id,
             persistent_players,
         )
         .await
@@ -89,6 +91,7 @@ async fn update_single_leaderboard(
     channel_id: i64,
     message_ids_json: &serde_json::Value,
     status_message_id: i64,
+    milestone_message_id: i64,
     persistent_players: u64,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let msg_ids: Vec<u64> = serde_json::from_value(message_ids_json.clone()).unwrap_or_default();
@@ -135,6 +138,48 @@ async fn update_single_leaderboard(
                 "Leaderboard updater: failed to edit message."
             );
         }
+    }
+
+    // == UPDATE MILESTONE CARD ================================================
+    if milestone_message_id != 0 {
+        match helpers::generate_milestone_card(pool, guild_id).await {
+            Ok(png_bytes) => {
+                let attachment = CreateAttachment::bytes(png_bytes, "milestones.png");
+                let edit = EditMessage::new().new_attachment(attachment);
+                if let Err(e) = channel
+                    .edit_message(
+                        http,
+                        serenity::MessageId::new(milestone_message_id as u64),
+                        edit,
+                    )
+                    .await
+                {
+                    warn!(
+                        guild_id,
+                        milestone_message_id,
+                        error = %e,
+                        "Leaderboard updater: failed to update milestone card."
+                    );
+                } else {
+                    info!(
+                        guild_id,
+                        milestone_message_id, "Leaderboard updater: milestone card updated."
+                    );
+                }
+            }
+            Err(e) => {
+                warn!(
+                    guild_id,
+                    error = %e,
+                    "Leaderboard updater: failed to generate milestone card, skipping."
+                );
+            }
+        }
+    } else {
+        warn!(
+            guild_id,
+            "Leaderboard updater: milestone_message_id is 0, skipping milestone card update."
+        );
     }
 
     // Update last_updated timestamp

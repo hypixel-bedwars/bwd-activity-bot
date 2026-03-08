@@ -271,6 +271,33 @@ pub async fn update_last_hypixel_refresh(
 /// Called at the start of `/level` and `/stats` so that the background
 /// sweeper can identify recently active users and prioritise their refresh
 /// slot in the next sweep cycle.
+/// Update the Hypixel rank and rank-plus-colour for a user.
+///
+/// Called from `sweep_hypixel_user` after every successful API fetch so that
+/// rank data is always kept in sync with the live Hypixel response.
+pub async fn update_user_hypixel_rank(
+    pool: &PgPool,
+    user_id: i64,
+    rank: Option<&str>,
+    rank_plus_color: Option<&str>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::update_user_hypixel_rank: user_id={}, rank={:?}, rank_plus_color={:?}",
+        user_id, rank, rank_plus_color
+    );
+    sqlx::query(
+        "UPDATE users
+         SET hypixel_rank = $1, hypixel_rank_plus_color = $2
+         WHERE id = $3",
+    )
+    .bind(rank)
+    .bind(rank_plus_color)
+    .bind(user_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
 pub async fn update_last_command_activity(
     pool: &PgPool,
     user_id: i64,
@@ -387,27 +414,27 @@ pub async fn get_all_users_in_guild(
 
 /// Get the rank of a user within their guild, based on total XP. Returns `None` if the user is not registered or has no XP record.
 pub async fn get_user_rank_in_guild(
-	pool: &PgPool,
-	user_id: i64,
-	guild_id: i64,
+    pool: &PgPool,
+    user_id: i64,
+    guild_id: i64,
 ) -> Result<Option<i64>, sqlx::Error> {
-	debug!(
-		"queries::get_user_rank_in_guild: user_id={}, guild_id={}",
-		user_id, guild_id
-	);
-	sqlx::query_scalar::<_, i64>(
-		"SELECT rank FROM (
+    debug!(
+        "queries::get_user_rank_in_guild: user_id={}, guild_id={}",
+        user_id, guild_id
+    );
+    sqlx::query_scalar::<_, i64>(
+        "SELECT rank FROM (
 			 SELECT u.id AS user_id, RANK() OVER (ORDER BY COALESCE(x.total_xp, 0) DESC) AS rank
 			 FROM users u
 			 LEFT JOIN xp x ON x.user_id = u.id
 			 WHERE u.guild_id = $1
 		 ) sub
 		 WHERE user_id = $2",
-	)
-	.bind(guild_id)
-	.bind(user_id)
-	.fetch_optional(pool)
-	.await
+    )
+    .bind(guild_id)
+    .bind(user_id)
+    .fetch_optional(pool)
+    .await
 }
 
 // =========================================================================
@@ -776,7 +803,9 @@ pub async fn get_leaderboard(
                 u.minecraft_username,
                 u.minecraft_uuid,
                 COALESCE(x.total_xp, 0.0) AS total_xp,
-                COALESCE(x.level, 1) AS level
+                COALESCE(x.level, 1) AS level,
+                u.hypixel_rank,
+                u.hypixel_rank_plus_color
          FROM users u
          LEFT JOIN xp x ON x.user_id = u.id
          WHERE u.guild_id = $1
@@ -810,22 +839,24 @@ pub async fn upsert_persistent_leaderboard(
     channel_id: i64,
     message_ids: &serde_json::Value,
     status_message_id: i64,
+    milestone_message_id: i64,
     created_at: &DateTime<Utc>,
     last_updated: &DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
     debug!(
-        "queries::upsert_persistent_leaderboard: guild_id={}, channel_id={}, status_message_id={}, created_at={}, last_updated={}",
-        guild_id, channel_id, status_message_id, created_at, last_updated
+        "queries::upsert_persistent_leaderboard: guild_id={}, channel_id={}, status_message_id={}, milestone_message_id={}, created_at={}, last_updated={}",
+        guild_id, channel_id, status_message_id, milestone_message_id, created_at, last_updated
     );
 
     sqlx::query(
         "INSERT INTO persistent_leaderboards
-        (guild_id, channel_id, message_ids, status_message_id, created_at, last_updated)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        (guild_id, channel_id, message_ids, status_message_id, milestone_message_id, created_at, last_updated)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT(guild_id) DO UPDATE SET
             channel_id = excluded.channel_id,
             message_ids = excluded.message_ids,
             status_message_id = excluded.status_message_id,
+            milestone_message_id = excluded.milestone_message_id,
             created_at = excluded.created_at,
             last_updated = excluded.last_updated",
     )
@@ -833,6 +864,7 @@ pub async fn upsert_persistent_leaderboard(
     .bind(channel_id)
     .bind(message_ids)
     .bind(status_message_id)
+    .bind(milestone_message_id)
     .bind(created_at)
     .bind(last_updated)
     .execute(pool)
@@ -901,6 +933,28 @@ pub async fn update_persistent_leaderboard_messages(
     )
     .bind(message_ids)
     .bind(last_updated)
+    .bind(guild_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Update only the milestone_message_id for a persistent leaderboard.
+pub async fn update_persistent_leaderboard_milestone_message(
+    pool: &PgPool,
+    guild_id: i64,
+    milestone_message_id: i64,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::update_persistent_leaderboard_milestone_message: guild_id={}, milestone_message_id={}",
+        guild_id, milestone_message_id
+    );
+    sqlx::query(
+        "UPDATE persistent_leaderboards
+         SET milestone_message_id = $1
+         WHERE guild_id = $2",
+    )
+    .bind(milestone_message_id)
     .bind(guild_id)
     .execute(pool)
     .await?;

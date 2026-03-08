@@ -12,12 +12,12 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 use reqwest::Client;
-use uuid::Uuid;
 use std::collections::HashMap;
 use tokio::sync::{RwLock, Semaphore};
 use tracing::debug;
+use uuid::Uuid;
 
-use super::models::{BedwarsStats, HypixelPlayerResponse, MojangProfile, PlayerData};
+use super::models::{BedwarsStats, HypixelPlayerResponse, HypixelRank, MojangProfile, PlayerData};
 use crate::shared::cache::TimedCache;
 
 /// Default cache TTL for Hypixel stat lookups (60 seconds).
@@ -136,7 +136,7 @@ impl HypixelClient {
 
         let data: HypixelPlayerResponse = resp.json().await?;
 
-        let (bedwars, socials) = match data.player {
+        let (bedwars, socials, rank, rank_plus_color) = match data.player {
             Some(player) => {
                 let bw = player
                     .stats
@@ -146,14 +146,27 @@ impl HypixelClient {
 
                 let socials = player.social_media.map(|s| s.links).unwrap_or_default();
 
-                (bw, socials)
+                let rank = HypixelRank::from_api(
+                    player.new_package_rank.as_deref(),
+                    player.monthly_package_rank.as_deref(),
+                );
+                let rank_plus_color = player.rank_plus_color;
+
+                (bw, socials, rank, rank_plus_color)
             }
-            None => (BedwarsStats::empty(), HashMap::new()),
+            None => (
+                BedwarsStats::empty(),
+                HashMap::new(),
+                HypixelRank::None,
+                None,
+            ),
         };
 
         let result = PlayerData {
             bedwars,
             social_links: socials,
+            rank,
+            rank_plus_color,
         };
 
         self.cache.insert(uuid.to_string(), result.clone()).await;

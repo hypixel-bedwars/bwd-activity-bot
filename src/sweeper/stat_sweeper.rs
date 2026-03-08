@@ -50,8 +50,7 @@ pub async fn run_hypixel_sweep(
 ) -> Result<()> {
     // Active = used a stat command within the last hour.
     let activity_cutoff = chrono::Utc::now() - chrono::Duration::hours(1);
-    let users =
-        queries::get_users_prioritized_for_hypixel_sweep(pool, activity_cutoff).await?;
+    let users = queries::get_users_prioritized_for_hypixel_sweep(pool, activity_cutoff).await?;
 
     if users.is_empty() {
         debug!("Hypixel sweep: no registered users, skipping.");
@@ -130,6 +129,32 @@ pub(crate) async fn sweep_hypixel_user(
     // Fetch player data exactly once per user per Hypixel sweep.
     let player_data = hypixel.fetch_player(&user.minecraft_uuid).await?;
     let bw = &player_data.bedwars;
+
+    // Persist rank data if it has changed or has never been stored.
+    // We store it unconditionally on every sweep so stale ranks self-correct.
+    let rank_db_str = player_data.rank.as_db_str();
+    let rank_plus = player_data.rank_plus_color.as_deref();
+    let rank_changed = user.hypixel_rank.as_deref() != rank_db_str
+        || user.hypixel_rank_plus_color.as_deref() != rank_plus;
+
+    if rank_changed {
+        if let Err(e) =
+            queries::update_user_hypixel_rank(pool, user.id, rank_db_str, rank_plus).await
+        {
+            warn!(
+                user_id = user.id,
+                error = %e,
+                "sweep_hypixel_user: failed to update hypixel rank, continuing."
+            );
+        } else {
+            debug!(
+                user_id = user.id,
+                rank = ?rank_db_str,
+                rank_plus_color = ?rank_plus,
+                "sweep_hypixel_user: updated hypixel rank."
+            );
+        }
+    }
 
     let now = chrono::Utc::now();
     let guild_config = load_guild_config(pool, user.guild_id).await;
@@ -298,10 +323,7 @@ async fn apply_stat_deltas(
 
     // Filter to deltas that are positive — these get a stat_deltas row
     // regardless of whether they have an XP multiplier configured.
-    let positive_deltas: Vec<&StatDelta> = deltas
-        .iter()
-        .filter(|d| d.difference > 0.0)
-        .collect();
+    let positive_deltas: Vec<&StatDelta> = deltas.iter().filter(|d| d.difference > 0.0).collect();
 
     if positive_deltas.is_empty() && cursor_updates.is_empty() {
         return Ok(());
@@ -604,9 +626,15 @@ mod tests {
 
         // Cursor is intentionally absent. First run should bootstrap from this
         // timestamp and award only the 5 -> 9 delta.
-        queries::set_xp_and_level(&pool, user.id, 10.0, 1, &(fake_time + chrono::Duration::minutes(7)))
-            .await
-            .expect("xp row should seed");
+        queries::set_xp_and_level(
+            &pool,
+            user.id,
+            10.0,
+            1,
+            &(fake_time + chrono::Duration::minutes(7)),
+        )
+        .await
+        .expect("xp row should seed");
 
         run_discord_sweep(&pool, &config)
             .await
@@ -748,7 +776,9 @@ mod tests {
         let multiplier = 3.0_f64;
         let mut guild_cfg = GuildConfig::default();
         guild_cfg.xp_config = HashMap::new();
-        guild_cfg.xp_config.insert("messages_sent".to_string(), multiplier);
+        guild_cfg
+            .xp_config
+            .insert("messages_sent".to_string(), multiplier);
 
         let now = chrono::Utc.with_ymd_and_hms(2026, 1, 1, 0, 0, 0).unwrap();
         // delta = 4 units → 4 * 3.0 = 12 XP
@@ -797,7 +827,11 @@ mod tests {
         .fetch_all(&pool)
         .await
         .expect("stat_deltas FK query should succeed");
-        assert_eq!(delta_rows.len(), 1, "xp_events.delta_id should reference a stat_deltas row");
+        assert_eq!(
+            delta_rows.len(),
+            1,
+            "xp_events.delta_id should reference a stat_deltas row"
+        );
 
         // Verify xp.total_xp was also updated
         let xp = queries::get_xp(&pool, user.id)
@@ -852,6 +886,9 @@ mod tests {
             .expect("xp row should exist");
 
         assert_eq!(xp.total_xp, 100.0, "total_xp should be 100");
-        assert_eq!(xp.level, 2, "level should advance to 2 after earning 100 XP");
+        assert_eq!(
+            xp.level, 2,
+            "level should advance to 2 after earning 100 XP"
+        );
     }
 }

@@ -37,6 +37,30 @@ pub struct HypixelPlayer {
     #[serde(rename = "socialMedia")]
     #[serde(default)]
     pub social_media: Option<HypixelSocialMedia>,
+
+    /// The player's rank package, e.g. `"VIP"`, `"VIP_PLUS"`, `"MVP"`,
+    /// `"MVP_PLUS"`. For MVP++ this field is absent and
+    /// `monthly_package_rank` is `"SUPERSTAR"` instead.
+    ///
+    /// API key: `newPackageRank`
+    #[serde(rename = "newPackageRank")]
+    #[serde(default)]
+    pub new_package_rank: Option<String>,
+
+    /// Monthly rank — `"SUPERSTAR"` means the player has MVP++.
+    ///
+    /// API key: `monthlyPackageRank`
+    #[serde(rename = "monthlyPackageRank")]
+    #[serde(default)]
+    pub monthly_package_rank: Option<String>,
+
+    /// The colour of the `+` on the player's rank badge (e.g. `"RED"`,
+    /// `"GOLD"`, `"DARK_GREEN"`). Only present for MVP+ / MVP++.
+    ///
+    /// API key: `rankPlusColor`
+    #[serde(rename = "rankPlusColor")]
+    #[serde(default)]
+    pub rank_plus_color: Option<String>,
 }
 
 /// Social media block inside `player`.
@@ -131,7 +155,7 @@ impl BedwarsStats {
         }
     }
 
-    // Convenience accessors 
+    // Convenience accessors
 
     pub fn wins(&self) -> f64 {
         self.stats.get("wins_bedwars").copied().unwrap_or(0.0)
@@ -149,6 +173,97 @@ impl BedwarsStats {
     }
 }
 
+/// A player's Hypixel rank, normalised from the various API fields.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HypixelRank {
+    None,
+    Vip,
+    VipPlus,
+    Mvp,
+    MvpPlus,
+    /// MVP++ (monthly rank "SUPERSTAR")
+    MvpPlusPlus,
+}
+
+impl HypixelRank {
+    /// Parse from the raw API fields `new_package_rank` and
+    /// `monthly_package_rank`. MVP++ players have `monthly_package_rank ==
+    /// "SUPERSTAR"` and no `new_package_rank`.
+    pub fn from_api(new_package_rank: Option<&str>, monthly_package_rank: Option<&str>) -> Self {
+        if monthly_package_rank == Some("SUPERSTAR") {
+            return Self::MvpPlusPlus;
+        }
+        match new_package_rank {
+            Some("MVP_PLUS") => Self::MvpPlus,
+            Some("MVP") => Self::Mvp,
+            Some("VIP_PLUS") => Self::VipPlus,
+            Some("VIP") => Self::Vip,
+            _ => Self::None,
+        }
+    }
+
+    /// The raw string stored in the database (mirrors the Hypixel API values,
+    /// with `"SUPERSTAR"` used for MVP++).
+    pub fn as_db_str(&self) -> Option<&'static str> {
+        match self {
+            Self::None => None,
+            Self::Vip => Some("VIP"),
+            Self::VipPlus => Some("VIP_PLUS"),
+            Self::Mvp => Some("MVP"),
+            Self::MvpPlus => Some("MVP_PLUS"),
+            Self::MvpPlusPlus => Some("SUPERSTAR"),
+        }
+    }
+
+    /// The RGBA colour used to render the rank name on cards.
+    ///
+    /// - VIP / VIP+  → green  `#55FF55`
+    /// - MVP / MVP+  → blue   `#55FFFF`
+    /// - MVP++       → gold   `#FFD700`
+    /// - None        → white
+    pub fn name_color(&self) -> image::Rgba<u8> {
+        match self {
+            Self::None => image::Rgba([0xff, 0xff, 0xff, 0xff]),
+            Self::Vip | Self::VipPlus => image::Rgba([0x55, 0xff, 0x55, 0xff]),
+            Self::Mvp | Self::MvpPlus => image::Rgba([0x55, 0xff, 0xff, 0xff]),
+            Self::MvpPlusPlus => image::Rgba([0xff, 0xd7, 0x00, 0xff]),
+        }
+    }
+
+    /// Human-readable display label (e.g. `"[MVP++]"`).
+    pub fn display_label(&self) -> &'static str {
+        match self {
+            Self::None => "",
+            Self::Vip => "[VIP]",
+            Self::VipPlus => "[VIP+]",
+            Self::Mvp => "[MVP]",
+            Self::MvpPlus => "[MVP+]",
+            Self::MvpPlusPlus => "[MVP++]",
+        }
+    }
+}
+
+/// The RGBA colour for a rank `+` symbol given the raw API colour name.
+///
+/// Falls back to white for unrecognised values.
+pub fn plus_color_to_rgba(color: Option<&str>) -> image::Rgba<u8> {
+    match color {
+        Some("RED") => image::Rgba([0xff, 0x55, 0x55, 0xff]),
+        Some("GOLD") => image::Rgba([0xff, 0xaa, 0x00, 0xff]),
+        Some("GREEN") => image::Rgba([0x55, 0xff, 0x55, 0xff]),
+        Some("YELLOW") => image::Rgba([0xff, 0xff, 0x55, 0xff]),
+        Some("LIGHT_PURPLE") => image::Rgba([0xff, 0x55, 0xff, 0xff]),
+        Some("WHITE") => image::Rgba([0xff, 0xff, 0xff, 0xff]),
+        Some("BLUE") => image::Rgba([0x55, 0x55, 0xff, 0xff]),
+        Some("DARK_GREEN") => image::Rgba([0x00, 0xaa, 0x00, 0xff]),
+        Some("DARK_RED") => image::Rgba([0xaa, 0x00, 0x00, 0xff]),
+        Some("DARK_AQUA") => image::Rgba([0x00, 0xaa, 0xaa, 0xff]),
+        Some("DARK_PURPLE") => image::Rgba([0xaa, 0x00, 0xaa, 0xff]),
+        Some("BLACK") => image::Rgba([0x00, 0x00, 0x00, 0xff]),
+        _ => image::Rgba([0xff, 0xff, 0xff, 0xff]),
+    }
+}
+
 /// PlayerData is the compact internal structure returned by the Hypixel client
 /// and stored in the TTL cache.
 #[derive(Debug, Clone)]
@@ -156,4 +271,9 @@ pub struct PlayerData {
     pub bedwars: BedwarsStats,
     /// social links (e.g. "DISCORD" -> "va80_")
     pub social_links: HashMap<String, String>,
+    /// The player's normalised Hypixel rank.
+    pub rank: HypixelRank,
+    /// The raw plus-colour string from the API (e.g. `"DARK_GREEN"`).
+    /// `None` for ranks that don't have a `+`.
+    pub rank_plus_color: Option<String>,
 }
