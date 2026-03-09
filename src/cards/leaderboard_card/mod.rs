@@ -40,7 +40,7 @@ const IMG_W: u32 = 1200;
 const BASE_IMG_H: u32 = 700;
 const MARGIN: u32 = 20;
 const HEADER_H: u32 = 70;
-const ROW_H: u32 = 40;
+const ROW_H: u32 = 60;
 const AVATAR_SIZE: u32 = 40;
 const CORNER_R: u32 = 12;
 
