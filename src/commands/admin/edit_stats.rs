@@ -12,6 +12,7 @@
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use tracing::info;
 
+use crate::commands::logger::logger::logger;
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
@@ -233,6 +234,19 @@ pub async fn add_bedwars(
         ctx.author().name
     );
 
+    logger(
+        ctx.serenity_context(),
+        data,
+        ctx.guild_id().unwrap(),
+        crate::commands::logger::logger::LogType::Info,
+        format!(
+            "{} added Bedwars stat `{stat_key}` with {} XP/unit",
+            ctx.author().name,
+            xp_per_unit
+        ),
+    )
+    .await?;
+
     Ok(())
 }
 
@@ -296,6 +310,19 @@ pub async fn add_discord(
         ctx.author().name
     );
 
+    logger(
+        ctx.serenity_context(),
+        data,
+        ctx.guild_id().unwrap(),
+        crate::commands::logger::logger::LogType::Info,
+        format!(
+            "{} added Discord stat `{stat}` with {} XP/unit",
+            ctx.author().name,
+            xp_per_unit
+        ),
+    )
+    .await?;
+
     Ok(())
 }
 
@@ -341,6 +368,20 @@ pub async fn edit_stat(
         ctx.author().name
     );
 
+    logger(
+        ctx.serenity_context(),
+        data,
+        ctx.guild_id().unwrap(),
+        crate::commands::logger::logger::LogType::Warn,
+        format!(
+            "{} changed `{stat_name}` XP from {} → {}",
+            ctx.author().name,
+            old_xp,
+            new_xp_value
+        ),
+    )
+    .await?;
+
     Ok(())
 }
 
@@ -378,15 +419,23 @@ pub async fn remove(
         ctx.author().name
     );
 
+    logger(
+        ctx.serenity_context(),
+        data,
+        ctx.guild_id().unwrap(),
+        crate::commands::logger::logger::LogType::Warn,
+        format!(
+            "{} removed stat `{stat_name}` from XP config",
+            ctx.author().name
+        ),
+    )
+    .await?;
+
     Ok(())
 }
 
 /// List all stats currently in the XP configuration.
-#[poise::command(
-    slash_command,
-    guild_only,
-    ephemeral
-)]
+#[poise::command(slash_command, guild_only, ephemeral)]
 pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = ctx
         .guild_id()

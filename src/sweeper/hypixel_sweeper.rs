@@ -3,14 +3,14 @@ use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use tracing::{debug, error, info, warn};
 
-use std::sync::Arc;
 use std::time::Duration;
 
+use crate::commands::logger::logger::{LogType, logger_system};
 use crate::config::{AppConfig, GuildConfig};
 use crate::database::models::DbUser;
 use crate::database::queries;
-use crate::hypixel::client::HypixelClient;
 use crate::milestones;
+use crate::shared::types::Data;
 use crate::shared::types::StatDelta;
 use crate::xp::{XPConfig, calculator};
 
@@ -18,12 +18,12 @@ use crate::xp::{XPConfig, calculator};
 // On-demand refresh (used by commands)
 // =============================================================
 
-pub async fn refresh_hypixel_user(
-    pool: &PgPool,
-    hypixel: &Arc<HypixelClient>,
-    user: &DbUser,
-    config: &AppConfig,
-) -> bool {
+pub async fn refresh_hypixel_user(data: &Data, user: &DbUser) -> bool {
+    let pool = &data.db;
+    let _hypixel = &data.hypixel;
+    let config = &data.config;
+    let http = &data.http;
+
     let now = Utc::now();
 
     if let Err(e) = queries::update_last_command_activity(pool, user.id, &now).await {
@@ -40,8 +40,7 @@ pub async fn refresh_hypixel_user(
         None => true,
         Some(last) => {
             let elapsed = now.signed_duration_since(last);
-            elapsed > chrono::Duration::from_std(cooldown)
-                .unwrap_or(chrono::Duration::seconds(60))
+            elapsed > chrono::Duration::from_std(cooldown).unwrap_or(chrono::Duration::seconds(60))
         }
     };
 
@@ -53,12 +52,25 @@ pub async fn refresh_hypixel_user(
         return false;
     }
 
-    if let Err(e) = refresh_user(pool, hypixel, user, config).await {
+    if let Err(e) = refresh_user(data, user).await {
         warn!(
             user_id = user.id,
             error = %e,
             "Hypixel refresh failed, using cached data."
         );
+
+        logger_system(
+            http,
+            pool,
+            user.guild_id,
+            LogType::Error,
+            format!(
+                "Hypixel refresh failed for <@{}>: {}",
+                user.discord_user_id, e
+            ),
+        )
+        .await;
+
         return false;
     }
 
@@ -71,11 +83,8 @@ pub async fn refresh_hypixel_user(
 // Background sweeper
 // =============================================================
 
-pub async fn run_hypixel_stale_sweep(
-    pool: &PgPool,
-    hypixel: &Arc<HypixelClient>,
-    config: &AppConfig,
-) -> Result<()> {
+pub async fn run_hypixel_stale_sweep(data: &Data) -> Result<()> {
+    let pool = &data.db;
 
     info!("Starting Hypixel stale sweep.");
 
@@ -88,15 +97,30 @@ pub async fn run_hypixel_stale_sweep(
         return Ok(());
     }
 
-    info!(expired_users = users.len(), "Hypixel sweep refreshing expired users.");
+    info!(
+        expired_users = users.len(),
+        "Hypixel sweep refreshing expired users."
+    );
 
     for user in &users {
-        if let Err(e) = refresh_user(pool, hypixel, user, config).await {
+        if let Err(e) = refresh_user(data, user).await {
             warn!(
                 user_id = user.id,
                 error = %e,
                 "Hypixel sweep: failed refreshing user."
             );
+
+            logger_system(
+                &data.http,
+                pool,
+                user.guild_id,
+                LogType::Error,
+                format!(
+                    "Hypixel sweep failed for <@{}>: {}",
+                    user.discord_user_id, e
+                ),
+            )
+            .await;
         }
 
         tokio::time::sleep(Duration::from_secs(1)).await;
@@ -111,11 +135,8 @@ pub async fn run_hypixel_stale_sweep(
 // Complete sweeper
 // =============================================================
 
-pub async fn run_full_hypixel_sweep(
-    pool: &PgPool,
-    hypixel: &Arc<HypixelClient>,
-    config: &AppConfig,
-) -> bool {
+pub async fn run_full_hypixel_sweep(data: &Data) -> bool {
+    let pool = &data.db;
 
     info!("Starting full Hypixel sweep.");
 
@@ -126,7 +147,7 @@ pub async fn run_full_hypixel_sweep(
     debug!(total_users = users.len(), "Full Hypixel sweep users.");
 
     for user in &users {
-        if let Err(e) = refresh_user(pool, hypixel, user, config).await {
+        if let Err(e) = refresh_user(data, user).await {
             warn!(
                 user_id = user.id,
                 error = %e,
@@ -146,12 +167,10 @@ pub async fn run_full_hypixel_sweep(
 // Core refresh logic
 // =============================================================
 
-async fn refresh_user(
-    pool: &PgPool,
-    hypixel: &Arc<HypixelClient>,
-    user: &DbUser,
-    config: &AppConfig,
-) -> Result<()> {
+async fn refresh_user(data: &Data, user: &DbUser) -> Result<()> {
+    let pool = &data.db;
+    let hypixel = &data.hypixel;
+    let config = &data.config;
 
     debug!(user_id = user.id, "Refreshing Hypixel user.");
 
@@ -194,7 +213,6 @@ async fn refresh_user(
     let mut deltas: Vec<StatDelta> = Vec::new();
 
     for stat_name in guild_config.xp_config.keys() {
-
         let new_value = match bw.stats.get(stat_name) {
             Some(&v) => v,
             None => continue,
@@ -422,6 +440,7 @@ async fn apply_stat_deltas(
                     milestone_level = m.level,
                     "Milestone reached — calling handle_milestone_reached."
                 );
+
                 milestones::handle_milestone_reached(user.discord_user_id as u64, m.level).await;
             }
         }

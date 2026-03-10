@@ -1,4 +1,4 @@
-// The only reason i added back the use of nicknames is because 
+// The only reason i added back the use of nicknames is because
 // It is a better way for a user to register if they are already verified in the server
 // So i do beleive having the nickanme registration is a good UX improvment
 
@@ -80,8 +80,12 @@ async fn handle_register_button(
         Ok(u) => u,
         Err(e) => {
             warn!(error = %e, "Failed to query DB for user during button press");
-            respond_ephemeral(ctx, component, "A database error occurred. Please try again.")
-                .await?;
+            respond_ephemeral(
+                ctx,
+                component,
+                "A database error occurred. Please try again.",
+            )
+            .await?;
             return Ok(());
         }
     };
@@ -203,9 +207,7 @@ async fn handle_register_button(
     let reply_text = match result {
         Ok((text, Some((db_user_id, uuid)))) => {
             let _ = crate::commands::registration::register::fetch_and_cache_head_texture(
-                &data.db,
-                db_user_id,
-                &uuid,
+                &data.db, db_user_id, &uuid,
             )
             .await;
             text
@@ -241,8 +243,12 @@ async fn resolve_nickname_path(
         Ok(r) => r,
         Err(e) => {
             warn!(error = %e, "Failed to load guild config during button press");
-            respond_ephemeral(ctx, component, "A database error occurred. Please try again.")
-                .await?;
+            respond_ephemeral(
+                ctx,
+                component,
+                "A database error occurred. Please try again.",
+            )
+            .await?;
             return Ok(None);
         }
     };

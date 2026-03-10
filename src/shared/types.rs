@@ -11,6 +11,7 @@ use crate::commands::leaderboard::leaderboard::LeaderboardCache;
 use crate::config::AppConfig;
 use crate::database::models::MessageValidationState;
 use crate::hypixel::client::HypixelClient;
+use poise::serenity_prelude as serenity;
 
 /// The error type used throughout the bot. We use a boxed trait object so that
 /// any error type that implements `std::error::Error + Send + Sync` can be
@@ -25,6 +26,7 @@ pub type Context<'a> = poise::Context<'a, Data, Error>;
 ///
 /// This is constructed once during bot setup and then shared (via `Arc` internally
 /// by Poise) for the lifetime of the process.
+#[derive(Clone)]
 pub struct Data {
     /// Postgres connection pool for all database operations.
     pub db: PgPool,
@@ -37,10 +39,13 @@ pub struct Data {
 
     /// Timed cache for leaderboard page images, keyed by `(guild_id, page)`.
     pub leaderboard_cache: LeaderboardCache,
-    
+
     /// State for message validation, used by the Discord activity tracker to determine
     /// if a message is valid for XP (e.g. not a bot command, not a duplicate, etc.).
     pub message_validation: MessageValidationState,
+
+    /// Discord HTTP client for sending messages outside command contexts.
+    pub http: Arc<serenity::Http>,
 }
 
 /// Represents a change in a single stat for a single user between two snapshots.

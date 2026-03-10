@@ -56,7 +56,7 @@ pub struct AppConfig {
     /// fetch if the user's `last_hypixel_refresh` is older than this value.
     /// Defaults to 60 if `HYPIXEL_REFRESH_COOLDOWN_SECONDS` is unset.
     pub hypixel_refresh_cooldown_seconds: u64,
-    
+
     pub enable_hypixel_sweeper: bool,
 }
 
@@ -109,9 +109,9 @@ impl AppConfig {
                 .parse()
                 .expect("HYPIXEL_REFRESH_COOLDOWN_SECONDS must be a valid u64"),
             enable_hypixel_sweeper: env::var("ENABLE_HYPIXEL_SWEEPER")
-				.unwrap_or_else(|_| "false".to_string())
-				.parse()
-				.expect("ENABLE_HYPIXEL_SWEEPER must be a valid bool"),
+                .unwrap_or_else(|_| "false".to_string())
+                .parse()
+                .expect("ENABLE_HYPIXEL_SWEEPER must be a valid bool"),
         }
     }
 }

@@ -1,4 +1,7 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 use chrono::{DateTime, NaiveDate, Utc};
 use serde_json::Value;
@@ -21,7 +24,25 @@ use uuid::Uuid;
 pub struct DbGuild {
     pub guild_id: i64,
     pub registered_role_id: Option<i64>,
+    /// Optional Discord channel ID configured to receive guild-level logs.
+    pub log_channel_id: Option<i64>,
     pub config_json: Value,
+}
+
+impl DbGuild {
+    /// Return the configured logging channel, if any.
+    pub fn log_channel(&self) -> Option<i64> {
+        self.log_channel_id
+    }
+
+    /// Set or clear the logging channel on this in-memory model.
+    ///
+    /// Note: this only mutates the struct. Persisting to the database must be
+    /// done via the appropriate query function (e.g. update_guild_config or a
+    /// dedicated query that updates the `guilds` table).
+    pub fn set_log_channel(&mut self, channel_id: Option<i64>) {
+        self.log_channel_id = channel_id;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -220,14 +241,32 @@ pub struct DbXPEvent {
 // Note for future self: Right now your cooldown is per user globally, so if you wanna do this for
 // multiple guilds you might want to change the key to (user_id, guild_id) or something like that.
 pub struct MessageValidationState {
-    pub last_counted: Mutex<HashMap<i64, OffsetDateTime>>,
-    pub last_message: Mutex<HashMap<i64, String>>,
+    pub last_counted: Arc<Mutex<HashMap<i64, OffsetDateTime>>>,
+    pub last_message: Arc<Mutex<HashMap<i64, String>>>,
+}
+
+impl Clone for MessageValidationState {
+    fn clone(&self) -> Self {
+        Self {
+            last_counted: Arc::clone(&self.last_counted),
+            last_message: Arc::clone(&self.last_message),
+        }
+    }
+}
+
+impl Default for MessageValidationState {
+    fn default() -> Self {
+        Self {
+            last_counted: Arc::new(Mutex::new(HashMap::new())),
+            last_message: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
 // Daily snapshots
 // ---------------------------------------------------------------------------
-// 
+//
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct DbDailySnapshot {
     pub user_id: i64,

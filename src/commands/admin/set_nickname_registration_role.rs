@@ -9,6 +9,7 @@
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use tracing::{debug, info};
 
+use crate::commands::logger::logger::{LogType, logger};
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
@@ -72,6 +73,19 @@ pub async fn set_nickname_registration_role(
         guild_id, role.name, role.id
     );
 
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Info,
+        format!(
+            "{} set nickname registration role for guild {} to {}",
+            ctx.author().name,
+            guild_id,
+            role.name
+        ),
+    )
+    .await?;
     Ok(())
 }
 
@@ -115,6 +129,19 @@ pub async fn clear_nickname_registration_role(ctx: Context<'_>) -> Result<(), Er
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
 
     info!("Cleared nickname registration role for guild {}", guild_id);
+
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Info,
+        format!(
+            "{} cleared nickname registration role for guild {}",
+            ctx.author().name,
+            guild_id
+        ),
+    )
+    .await?;
 
     Ok(())
 }

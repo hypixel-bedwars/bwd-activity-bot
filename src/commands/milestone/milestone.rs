@@ -7,6 +7,7 @@
 use poise::serenity_prelude as serenity;
 use tracing::info;
 
+use crate::commands::logger::logger::{LogType, logger};
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
 
@@ -57,7 +58,11 @@ pub async fn milestone(_ctx: Context<'_>) -> Result<(), Error> {
 ///
 /// Creates a milestone at the given level threshold. Once added it appears on
 /// the leaderboard with a live count of how many users have reached it.
-#[poise::command(slash_command, ephemeral, check = "crate::utils::permissions::admin_check")]
+#[poise::command(
+    slash_command,
+    ephemeral,
+    check = "crate::utils::permissions::admin_check"
+)]
 pub async fn add(
     ctx: Context<'_>,
     #[description = "The level threshold for this milestone (e.g. 25, 50, 100)"] level: i32,
@@ -87,6 +92,15 @@ pub async fn add(
                 .content(format!("Milestone **Level {level}** added successfully.")),
         )
         .await?;
+
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            ctx.guild_id().unwrap(),
+            LogType::Info,
+            format!("{} added milestone Level {}", ctx.author().name, level),
+        )
+        .await?;
     } else {
         ctx.send(
             poise::CreateReply::default()
@@ -94,6 +108,18 @@ pub async fn add(
                 .content(format!(
                     "A milestone at **Level {level}** already exists for this server."
                 )),
+        )
+        .await?;
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            ctx.guild_id().unwrap(),
+            LogType::Warn,
+            format!(
+                "{} attempted to add milestone Level {} but it already exists",
+                ctx.author().name,
+                level
+            ),
         )
         .await?;
     }
@@ -105,7 +131,11 @@ pub async fn add(
 ///
 /// Select the milestone you want to change via autocomplete, then supply the
 /// new level value. The milestone must not conflict with another existing one.
-#[poise::command(slash_command, ephemeral, check = "crate::utils::permissions::admin_check")]
+#[poise::command(
+    slash_command,
+    ephemeral,
+    check = "crate::utils::permissions::admin_check"
+)]
 pub async fn edit(
     ctx: Context<'_>,
     #[description = "The current milestone level to edit"]
@@ -201,6 +231,19 @@ pub async fn edit(
                 )),
         )
         .await?;
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            ctx.guild_id().unwrap(),
+            LogType::Warn,
+            format!(
+                "{} edited milestone Level {} → Level {}",
+                ctx.author().name,
+                parsed_current,
+                new_level
+            ),
+        )
+        .await?;
     } else {
         ctx.send(
             poise::CreateReply::default()
@@ -217,7 +260,11 @@ pub async fn edit(
 ///
 /// Select the milestone to delete via autocomplete. This action cannot be
 /// undone.
-#[poise::command(slash_command, ephemeral, check = "crate::utils::permissions::admin_check")]
+#[poise::command(
+    slash_command,
+    ephemeral,
+    check = "crate::utils::permissions::admin_check"
+)]
 pub async fn remove(
     ctx: Context<'_>,
     #[description = "The milestone level to remove"]
@@ -270,11 +317,34 @@ pub async fn remove(
                 .content(format!("Milestone **Level {parsed_level}** removed.")),
         )
         .await?;
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            ctx.guild_id().unwrap(),
+            LogType::Warn,
+            format!(
+                "{} removed milestone Level {}",
+                ctx.author().name,
+                parsed_level
+            ),
+        )
+        .await?;
     } else {
         ctx.send(
             poise::CreateReply::default()
                 .ephemeral(true)
                 .content("Failed to remove the milestone. Please try again."),
+        )
+        .await?;
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            ctx.guild_id().unwrap(),
+            LogType::Error,
+            format!(
+                "Failed to remove milestone Level {} in guild {}",
+                parsed_level, guild_id
+            ),
         )
         .await?;
     }

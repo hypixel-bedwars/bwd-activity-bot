@@ -31,9 +31,6 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
     let hypixel = Arc::new(HypixelClient::new(config.hypixel_api_key.clone()));
 
     // Clone values that need to move into closures.
-    let sweep_db = db.clone();
-    let sweep_hypixel = hypixel.clone();
-    let sweep_config = config.clone();
     let lb_db = db.clone();
     let lb_config = config.clone();
 
@@ -73,87 +70,61 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
 
             ..Default::default()
         })
-        .setup(move |ctx, _ready, framework| {
+        .setup(move |ctx, _ready, _framework| {
             Box::pin(async move {
                 info!("Bot is connected and ready!");
 
-                let guild = std::env::var("GUILD_ID").ok();
+                let leaderboard_cache = lb::new_cache(config.leaderboard_cache_seconds);
 
-                if let Some(dev) = guild {
-                    if let Ok(gid) = dev.parse::<u64>() {
-                        let guild_id = serenity::GuildId::new(gid);
+                // Create bot data
+                let data = Data {
+                    db: db.clone(),
+                    hypixel: hypixel.clone(),
+                    config: config.clone(),
+                    leaderboard_cache,
+                    message_validation: MessageValidationState::default(),
+                    http: ctx.http.clone(),
+                };
 
-                        // Remove any existing global commands (prevents duplicates)
-                        serenity::Command::set_global_commands(&ctx.http, vec![]).await?;
+                // Create Arc for background tasks
+                let data_arc = Arc::new(data.clone());
 
-                        // Register commands only in the dev guild
-                        poise::builtins::register_in_guild(
-                            ctx,
-                            &framework.options().commands,
-                            guild_id,
-                        )
-                        .await?;
+                // Hypixel sweeper
+                let sweeper_data = Arc::clone(&data_arc);
 
-                        info!(guild = gid, "Slash commands registered in dev guild");
-                    } else {
-                        info!("GUILD_ID set but invalid");
-                    }
-                } else {
-                    info!("GUILD_ID not set, skipping slash command registration");
-                }
-
-                // Start background sweepers.
-                let sweep_db_clone = sweep_db.clone();
-                let sweep_hypixel_clone = sweep_hypixel.clone();
-                let sweep_config_clone = sweep_config.clone();
-
-                // Background sweeper, fetches hypixel stats 
-                // only if the data of a user has not been updated in 2 hours
                 tokio::spawn(async move {
                     info!("Hypixel background sweeper started.");
 
                     let mut ticker = tokio::time::interval(std::time::Duration::from_secs(
-                        sweep_config_clone.hypixel_sweep_interval_seconds,
+                        sweeper_data.config.hypixel_sweep_interval_seconds,
                     ));
 
                     loop {
                         ticker.tick().await;
 
-                        if let Err(e) = sweeper::hypixel_sweeper::run_hypixel_stale_sweep(
-                            &sweep_db_clone,
-                            &sweep_hypixel_clone,
-                            &sweep_config_clone,
-                        )
-                        .await
+                        if let Err(e) =
+                            sweeper::hypixel_sweeper::run_hypixel_stale_sweep(&sweeper_data).await
                         {
                             tracing::error!(error = %e, "Hypixel stale sweep failed");
                         }
                     }
                 });
-                
-                // Start the daily snapshot task.
-                tokio::spawn(sweeper::daily_snapshot::start_daily_snapshot_loop(db.clone()));
 
-                // Start persistent leaderboard updater.
+                // Daily snapshot
+                let snapshot_data = Arc::clone(&data_arc);
+                tokio::spawn(sweeper::daily_snapshot::start_daily_snapshot_loop(
+                    snapshot_data,
+                ));
+
+                // Leaderboard updater
                 leaderboard_updater::start_leaderboard_updater(
                     lb_db,
                     Arc::clone(&ctx.http),
                     lb_config,
                 );
 
-                // Create leaderboard image cache.
-                let leaderboard_cache = lb::new_cache(config.leaderboard_cache_seconds);
-
-                Ok(Data {
-                    db,
-                    hypixel,
-                    config,
-                    leaderboard_cache,
-                    message_validation: MessageValidationState {
-                        last_counted: Default::default(),
-                        last_message: Default::default(),
-                    },
-                })
+                // Return Data to Poise
+                Ok(data)
             })
         })
         .build();

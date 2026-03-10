@@ -7,10 +7,11 @@ use tracing::{error, info};
 
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 
+use crate::commands::logger::logger::{LogType, logger};
+use crate::commands::registration::register::fetch_and_cache_head_texture;
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
-use crate::commands::registration::register::fetch_and_cache_head_texture;
 
 /// Forcibly register a user, bypassing Hypixel Discord verification.
 #[poise::command(slash_command, guild_only, required_permissions = "ADMINISTRATOR")]
@@ -73,11 +74,26 @@ pub async fn force_register(
                 existing_user.minecraft_uuid, existing_user.minecraft_uuid
             ));
         ctx.send(poise::CreateReply::default().embed(embed)).await?;
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            guild_id,
+            LogType::Warn,
+            format!(
+                "{} attempted to force register <@{}> but they are already registered as `{}`",
+                ctx.author().name,
+                user.id,
+                existing_user.minecraft_uuid
+            ),
+        )
+        .await?;
         return Ok(());
     }
 
     let role = serenity::RoleId::new(role_id);
-    let member = guild_id.member(&ctx.serenity_context().http, user.id).await?;
+    let member = guild_id
+        .member(&ctx.serenity_context().http, user.id)
+        .await?;
 
     if let Err(e) = member.add_role(&ctx.serenity_context().http, role).await {
         error!(
@@ -93,6 +109,30 @@ pub async fn force_register(
             .color(0xFF4444)
             .description("I couldn't assign the registered role. Please ensure I have **Manage Roles** permission and my role is above the registered role.");
         ctx.send(poise::CreateReply::default().embed(embed)).await?;
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            guild_id,
+            LogType::Error,
+            format!(
+                "Failed to assign registered role during force register for <@{}> by {}",
+                user.id,
+                ctx.author().name
+            ),
+        )
+        .await?;
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            guild_id,
+            LogType::Error,
+            format!(
+                "Failed to assign registered role during force register for <@{}> by {}",
+                user.id,
+                ctx.author().name
+            ),
+        )
+        .await?;
         return Ok(());
     }
 
@@ -113,12 +153,14 @@ pub async fn force_register(
         db_user.id,
         player_data.rank.as_db_str(),
         player_data.rank_plus_color.as_deref(),
-    ).await?;
+    )
+    .await?;
 
     // Insert stat snapshots as in normal registration
     let bw = &player_data.bedwars;
     for (stat_name, value) in &bw.stats {
-        queries::insert_hypixel_snapshot(&ctx.data().db, db_user.id, stat_name, *value, now).await?;
+        queries::insert_hypixel_snapshot(&ctx.data().db, db_user.id, stat_name, *value, now)
+            .await?;
     }
     for stat_name in &["messages_sent", "reactions_added", "commands_used"] {
         queries::insert_discord_snapshot(&ctx.data().db, db_user.id, stat_name, 0.0, now).await?;
@@ -132,6 +174,21 @@ pub async fn force_register(
         minecraft_name = %profile.name,
         "User forcibly registered by admin"
     );
+
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Warn,
+        format!(
+            "{} forcibly registered <@{}> as **{}** (`{}`)",
+            ctx.author().name,
+            user.id,
+            profile.name,
+            profile.id
+        ),
+    )
+    .await?;
 
     let embed = CreateEmbed::default()
         .title("Force Registration Successful")

@@ -88,11 +88,10 @@ async fn increment_stat(
         Ok(None) => {
             warn!(
                 discord_user_id,
-                guild_id,
-                "user not registered, skipping stat increment"
+                guild_id, "user not registered, skipping stat increment"
             );
             return;
-        },
+        }
         Err(e) => {
             error!(error = %e, "failed to fetch user");
             return;

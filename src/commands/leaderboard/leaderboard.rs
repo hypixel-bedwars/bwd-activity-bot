@@ -6,7 +6,9 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use poise::serenity_prelude::{self as serenity, CreateAttachment, CreateInteractionResponse, CreateInteractionResponseMessage};
+use poise::serenity_prelude::{
+    self as serenity, CreateAttachment, CreateInteractionResponse, CreateInteractionResponseMessage,
+};
 use tracing::debug;
 
 use crate::shared::cache::TimedCache;
@@ -71,17 +73,15 @@ pub async fn get_or_generate(
 }
 
 /// Build pagination button components.
-pub fn pagination_buttons(
-    current_page: u32,
-    total_pages: u32,
-) -> Vec<serenity::CreateActionRow> {
+pub fn pagination_buttons(current_page: u32, total_pages: u32) -> Vec<serenity::CreateActionRow> {
     let prev_disabled = current_page <= 1;
     let next_disabled = current_page >= total_pages;
 
-    let prev_button = serenity::CreateButton::new(format!("lb_page_{}", current_page.saturating_sub(1).max(1)))
-        .label("Previous")
-        .style(serenity::ButtonStyle::Secondary)
-        .disabled(prev_disabled);
+    let prev_button =
+        serenity::CreateButton::new(format!("lb_page_{}", current_page.saturating_sub(1).max(1)))
+            .label("Previous")
+            .style(serenity::ButtonStyle::Secondary)
+            .disabled(prev_disabled);
 
     let page_indicator = serenity::CreateButton::new("lb_page_indicator")
         .label(format!("{} / {}", current_page, total_pages))
@@ -117,17 +117,13 @@ pub async fn handle_pagination(
         .and_then(|s| s.parse().ok())
         .unwrap_or(1);
 
-    let guild_id = component
-        .guild_id
-        .ok_or("Not in a guild")?;
+    let guild_id = component.guild_id.ok_or("Not in a guild")?;
 
     // Defer the update (acknowledges the interaction, keeps the message)
     component
         .create_response(
             ctx,
-            CreateInteractionResponse::Defer(
-                CreateInteractionResponseMessage::new(),
-            ),
+            CreateInteractionResponse::Defer(CreateInteractionResponseMessage::new()),
         )
         .await?;
 

@@ -4,6 +4,7 @@
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use tracing::{debug, info};
 
+use crate::commands::logger::logger::{LogType, logger};
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
@@ -61,6 +62,20 @@ pub async fn set_register_role(
         "Updated registration role for guild {} to {} (ID {})",
         guild_id, role.name, role.id
     );
+
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Info,
+        format!(
+            "{} set registration role for guild {} to {}",
+            ctx.author().name,
+            guild_id,
+            role.name
+        ),
+    )
+    .await?;
 
     Ok(())
 }

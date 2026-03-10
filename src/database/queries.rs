@@ -31,6 +31,58 @@ pub async fn upsert_guild(pool: &PgPool, guild_id: i64) -> Result<(), sqlx::Erro
     Ok(())
 }
 
+/// Set or clear the logging channel configured for this guild.
+///
+/// Pass `Some(channel_id)` to set the channel, or `None` to clear it.
+/// This updates the `guilds.log_channel_id` column.
+pub async fn set_guild_log_channel(
+    pool: &PgPool,
+    guild_id: i64,
+    channel_id: Option<i64>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::set_guild_log_channel: guild_id={}, channel_id={:?}",
+        guild_id, channel_id
+    );
+    sqlx::query("UPDATE guilds SET log_channel_id = $1 WHERE guild_id = $2")
+        .bind(channel_id)
+        .bind(guild_id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+/// Retrieve the configured logging channel for a guild, if any.
+/// Retrieve all guild IDs that have a logging channel configured.
+/// Used by background sweepers to broadcast log messages to every
+/// guild that has opted in to logging.
+pub async fn get_guilds_with_log_channel(pool: &PgPool) -> Result<Vec<i64>, sqlx::Error> {
+    debug!("queries::get_guilds_with_log_channel");
+
+    let rows: Vec<(i64,)> =
+        sqlx::query_as("SELECT guild_id FROM guilds WHERE log_channel_id IS NOT NULL")
+            .fetch_all(pool)
+            .await?;
+
+    Ok(rows.into_iter().map(|(id,)| id).collect())
+}
+
+pub async fn get_guild_log_channel(
+    pool: &PgPool,
+    guild_id: i64,
+) -> Result<Option<i64>, sqlx::Error> {
+    debug!("queries::get_guild_log_channel: guild_id={}", guild_id);
+
+    // Reuse the existing DbGuild mapping so we don't need an additional SQL mapping.
+    let guild_row: Option<super::models::DbGuild> =
+        sqlx::query_as("SELECT * FROM guilds WHERE guild_id = $1")
+            .bind(guild_id)
+            .fetch_optional(pool)
+            .await?;
+
+    Ok(guild_row.and_then(|g| g.log_channel_id))
+}
+
 /// Retrieve a guild row by its Discord snowflake.
 pub async fn get_guild(pool: &PgPool, guild_id: i64) -> Result<Option<DbGuild>, sqlx::Error> {
     debug!("queries::get_guild: guild_id={}", guild_id);
@@ -1163,7 +1215,7 @@ pub async fn get_users_with_expired_hypixel_stats(
          FROM users
          WHERE COALESCE(last_hypixel_refresh, 'epoch') < $1
          ORDER BY last_hypixel_refresh ASC NULLS FIRST
-         LIMIT $2"
+         LIMIT $2",
     )
     .bind(cutoff)
     .bind(limit)
@@ -1175,11 +1227,17 @@ pub async fn get_users_with_expired_hypixel_stats(
 // Daily snapshots
 // =======================================================================
 
-pub async fn insert_daily_snapshot(pool: &PgPool) -> Result<(), sqlx::Error> {
+/// Insert daily snapshots for an explicit UTC date, avoiding any dependency on
+/// the database server's session timezone. This is the preferred variant used
+/// by the scheduled snapshot loop.
+pub async fn insert_daily_snapshot_for_date(
+    pool: &PgPool,
+    date: NaiveDate,
+) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
         INSERT INTO daily_snapshots (user_id, stat_name, stat_value, snapshot_date)
-        SELECT user_id, stat_name, stat_value, CURRENT_DATE
+        SELECT user_id, stat_name, stat_value, $1::date
         FROM (
             SELECT DISTINCT ON (user_id, stat_name)
                 user_id,
@@ -1191,10 +1249,18 @@ pub async fn insert_daily_snapshot(pool: &PgPool) -> Result<(), sqlx::Error> {
         ON CONFLICT (user_id, stat_name, snapshot_date) DO NOTHING
         "#,
     )
+    .bind(date)
     .execute(pool)
     .await?;
 
     Ok(())
+}
+
+/// Convenience wrapper that computes today's UTC date and inserts snapshots.
+/// Prefer `insert_daily_snapshot_for_date` when you already have the date.
+pub async fn insert_daily_snapshot(pool: &PgPool) -> Result<(), sqlx::Error> {
+    let date = chrono::Utc::now().date_naive();
+    insert_daily_snapshot_for_date(pool, date).await
 }
 
 pub async fn get_daily_snapshot(

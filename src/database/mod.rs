@@ -5,8 +5,8 @@
 pub mod models;
 pub mod queries;
 
-use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+use sqlx::postgres::PgPoolOptions;
 use tracing::info;
 
 /// Initialize the PostgreSQL database.

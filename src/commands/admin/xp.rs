@@ -6,6 +6,7 @@
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use tracing::info;
 
+use crate::commands::logger::logger::{LogType, logger};
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
 use crate::xp::calculator;
@@ -79,6 +80,21 @@ pub async fn add(
         "Admin added XP"
     );
 
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Warn,
+        format!(
+            "{} added {} XP to <@{}> (new total: {})",
+            ctx.author().name,
+            amount,
+            user.id,
+            xp_row.total_xp
+        ),
+    )
+    .await?;
+
     Ok(())
 }
 
@@ -137,6 +153,21 @@ pub async fn remove(
         amount,
         "Admin removed XP"
     );
+
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Warn,
+        format!(
+            "{} removed {} XP from <@{}> (new total: {})",
+            ctx.author().name,
+            amount,
+            user.id,
+            xp_row.total_xp
+        ),
+    )
+    .await?;
 
     Ok(())
 }

@@ -170,7 +170,7 @@ pub async fn perform_registration(
 
     let role = serenity::RoleId::new(role_id);
     let member = guild_id.member(&serenity_ctx.http, user_id).await?;
-    
+
     let rank = player_data.rank.as_db_str();
     let plus_color = player_data.rank_plus_color.as_deref();
 
@@ -193,9 +193,7 @@ pub async fn perform_registration(
 
     debug!(
         guild_id = guild_id_i64,
-        discord_user_id,
-        role_id,
-        "Registered role assigned"
+        discord_user_id, role_id, "Registered role assigned"
     );
 
     let now = chrono::Utc::now();
@@ -209,13 +207,8 @@ pub async fn perform_registration(
         now,
     )
     .await?;
-    
-    queries::update_user_hypixel_rank(
-        &data.db,
-        db_user.id,
-        rank,
-        plus_color,
-    ).await?;
+
+    queries::update_user_hypixel_rank(&data.db, db_user.id, rank, plus_color).await?;
 
     debug!(
         db_user_id = db_user.id,

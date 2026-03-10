@@ -12,6 +12,7 @@ pub mod admin;
 /// - `leaderboard`   — leaderboard commands (user + admin)
 /// - `milestone`     — milestone management and progress commands
 pub mod leaderboard;
+pub mod logger;
 pub mod milestone;
 pub mod registration;
 pub mod stats;
@@ -30,10 +31,12 @@ pub fn all() -> Vec<poise::Command<Data, Error>> {
         admin::set_nickname_registration_role::set_nickname_registration_role(),
         admin::set_nickname_registration_role::clear_nickname_registration_role(),
         admin::edit_stats::edit_stats(),
+        admin::force_register::force_register(),
         admin::xp::xp(),
         leaderboard::leaderboard::leaderboard(),
         leaderboard::leaderboard_create::leaderboard_create(),
         leaderboard::leaderboard_remove::leaderboard_remove(),
         milestone::milestone::milestone(),
+        logger::logger_set::logger_set(),
     ]
 }

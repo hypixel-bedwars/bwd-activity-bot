@@ -6,6 +6,7 @@
 use poise::serenity_prelude::{self as serenity, CreateAttachment, CreateMessage};
 use tracing::info;
 
+use crate::commands::logger::logger::{LogType, logger};
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
 
@@ -55,6 +56,19 @@ pub async fn leaderboard_create(
                 )
                 .await;
         }
+
+        logger(
+            ctx.serenity_context(),
+            ctx.data(),
+            guild_id,
+            LogType::Warn,
+            format!(
+                "{} replaced the existing persistent leaderboard in <#{}>",
+                ctx.author().name,
+                channel_id.get()
+            ),
+        )
+        .await?;
     }
 
     let persistent_players = ctx.data().config.persistent_leaderboard_players;
@@ -75,6 +89,17 @@ pub async fn leaderboard_create(
                     poise::CreateReply::default()
                         .ephemeral(true)
                         .content(format!("Failed to generate leaderboard page {page}: {e}")),
+                )
+                .await?;
+                logger(
+                    ctx.serenity_context(),
+                    ctx.data(),
+                    guild_id,
+                    LogType::Error,
+                    format!(
+                        "Leaderboard creation failed for guild {} on page {}: {}",
+                        guild_id, page, e
+                    ),
                 )
                 .await?;
                 return Ok(());
@@ -152,6 +177,21 @@ pub async fn leaderboard_create(
         "Created persistent leaderboard for guild {} in channel {}",
         guild_id, channel_id
     );
+
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Info,
+        format!(
+            "{} created a persistent leaderboard in <#{}> ({} pages, top {} players)",
+            ctx.author().name,
+            channel_id.get(),
+            total_pages,
+            persistent_players
+        ),
+    )
+    .await?;
 
     Ok(())
 }

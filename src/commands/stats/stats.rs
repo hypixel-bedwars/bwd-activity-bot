@@ -8,8 +8,8 @@ use tracing::info;
 use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Context, Error};
-use crate::utils::stats_definitions::{display_name_for_key, is_discord_stat};
 use crate::sweeper;
+use crate::utils::stats_definitions::{display_name_for_key, is_discord_stat};
 
 #[poise::command(slash_command, guild_only)]
 pub async fn stats(
@@ -46,13 +46,7 @@ pub async fn stats(
     };
 
     // on-demand Hypixel refresh
-    sweeper::hypixel_sweeper::refresh_hypixel_user(
-        &data.db,
-        &data.hypixel,
-        &db_user,
-        &data.config,
-    )
-    .await;
+    sweeper::hypixel_sweeper::refresh_hypixel_user(data, &db_user).await;
 
     // load guild config
     let guild_row = queries::get_guild(&data.db, guild_id_i64).await?;
@@ -146,11 +140,7 @@ pub async fn stats(
 
         let delta = (latest_val - initial_val).max(0.0);
 
-        embed = embed.field(
-            display_name_for_key(key),
-            format!("+{:.0}", delta),
-            true,
-        );
+        embed = embed.field(display_name_for_key(key), format!("+{:.0}", delta), true);
     }
 
     // --------------------------
@@ -167,25 +157,15 @@ pub async fn stats(
 
     let xp_description = rows
         .iter()
-        .map(|(display, key, xp)| {
-            format!("**{}** — {:.0} XP (`{}`)", display, xp, key)
-        })
+        .map(|(display, key, xp)| format!("**{}** — {:.0} XP (`{}`)", display, xp, key))
         .collect::<Vec<_>>()
         .join("\n");
 
-    embed = embed.field(
-        "XP Rewards",
-        xp_description,
-        false,
-    );
+    embed = embed.field("XP Rewards", xp_description, false);
 
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
 
-    info!(
-        "Displayed stats for user {} ({})",
-        target.name,
-        target.id
-    );
+    info!("Displayed stats for user {} ({})", target.name, target.id);
 
     Ok(())
 }
