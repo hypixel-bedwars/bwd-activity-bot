@@ -70,7 +70,7 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
 
             ..Default::default()
         })
-        .setup(move |ctx, _ready, _framework| {
+        .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 info!("Bot is connected and ready!");
 
@@ -121,6 +121,27 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
                     lb_db,
                     Arc::clone(&ctx.http),
                     lb_config,
+                );
+
+                // Register slash commands to the configured guild only.
+                // Guild-scoped registration is instant (no propagation delay)
+                // and is controlled by the GUILD_ID environment variable.
+                let guild_id = serenity::GuildId::new(config.guild_id);
+                poise::builtins::register_in_guild(ctx, &framework.options().commands, guild_id)
+                    .await
+                    .map_err(|e| {
+                        tracing::error!(
+                            error = %e,
+                            guild_id = config.guild_id,
+                            "Failed to register slash commands in guild"
+                        );
+                        e
+                    })?;
+
+                info!(
+                    commands = framework.options().commands.len(),
+                    guild_id = config.guild_id,
+                    "Slash commands registered in guild."
                 );
 
                 // Return Data to Poise

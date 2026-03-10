@@ -18,6 +18,10 @@ pub struct AppConfig {
     /// Discord bot token.
     pub discord_token: String,
 
+    /// The Discord guild ID where slash commands are registered.
+    /// Parsed from the required `GUILD_ID` environment variable.
+    pub guild_id: u64,
+
     /// Hypixel API key for fetching player stats.
     pub hypixel_api_key: String,
 
@@ -67,6 +71,10 @@ impl AppConfig {
     pub fn from_env() -> Self {
         Self {
             discord_token: env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN must be set in .env"),
+            guild_id: env::var("GUILD_ID")
+                .expect("GUILD_ID must be set in .env")
+                .parse()
+                .expect("GUILD_ID must be a valid u64 Discord snowflake"),
             hypixel_api_key: env::var("HYPIXEL_API_KEY")
                 .expect("HYPIXEL_API_KEY must be set in .env"),
             database_url: env::var("DATABASE_URL")
