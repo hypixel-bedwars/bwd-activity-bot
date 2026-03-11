@@ -3,7 +3,7 @@
 /// Allows an admin to forcibly register a Discord user to a Minecraft account,
 /// bypassing Hypixel Discord verification. Use only if the normal registration
 /// process is failing for legitimate users.
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 
@@ -14,7 +14,11 @@ use crate::database::queries;
 use crate::shared::types::{Context, Error};
 
 /// Forcibly register a user, bypassing Hypixel Discord verification.
-#[poise::command(slash_command, guild_only, required_permissions = "ADMINISTRATOR")]
+#[poise::command(
+    slash_command,
+    guild_only,
+    check = "crate::utils::permissions::admin_check"
+)]
 pub async fn force_register(
     ctx: Context<'_>,
     #[description = "Discord user to register"] user: serenity::User,
@@ -198,5 +202,87 @@ pub async fn force_register(
             user.id, profile.name, profile.id
         ));
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    Ok(())
+}
+#[poise::command(
+    slash_command,
+    guild_only,
+    check = "crate::utils::permissions::admin_check"
+)]
+pub async fn force_unregister(
+    ctx: Context<'_>,
+    #[description = "Discord user to unregister"] user: serenity::User,
+) -> Result<(), Error> {
+    let user_id = user.id.get() as i64;
+
+    let guild_id = ctx
+        .guild_id()
+        .ok_or("This command can only be used in a server")?;
+    let guild_id_i64 = guild_id.get() as i64;
+
+    let data = ctx.data();
+
+    let guild_row = queries::get_guild(&data.db, guild_id_i64)
+        .await?
+        .ok_or("Guild configuration not found. Ask an admin to configure the bot.")?;
+
+    let guild_config: GuildConfig =
+        serde_json::from_value(guild_row.config_json.clone()).unwrap_or_default();
+
+    queries::unregister_user(&data.db, user_id, guild_id_i64).await?;
+
+    if let Some(role_id) = guild_config.registered_role_id {
+        let role = serenity::RoleId::new(role_id);
+
+        let role_exists = ctx
+            .guild()
+            .map(|g| g.roles.contains_key(&role))
+            .unwrap_or(false);
+
+        // check role exists in cached guild
+        if !role_exists {
+            debug!(
+                role_id,
+                guild_id = guild_id_i64,
+                "Registered role not found in guild, skipping role removal"
+            );
+            let embed = CreateEmbed::default()
+                .title("Unregistered")
+                .color(0xFFAA00)
+                .description(
+                    "You have been unregistered, but I couldn't find the registered role in \
+                     the server. Please ask an administrator to update the configuration and \
+                     remove the role manually if desired.",
+                );
+            ctx.send(poise::CreateReply::default().embed(embed)).await?;
+            return Ok(());
+        }
+
+        // remove role from the member
+        let member = guild_id.member(ctx.http(), ctx.author().id).await?;
+
+        if member.roles.contains(&role) {
+            member.remove_role(ctx.http(), role).await?;
+        }
+    }
+
+    let embed = CreateEmbed::default()
+        .title("Unregistered")
+        .color(0x00BFFF)
+        .description(format!(
+            "You have been successfully unregistered {}",
+            user.id
+        ));
+    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+
+    logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Warn,
+        format!("{} forcibly unregistered <@{}>", ctx.author().name, user.id),
+    )
+    .await?;
+
     Ok(())
 }
