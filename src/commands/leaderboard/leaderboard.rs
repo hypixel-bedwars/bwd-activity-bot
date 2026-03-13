@@ -7,7 +7,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use poise::serenity_prelude::{
-    self as serenity, CreateAttachment, CreateInteractionResponse, CreateInteractionResponseMessage,
+    self as serenity, CreateAttachment, CreateInteractionResponseMessage,
 };
 use tracing::debug;
 
@@ -111,7 +111,6 @@ pub async fn handle_pagination(
 ) -> Result<(), Error> {
     let custom_id = &component.data.custom_id;
 
-    // Parse page number from custom_id: "lb_page_3" -> 3
     let page: u32 = custom_id
         .strip_prefix("lb_page_")
         .and_then(|s| s.parse().ok())
@@ -119,25 +118,19 @@ pub async fn handle_pagination(
 
     let guild_id = component.guild_id.ok_or("Not in a guild")?;
 
-    // Defer the update (acknowledges the interaction, keeps the message)
-    component
-        .create_response(
-            ctx,
-            CreateInteractionResponse::Defer(CreateInteractionResponseMessage::new()),
-        )
-        .await?;
-
     let (png_bytes, total_pages) = get_or_generate(data, guild_id.get(), page).await?;
 
     let attachment = CreateAttachment::bytes(png_bytes, "leaderboard.png".to_string());
     let components = pagination_buttons(page, total_pages);
 
     component
-        .edit_response(
+        .create_response(
             ctx,
-            serenity::EditInteractionResponse::new()
-                .new_attachment(attachment)
-                .components(components),
+            serenity::CreateInteractionResponse::UpdateMessage(
+                CreateInteractionResponseMessage::new()
+                    .add_file(attachment)
+                    .components(components),
+            ),
         )
         .await?;
 
