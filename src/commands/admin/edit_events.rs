@@ -24,7 +24,6 @@ use crate::database::queries;
 use crate::shared::types::{Context, Error};
 use crate::utils::stats_definitions::display_name_for_key;
 
-/// Autocomplete for event names — returns non-ended events in this guild.
 async fn autocomplete_event_name<'a>(
     ctx: Context<'_>,
     partial: &'a str,
@@ -42,7 +41,6 @@ async fn autocomplete_event_name<'a>(
 
     events
         .iter()
-        .filter(|e| e.status != "ended")
         .filter(|e| e.name.to_lowercase().contains(&partial_lower))
         .take(25)
         .map(|e| {
