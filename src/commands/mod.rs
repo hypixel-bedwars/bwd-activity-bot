@@ -34,6 +34,7 @@ pub fn all() -> Vec<poise::Command<Data, Error>> {
         admin::set_nickname_registration_role::clear_nickname_registration_role(),
         admin::edit_stats::edit_stats(),
         admin::force_register::force_register(),
+        admin::force_register::force_unregister(),
         admin::xp::xp(),
         admin::edit_events::edit_event(),
         events::events::event(),
