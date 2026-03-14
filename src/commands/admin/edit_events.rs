@@ -567,7 +567,7 @@ pub async fn stats_remove(
         ctx.say("Cannot modify stats on an ended event.").await?;
         return Ok(());
     }
-    
+
     if event.status == "active" {
         ctx.say("Cannot modify stats on an active event.").await?;
         return Ok(());
@@ -628,7 +628,7 @@ pub async fn stats_edit(
         ctx.say("Cannot modify stats on an ended event.").await?;
         return Ok(());
     }
-    
+
     if event.status == "active" {
         ctx.say("Cannot modify stats on an active event.").await?;
         return Ok(());

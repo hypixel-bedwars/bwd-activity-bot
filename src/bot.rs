@@ -20,6 +20,7 @@ use crate::hypixel::client::HypixelClient;
 use crate::shared::types::{Data, Error};
 use crate::sweeper;
 use crate::utils::event_leaderboard_updater;
+use crate::utils::event_status_updater;
 use crate::utils::leaderboard_updater;
 
 /// Build and return the Poise framework, ready to be started.
@@ -134,6 +135,14 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
                     Arc::clone(&ctx.http),
                     lb_interval_secs,
                 );
+
+                // Checks for any event to update every 60 seconds
+                // Should not be much a burden on the compute
+                // TODO: Make it less compute expensive
+                let status_db = db.clone();
+                tokio::spawn(async move {
+                    event_status_updater::start_event_status_updater(Arc::new(status_db)).await;
+                });
 
                 // Register slash commands to the configured guild only.
                 // Guild-scoped registration is instant (no propagation delay)
