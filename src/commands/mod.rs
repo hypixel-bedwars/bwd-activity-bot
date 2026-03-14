@@ -37,6 +37,7 @@ pub fn all() -> Vec<poise::Command<Data, Error>> {
         admin::force_register::force_unregister(),
         admin::xp::xp(),
         admin::edit_events::edit_event(),
+        admin::audit_users::audit_users(),
         events::events::event(),
         leaderboard::leaderboard::leaderboard(),
         leaderboard::leaderboard_create::leaderboard_create(),

@@ -1,4 +1,4 @@
-use serenity::all::FullEvent;
+use serenity::all::{FullEvent, GuildId, RoleId};
 use sqlx::PgPool;
 use tracing::{debug, error, warn};
 
@@ -63,6 +63,60 @@ pub async fn handle_event(event: &FullEvent, data: &Data) -> Result<(), Error> {
 
         FullEvent::VoiceStateUpdate { old, new } => {
             handle_voice_state_update(data, old.as_ref(), new).await;
+        }
+
+        FullEvent::GuildMemberRemoval { guild_id, user, .. } => {
+            let discord_user_id = user.id.get() as i64;
+            let guild_i64 = guild_id.get() as i64;
+            let now = chrono::Utc::now();
+
+            // mark them left (soft delete)
+            if let Err(e) =
+                queries::mark_user_inactive(&data.db, discord_user_id, guild_i64, &now).await
+            {
+                error!(error = %e, "Failed to mark user left on GuildMemberRemoval");
+            }
+        }
+
+        FullEvent::GuildMemberAddition { new_member } => {
+            let discord_user_id = new_member.user.id.get() as i64;
+            let guild_i64 = new_member.guild_id.get() as i64;
+
+            // Only reactivate if the user was previously registered in this guild.
+            match queries::get_user_by_discord_id(&data.db, discord_user_id, guild_i64).await {
+                Ok(Some(_db_user)) => {
+                    // Reactivate them (soft un-delete)
+                    if let Err(e) =
+                        queries::mark_user_active(&data.db, discord_user_id, guild_i64).await
+                    {
+                        error!(error = %e, "Failed to mark user active on GuildMemberAddition");
+                    }
+
+                    // Optional: restore registered role if configured and if we can fetch the member
+                    if let Ok(Some(guild_row)) = queries::get_guild(&data.db, guild_i64).await {
+                        let guild_config: crate::config::GuildConfig =
+                            serde_json::from_value(guild_row.config_json).unwrap_or_default();
+
+                        if let Some(role_id) = guild_config.registered_role_id {
+                            if let Ok(member) = GuildId::new(guild_i64 as u64)
+                                .member(&data.http, new_member.user.id)
+                                .await
+                            {
+                                // ignore role-add errors but you can log them if desired
+                                let _ = member.add_role(&data.http, RoleId::new(role_id)).await;
+                            }
+                        }
+                    }
+                }
+
+                // User never registered for this guild — nothing to do.
+                Ok(None) => {}
+
+                // DB error while checking registration
+                Err(e) => {
+                    error!(error = %e, "Failed checking user registration on GuildMemberAddition");
+                }
+            }
         }
 
         _ => {}

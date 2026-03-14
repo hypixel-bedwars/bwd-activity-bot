@@ -864,6 +864,7 @@ pub async fn get_leaderboard(
          FROM users u
          LEFT JOIN xp x ON x.user_id = u.id
          WHERE u.guild_id = $1
+           AND u.active = TRUE
          ORDER BY total_xp DESC, u.id ASC
          LIMIT $2 OFFSET $3",
     )
@@ -1843,6 +1844,7 @@ pub async fn get_event_leaderboard(
          FROM event_xp ex
          JOIN users u ON u.id = ex.user_id
          WHERE ex.event_id = $1
+           AND u.active = TRUE
          GROUP BY u.discord_user_id, u.minecraft_username, u.minecraft_uuid,
                   u.hypixel_rank, u.hypixel_rank_plus_color
          ORDER BY total_event_xp DESC
@@ -1906,6 +1908,63 @@ pub async fn get_user_event_rank(
     .await
 }
 
+/// Mark a user as inactive (soft-delete) when they leave a guild.
+///
+/// Sets `active = FALSE`, records `left_at`, and updates `updated_at`.
+/// Use this from your guild-member-remove handler so the user will be
+/// excluded from leaderboards without losing historical data.
+pub async fn mark_user_inactive(
+    pool: &PgPool,
+    discord_user_id: i64,
+    guild_id: i64,
+    left_at: &DateTime<Utc>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::mark_user_inactive: discord_user_id={}, guild_id={}, left_at={}",
+        discord_user_id, guild_id, left_at
+    );
+
+    sqlx::query(
+        "UPDATE users
+         SET active = FALSE,
+             left_at = $3
+         WHERE discord_user_id = $1
+           AND guild_id = $2",
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .bind(left_at)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Mark a user as active (e.g. they rejoined).
+pub async fn mark_user_active(
+    pool: &PgPool,
+    discord_user_id: i64,
+    guild_id: i64,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::mark_user_active: discord_user_id={}, guild_id={}",
+        discord_user_id, guild_id
+    );
+
+    sqlx::query(
+        "UPDATE users
+         SET active = TRUE,
+             left_at = NULL
+         WHERE discord_user_id = $1
+           AND guild_id = $2",
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+
 // =========================================================================
 // persistent_event_leaderboards
 // =========================================================================
@@ -1913,11 +1972,15 @@ pub async fn get_user_event_rank(
 /// Count participants (distinct users) for a given event.
 pub async fn count_event_participants(pool: &PgPool, event_id: i64) -> Result<i64, sqlx::Error> {
     debug!("queries::count_event_participants: event_id={}", event_id);
-    let row: (i64,) =
-        sqlx::query_as("SELECT COUNT(DISTINCT user_id) FROM event_xp WHERE event_id = $1")
-            .bind(event_id)
-            .fetch_one(pool)
-            .await?;
+    let row: (i64,) = sqlx::query_as(
+        "SELECT COUNT(DISTINCT u.id)
+         FROM event_xp ex
+         JOIN users u ON u.id = ex.user_id
+         WHERE ex.event_id = $1 AND u.active = TRUE",
+    )
+    .bind(event_id)
+    .fetch_one(pool)
+    .await?;
     Ok(row.0)
 }
 

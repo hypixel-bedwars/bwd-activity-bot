@@ -84,6 +84,12 @@ pub struct DbUser {
     /// by the Hypixel API's `rankPlusColor` field (e.g. `"RED"`, `"GOLD"`,
     /// `"DARK_GREEN"`). Only meaningful for MVP+ and MVP++; `None` otherwise.
     pub hypixel_rank_plus_color: Option<String>,
+
+    // mark whether the user is active in the guild (true = shown on leaderboards)
+    pub active: bool,
+
+    // when the user left the guild (optional)
+    pub left_at: Option<DateTime<Utc>>,
 }
 
 // ---------------------------------------------------------------------------
