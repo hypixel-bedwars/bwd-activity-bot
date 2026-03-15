@@ -44,9 +44,7 @@ pub const PRESET_RANGES: &[(i64, &str)] = &[
 #[poise::command(slash_command, guild_only)]
 pub async fn statistics(
     ctx: Context<'_>,
-    #[description = "Start date (YYYY-MM-DD). Defaults to 14 days ago."] start_date: Option<
-        String,
-    >,
+    #[description = "Start date (YYYY-MM-DD). Defaults to 14 days ago."] start_date: Option<String>,
     #[description = "End date (YYYY-MM-DD). Defaults to today."] end_date: Option<String>,
 ) -> Result<(), Error> {
     ctx.defer().await?;
@@ -164,16 +162,12 @@ pub fn build_range_components(guild_id: i64, selected_days: i64) -> Vec<CreateAc
 fn parse_date_start(s: &str) -> Result<chrono::DateTime<Utc>, Error> {
     let d = NaiveDate::parse_from_str(s, "%Y-%m-%d")
         .map_err(|_| format!("Invalid date format: `{}`. Expected `YYYY-MM-DD`.", s))?;
-    Ok(d.and_hms_opt(0, 0, 0)
-        .ok_or("Invalid time")?
-        .and_utc())
+    Ok(d.and_hms_opt(0, 0, 0).ok_or("Invalid time")?.and_utc())
 }
 
 /// Parse a `YYYY-MM-DD` string as the **end** of that day (23:59:59 UTC).
 fn parse_date_end(s: &str) -> Result<chrono::DateTime<Utc>, Error> {
     let d = NaiveDate::parse_from_str(s, "%Y-%m-%d")
         .map_err(|_| format!("Invalid date format: `{}`. Expected `YYYY-MM-DD`.", s))?;
-    Ok(d.and_hms_opt(23, 59, 59)
-        .ok_or("Invalid time")?
-        .and_utc())
+    Ok(d.and_hms_opt(23, 59, 59).ok_or("Invalid time")?.and_utc())
 }

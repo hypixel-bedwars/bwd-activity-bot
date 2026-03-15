@@ -8,7 +8,7 @@ use image::{DynamicImage, GenericImageView, ImageFormat, Rgba, RgbaImage};
 use tracing::debug;
 
 use crate::font::renderer::FontRenderer;
-use crate::hypixel::models::{plus_color_to_rgba, HypixelRank};
+use crate::hypixel::models::{HypixelRank, plus_color_to_rgba};
 
 // ---------------------------------------------------------------------------
 // Colour constants
@@ -327,19 +327,11 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
                         .round() as i32
                 }
             } else {
-                if params.level >= *m_level {
-                    100
-                } else {
-                    0
-                }
+                if params.level >= *m_level { 100 } else { 0 }
             };
 
             let color = if percentage > 0 {
-                if *reached {
-                    GREEN
-                } else {
-                    WHITE
-                }
+                if *reached { GREEN } else { WHITE }
             } else {
                 MUTED
             };
@@ -431,8 +423,7 @@ fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32
     }
 }
 
-
-// Added tests for the milestones because there is not really any easy way to test it 
+// Added tests for the milestones because there is not really any easy way to test it
 #[cfg(test)]
 mod tests {
     fn compute_fractional_level(level: i32, xp_this: f64, xp_next: f64) -> f64 {

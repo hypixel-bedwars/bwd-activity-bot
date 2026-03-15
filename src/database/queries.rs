@@ -2765,12 +2765,11 @@ pub async fn get_event_statistics(
     debug!("queries::get_event_statistics: event_id={}", event_id);
 
     // Total XP earned within this event.
-    let (total_xp,): (f64,) = sqlx::query_as(
-        "SELECT COALESCE(SUM(xp_earned), 0) FROM event_xp WHERE event_id = $1",
-    )
-    .bind(event_id)
-    .fetch_one(pool)
-    .await?;
+    let (total_xp,): (f64,) =
+        sqlx::query_as("SELECT COALESCE(SUM(xp_earned), 0) FROM event_xp WHERE event_id = $1")
+            .bind(event_id)
+            .fetch_one(pool)
+            .await?;
 
     // Per-stat unit totals for this event.
     let rows: Vec<(String, f64)> = sqlx::query_as(

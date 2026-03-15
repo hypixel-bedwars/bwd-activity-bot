@@ -206,7 +206,7 @@ async fn handle_stats_range(
 
     // Fetch updated statistics.
     let stats = queries::get_guild_statistics_ranged(&data.db, guild_id, start_dt, end_dt).await?;
-    
+
     let params = StatisticsCardParams {
         title: "Server Statistics".to_string(),
         subtitle: Some(subtitle),
@@ -216,7 +216,7 @@ async fn handle_stats_range(
     let png_bytes = statistics_card::render(&params);
     let attachment = serenity::CreateAttachment::bytes(png_bytes, "statistics.png");
     let components = build_range_components(guild_id, selected_days);
-    
+
     component
         .create_response(
             ctx,
