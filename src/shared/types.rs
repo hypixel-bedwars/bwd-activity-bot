@@ -1,3 +1,4 @@
+use std::sync::atomic::AtomicBool;
 /// Shared type definitions used across the entire bot.
 ///
 /// This module defines the core `Data` struct that Poise passes to every command,
@@ -56,6 +57,14 @@ pub struct Data {
 
     /// Discord HTTP client for sending messages outside command contexts.
     pub http: Arc<serenity::Http>,
+
+    /// Set to `true` while `run_full_hypixel_sweep` is in progress.
+    ///
+    /// Shared across the event sweep scheduler and the regular stale sweep so
+    /// that neither runs concurrently with a full sweep. Use
+    /// `AtomicBool::swap` to claim the flag atomically before spawning a
+    /// sweep, and `store(false)` once the sweep finishes.
+    pub is_full_sweep_running: Arc<AtomicBool>,
 }
 
 /// Represents a change in a single stat for a single user between two snapshots.

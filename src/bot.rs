@@ -5,6 +5,7 @@
 /// tracking, and starts the background stat sweeper and leaderboard updater.
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use dashmap::DashMap;
 use poise::serenity_prelude as serenity;
@@ -22,6 +23,7 @@ use crate::shared::types::{Data, Error};
 use crate::sweeper;
 use crate::utils::event_leaderboard_updater;
 use crate::utils::event_status_updater;
+use crate::utils::event_sweep_scheduler;
 use crate::utils::leaderboard_updater;
 
 /// Build and return the Poise framework, ready to be started.
@@ -92,6 +94,7 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
                     message_validation: MessageValidationState::default(),
                     voice_sessions: Arc::new(std::sync::Mutex::new(HashMap::new())),
                     http: ctx.http.clone(),
+                    is_full_sweep_running: Arc::new(AtomicBool::new(false)),
                 };
 
                 // Create Arc for background tasks
@@ -109,6 +112,13 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
 
                     loop {
                         ticker.tick().await;
+
+                        // Skip the stale sweep while a full event sweep is
+                        // already running — the full sweep covers every user
+                        if sweeper_data.is_full_sweep_running.load(Ordering::SeqCst) {
+                            info!("Stale sweep skipped — full event sweep already in progress.");
+                            continue;
+                        }
 
                         if let Err(e) =
                             sweeper::hypixel_sweeper::run_hypixel_stale_sweep(&sweeper_data).await
@@ -144,6 +154,15 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
                 let status_db = db.clone();
                 tokio::spawn(async move {
                     event_status_updater::start_event_status_updater(Arc::new(status_db)).await;
+                });
+
+                // Event sweep scheduler: triggers a full Hypixel sweep timed
+                // to complete right before each event starts and ends, so
+                // participant snapshots are as fresh as possible at event
+                // boundaries.
+                let event_sweep_data = Arc::clone(&data_arc);
+                tokio::spawn(async move {
+                    event_sweep_scheduler::start_event_sweep_scheduler(event_sweep_data).await;
                 });
 
                 // Register slash commands to the configured guild only.

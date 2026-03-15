@@ -1477,6 +1477,52 @@ pub async fn list_events_by_status(
     .await
 }
 
+/// Count all registered users across guild.
+///
+/// Used by the event sweep scheduler to estimate how long a full sweep will
+/// take (1 second per user) without fetching the full row set.
+pub async fn count_registered_users(pool: &PgPool) -> Result<i64, sqlx::Error> {
+    debug!("queries::count_registered_users (active flag)");
+    // Count only users who are marked active. The migrations add an `active`
+    // boolean column so users who left can be hidden without deleting history.
+    sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM users WHERE active = TRUE")
+        .fetch_one(pool)
+        .await
+}
+
+/// Return all pending events (across all guilds) whose start time is still in
+/// the future. Ordered by `start_date` ascending so the soonest event is first.
+///
+/// Used by the event sweep scheduler to decide when to kick off a pre-start
+/// full sweep.
+pub async fn get_all_pending_events(pool: &PgPool) -> Result<Vec<DbEvent>, sqlx::Error> {
+    debug!("queries::get_all_pending_events");
+    sqlx::query_as::<_, DbEvent>(
+        "SELECT * FROM events
+         WHERE status = 'pending' AND start_date > NOW()
+         ORDER BY start_date ASC",
+    )
+    .fetch_all(pool)
+    .await
+}
+
+/// Return all active events (across all guilds) whose end time is still in
+/// the future. Ordered by `end_date` ascending so the soonest-ending event is
+/// first.
+///
+/// Used by the event sweep scheduler to decide when to kick off a pre-end
+/// full sweep.
+pub async fn get_all_active_events(pool: &PgPool) -> Result<Vec<DbEvent>, sqlx::Error> {
+    debug!("queries::get_all_active_events");
+    sqlx::query_as::<_, DbEvent>(
+        "SELECT * FROM events
+         WHERE status = 'active' AND end_date > NOW()
+         ORDER BY end_date ASC",
+    )
+    .fetch_all(pool)
+    .await
+}
+
 /// Update mutable fields of an event. Only fields with `Some(...)` are changed.
 /// Returns `Ok(true)` if the update succeeded, `Ok(false)` if not found or ended.
 pub async fn update_event(
