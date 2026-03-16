@@ -25,11 +25,13 @@ const BRONZE_ROW: Rgba<u8> = Rgba([0x28, 0x1e, 0x14, 0xff]);
 const WHITE: Rgba<u8> = Rgba([0xff, 0xff, 0xff, 0xff]);
 const CYAN: Rgba<u8> = Rgba([0x00, 0xbf, 0xff, 0xff]);
 const MUTED: Rgba<u8> = Rgba([0x88, 0x88, 0xaa, 0xff]);
-const GOLD: Rgba<u8> = Rgba([0xff, 0xd7, 0x00, 0xff]);
+const GOLD: Rgba<u8> = Rgba([0xff, 0xaa, 0x00, 0xff]);
 const SILVER: Rgba<u8> = Rgba([0xc0, 0xc0, 0xc0, 0xff]);
 const BRONZE: Rgba<u8> = Rgba([0xcd, 0x7f, 0x32, 0xff]);
 const DIVIDER: Rgba<u8> = Rgba([0x30, 0x30, 0x50, 0xff]);
 const HEADER_BG: Rgba<u8> = Rgba([0x16, 0x16, 0x28, 0xff]);
+const RANK_GREEN: Rgba<u8> = Rgba([0x55, 0xff, 0x55, 0xff]);
+const LIGHT_BLUE: Rgba<u8> = Rgba([0x55, 0xff, 0xff, 0xff]);
 
 // ---------------------------------------------------------------------------
 // Image dimensions
@@ -147,60 +149,25 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
     // == HEADER ===============================================================
     let header_x = MARGIN;
     let header_y = MARGIN + y_offset;
-    let header_w = IMG_W - MARGIN * 2;
 
     // == COLUMN LAYOUT ========================================================
     // When show_level is false (event leaderboard) the Level column is hidden
     // and the XP column stays in its original position.
     let rank_column_x = header_x + 20;
-    let username_column_center = header_x + 350;
-    let level_column_center = header_x + 700;
-    // XP column stays at the right regardless of show_level.
-    let xp_column_center = header_x + header_w - 120;
+
 
     // == COLUMN HEADERS =======================================================
     let col_header_y = header_y + 10;
-
-    // Rank header
-    font.render_text(&mut img, rank_column_x, col_header_y, "Rank", 3, MUTED);
-
-    let username_header = "Username";
-    let username_header_w = font.measure_text(username_header, 3);
-    font.render_text(
-        &mut img,
-        username_column_center - username_header_w / 2,
-        col_header_y,
-        username_header,
-        3,
-        MUTED,
-    );
-
-    if params.show_level {
-        let level_header = "Level";
-        let level_header_w = font.measure_text(level_header, 3);
-        font.render_text(
-            &mut img,
-            level_column_center - level_header_w / 2,
-            col_header_y,
-            level_header,
-            3,
-            MUTED,
-        );
-    }
-
-    let xp_header = "XP";
-    let xp_header_w = font.measure_text(xp_header, 3);
-    font.render_text(
-        &mut img,
-        xp_column_center - xp_header_w / 2,
-        col_header_y,
-        xp_header,
-        3,
-        MUTED,
-    );
+    
+    let text = "Top 10";
+    
+    font.render_formatted(&mut img, rank_column_x, header_y, text, 5, GOLD);
+    font.render_formatted(&mut img, rank_column_x + 1, header_y, text, 5, GOLD);
+    font.render_formatted(&mut img, rank_column_x - 1, header_y, text, 5, GOLD);
+    font.render_formatted(&mut img, rank_column_x, header_y + 1, text, 5, GOLD);
 
     // == ROWS =================================================================
-    let rows_start_y = col_header_y + 28;
+    let rows_start_y = col_header_y + 32;
 
     for (i, row) in params.rows.iter().enumerate() {
         debug!(
@@ -210,30 +177,6 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
 
         let row_y = rows_start_y + (i as u32) * ROW_H;
 
-        // Position number (#1, #2, …)
-        let rank_color = if row.rank == 1 {
-            GOLD
-        } else if row.rank == 2 {
-            SILVER
-        } else if row.rank == 3 {
-            BRONZE
-        } else {
-            MUTED
-        };
-        let rank_text = format!("#{}", row.rank);
-        font.render_formatted_shadowed(
-            &mut img,
-            rank_column_x,
-            row_y + 16,
-            &rank_text,
-            5,
-            rank_color,
-        );
-
-        // Hypixel rank badge + username, starting after the position number
-        let text_y = row_y + 14;
-        let text_scale = 5u32;
-
         let raw_rank = row.hypixel_rank.as_deref();
         let (new_pkg, monthly_pkg) = if raw_rank == Some("SUPERSTAR") {
             (None, Some("SUPERSTAR"))
@@ -241,87 +184,75 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
             (raw_rank, None)
         };
         let hypixel_rank = HypixelRank::from_api(new_pkg, monthly_pkg);
-
-        let mut badge_w = 0;
-        if hypixel_rank != HypixelRank::None {
-            let label = hypixel_rank.display_label();
-            badge_w = font.measure_text(label, text_scale) + 6;
-        }
-
-        let username_w = font.measure_text(&row.username, text_scale);
-        let total_name_w = badge_w + username_w;
-        let mut cursor_x = username_column_center - total_name_w / 2;
+        
+        let mut cursor_x = rank_column_x; 
+        let y = row_y + 14;
+        let scale = 5;
+        
+        // #rank
+        let rank_str = format!("#{}", row.rank);
+        font.render_formatted_shadowed(&mut img, cursor_x, y, &rank_str, scale, RANK_GREEN);
+        cursor_x += font.measure_text(&rank_str, scale);
+        
+        // space
+        cursor_x += font.measure_text(" ", scale);
+        
         let name_col = hypixel_rank.name_color();
-
-        debug!(
-            "rank debug: username={} raw_rank={:?} parsed_rank={:?}",
-            row.username, raw_rank, hypixel_rank
-        );
-
+        
+        // hypixel rank label
         if hypixel_rank != HypixelRank::None {
             let label = hypixel_rank.display_label();
             let name_col = hypixel_rank.name_color();
             let plus_color = plus_color_to_rgba(row.hypixel_rank_plus_color.as_deref());
-
+        
             if let Some(plus_pos) = label.find('+') {
                 let before = &label[..plus_pos];
+        
                 let plus_count = label[plus_pos..].chars().take_while(|&c| c == '+').count();
-                let after_start = plus_pos + plus_count;
-                let after = &label[after_start..];
-
-                font.render_text(&mut img, cursor_x, text_y, before, text_scale, name_col);
-                cursor_x += font.measure_text(before, text_scale);
-
-                let plus_str = &label[plus_pos..after_start];
-                font.render_text(&mut img, cursor_x, text_y, plus_str, text_scale, plus_color);
-                cursor_x += font.measure_text(plus_str, text_scale);
-
+                let plus_end = plus_pos + plus_count;
+        
+                let plus_part = &label[plus_pos..plus_end];
+                let after = &label[plus_end..];
+        
+                // text before +
+                font.render_formatted_shadowed(&mut img, cursor_x, y, before, scale, name_col);
+                cursor_x += font.measure_text(before, scale);
+        
+                // +++
+                font.render_text(&mut img, cursor_x+5, y, plus_part, scale, plus_color);
+                cursor_x += font.measure_text(plus_part, scale);
+        
+                // text after +
                 if !after.is_empty() {
-                    font.render_formatted_shadowed(
-                        &mut img, cursor_x, text_y, after, text_scale, name_col,
-                    );
-                    cursor_x += font.measure_text(after, text_scale);
+                    font.render_formatted_shadowed(&mut img, cursor_x, y, after, scale, name_col);
+                    cursor_x += font.measure_text(after, scale);
                 }
             } else {
-                font.render_formatted_shadowed(
-                    &mut img, cursor_x, text_y, label, text_scale, name_col,
-                );
-                cursor_x += font.measure_text(label, text_scale);
+                font.render_formatted_shadowed(&mut img, cursor_x, y, label, scale, name_col);
+                cursor_x += font.measure_text(label, scale);
             }
-
-            cursor_x += 6;
+        
+            cursor_x += font.measure_text(" ", scale);
         }
-
-        // Username
-        font.render_formatted_shadowed(
-            &mut img,
-            cursor_x,
-            text_y,
-            &row.username,
-            text_scale,
-            name_col,
-        );
-
-        // Level (only rendered when show_level is true)
-        if params.show_level {
-            let level_text = format!("{}", row.level);
-            let level_w = font.measure_text(&level_text, text_scale);
-            let level_x = level_column_center - level_w / 2;
-            font.render_formatted_shadowed(
-                &mut img,
-                level_x,
-                row_y + 14,
-                &level_text,
-                text_scale,
-                CYAN,
-            );
-        }
-
-        // XP right aligned
-        let xp_text = format_xp(row.total_xp);
-        let xp_w = font.measure_text(&xp_text, text_scale);
-        let xp_x = xp_column_center - xp_w / 2;
-        font.render_formatted_shadowed(&mut img, xp_x, row_y + 14, &xp_text, text_scale, WHITE);
+        
+        // username
+        font.render_formatted_shadowed(&mut img, cursor_x, y, &row.username, scale, name_col);
+        cursor_x += font.measure_text(&row.username, scale);
+        
+        // dash
+        font.render_formatted(&mut img, cursor_x, y, " - ", scale, MUTED);
+        cursor_x += font.measure_text(" - ", scale);
+        
+        // level
+        let level_str = format!("Level {}", row.level);
+        font.render_formatted_shadowed(&mut img, cursor_x, y, &level_str, scale, LIGHT_BLUE);
+        cursor_x += font.measure_text(&level_str, scale);
+        
+        // xp
+        let xp_str = format!(" ({}xp)", format_xp(row.total_xp));
+        font.render_formatted_shadowed(&mut img, cursor_x, y, &xp_str, scale, WHITE);
+        
+        
     }
 
     // == EMPTY STATE ==========================================================

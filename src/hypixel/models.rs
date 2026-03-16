@@ -226,7 +226,7 @@ impl HypixelRank {
             Self::None => image::Rgba([0xff, 0xff, 0xff, 0xff]),
             Self::Vip | Self::VipPlus => image::Rgba([0x55, 0xff, 0x55, 0xff]),
             Self::Mvp | Self::MvpPlus => image::Rgba([0x55, 0xff, 0xff, 0xff]),
-            Self::MvpPlusPlus => image::Rgba([0xff, 0xd7, 0x00, 0xff]),
+            Self::MvpPlusPlus => image::Rgba([0xff, 0xaa, 0x00, 0xff]),
         }
     }
 
