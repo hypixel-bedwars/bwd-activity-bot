@@ -25,7 +25,7 @@ use crate::shared::types::{Data, Error};
 pub fn all() -> Vec<poise::Command<Data, Error>> {
     vec![
         // registration::register::register(),
-        registration::unregister::unregister(),
+        // registration::unregister::unregister(),
         registration::send_registration_message::send_registration_message(),
         stats::stats::stats(),
         stats::level::level(),
