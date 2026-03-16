@@ -61,7 +61,7 @@ async fn autocomplete_event_name<'a>(
 #[poise::command(
     slash_command,
     guild_only,
-    subcommands("list", "info", "leaderboard", "level", "statistics"),
+    subcommands("list", "info", "leaderboard", "level", "statistics", "milestones"),
     subcommand_required
 )]
 pub async fn event(_ctx: Context<'_>) -> Result<(), Error> {
@@ -452,6 +452,89 @@ pub async fn statistics(
         "Sent event statistics card for guild {} event '{}'",
         guild_id, event_name
     );
+
+    Ok(())
+}
+
+/// Show milestone completers for an event as a Discord embed.
+///
+/// Each milestone gets one embed field listing how many players reached it
+/// and their Discord mentions (up to Discord's 25-field / 1024-char limits).
+#[poise::command(slash_command, guild_only, ephemeral)]
+pub async fn milestones(
+    ctx: Context<'_>,
+    #[description = "Event name (defaults to most recent)"]
+    #[autocomplete = "autocomplete_event_name"]
+    event_name: Option<String>,
+) -> Result<(), Error> {
+    ctx.defer_ephemeral().await?;
+
+    let guild_id = ctx.guild_id().unwrap().get() as i64;
+
+    let event_name = match event_name {
+        Some(n) => n,
+        None => queries::get_latest_event_name(&ctx.data().db, guild_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("No active or ended events found"))?,
+    };
+
+    let event = match queries::get_event_by_name(&ctx.data().db, guild_id, &event_name).await? {
+        Some(e) => e,
+        None => {
+            ctx.say(format!("Event **{}** not found.", event_name))
+                .await?;
+            return Ok(());
+        }
+    };
+
+    let milestones = queries::get_event_milestones(&ctx.data().db, event.id).await?;
+
+    if milestones.is_empty() {
+        ctx.say(format!(
+            "No milestones have been configured for **{}** yet. Admins can add them with `/edit-event milestones-add`.",
+            event.name
+        ))
+        .await?;
+        return Ok(());
+    }
+
+    let mut embed = poise::serenity_prelude::CreateEmbed::new()
+        .title(format!("Milestones — {}", event.name))
+        .color(0x00BFFF);
+
+    // Build one field per milestone (cap at Discord's 25-field limit).
+    for milestone in milestones.iter().take(25) {
+        let completers =
+            queries::get_event_milestone_completers(&ctx.data().db, event.id, milestone.xp_threshold)
+                .await
+                .unwrap_or_default();
+
+        let count = completers.len();
+        let field_name = format!("{} XP", milestone.xp_threshold as i64);
+
+        // Build mention list, respecting Discord's 1024-char field value limit.
+        let mut value = if count == 0 {
+            "No players have reached this milestone yet.".to_string()
+        } else {
+            let mut s = format!("**{count} player{}**\n", if count == 1 { "" } else { "s" });
+            for uid in &completers {
+                let mention = format!("<@{uid}> ");
+                if s.len() + mention.len() > 1020 {
+                    s.push_str("…");
+                    break;
+                }
+                s.push_str(&mention);
+            }
+            s
+        };
+
+        // Discord field values must be non-empty and ≤ 1024 chars.
+        value.truncate(1024);
+
+        embed = embed.field(field_name, value, false);
+    }
+
+    ctx.send(poise::CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }

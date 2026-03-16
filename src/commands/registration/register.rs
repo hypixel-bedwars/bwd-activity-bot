@@ -148,23 +148,86 @@ pub async fn perform_registration(
         }
     };
 
+    // If the user exists already (active OR inactive), handle accordingly.
+    // We must use the _any variant here because an unregistered user has active=FALSE
+    // and would not be found by the active-only query, causing a silent fall-through to
+    // the fresh-registration path which does not restore active=TRUE.
     if let Some(existing_user) =
-        queries::get_user_by_discord_id(&data.db, discord_user_id, guild_id_i64).await?
+        queries::get_user_by_discord_id_any(&data.db, discord_user_id, guild_id_i64).await?
     {
+        if existing_user.active {
+            debug!(
+                guild_id = guild_id_i64,
+                discord_user_id,
+                minecraft_uuid = %existing_user.minecraft_uuid,
+                "User attempted duplicate registration (already active)"
+            );
+
+            return Ok((
+                format!(
+                    "You are already registered as **{}** (UUID `{}`). \
+                If you want to change your linked Minecraft account, please unregister first with `/unregister`.",
+                    existing_user.minecraft_username.as_deref().unwrap_or("unknown"), existing_user.minecraft_uuid
+                ),
+                None,
+            ));
+        }
+
         debug!(
             guild_id = guild_id_i64,
             discord_user_id,
             minecraft_uuid = %existing_user.minecraft_uuid,
-            "User attempted duplicate registration"
+            "User is re-registering (was inactive) — will reactivate and keep stats"
+        );
+
+        // Reactivate the row and update Minecraft identity (keeps all stats history).
+        queries::mark_user_active(&data.db, discord_user_id, guild_id_i64).await?;
+
+        let rank = player_data.rank.as_db_str();
+        let plus_color = player_data.rank_plus_color.as_deref();
+
+        let now = chrono::Utc::now();
+        let db_user = queries::register_user(
+            &data.db,
+            discord_user_id,
+            profile.id,
+            &profile.name,
+            guild_id_i64,
+            now,
+        )
+        .await?;
+
+        queries::update_user_hypixel_rank(&data.db, db_user.id, rank, plus_color).await?;
+
+        // Re-assign the registered role (it was removed during unregister).
+        let role = serenity::RoleId::new(role_id);
+        let member = guild_id.member(&serenity_ctx.http, user_id).await?;
+        if let Err(e) = member.add_role(&serenity_ctx.http, role).await {
+            error!(
+                guild_id = guild_id_i64,
+                discord_user_id,
+                role_id,
+                error = %e,
+                "Failed to re-assign registered role during re-registration"
+            );
+        }
+
+        // Do NOT reseed snapshots here — they already exist and should remain continuous.
+
+        info!(
+            discord_user_id,
+            minecraft_uuid = %profile.id,
+            minecraft_name = %profile.name,
+            "User re-registered"
         );
 
         return Ok((
             format!(
-                "You are already registered as **{}** (UUID `{}`). \
-                If you want to change your linked Minecraft account, please unregister first with `/unregister`.",
-                existing_user.minecraft_uuid, existing_user.minecraft_uuid
+                "Welcome back — you have been re-registered as **{}** (UUID `{}`). \
+                Your previous stats have been preserved and tracking is now active again.",
+                profile.name, profile.id
             ),
-            None,
+            Some((db_user.id, profile.id)),
         ));
     }
 
@@ -322,8 +385,8 @@ pub async fn register(
         let _ = fetch_and_cache_head_texture(&ctx.data().db, db_user_id, &uuid).await;
     }
 
-    // Detect success by looking for the phrase we set in the success branch.
-    let success = msg.contains("You have been registered");
+    // Detect success by looking for the phrases set in the success branches.
+    let success = msg.contains("You have been registered") || msg.contains("Welcome back");
     let embed = CreateEmbed::default()
         .title(if success {
             "Registration Successful"

@@ -8,7 +8,8 @@ use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 
 use crate::cards::leaderboard_card::{
-    self, LeaderboardCardParams, LeaderboardRow, MilestoneCardParams, MilestoneEntry,
+    self, EventMilestoneCardParams, EventMilestoneEntry, LeaderboardCardParams, LeaderboardRow,
+    MilestoneCardParams, MilestoneEntry,
 };
 use crate::database::queries;
 
@@ -223,4 +224,40 @@ pub async fn generate_milestone_card(
     };
 
     Ok(leaderboard_card::render_milestone_card(&params))
+}
+
+/// Generate a standalone event milestone card PNG.
+///
+/// Returns `None` if no milestones are configured for this event.
+/// Non-fatal errors (e.g. DB failure) produce `Ok(None)`.
+pub async fn generate_event_milestone_card(
+    pool: &PgPool,
+    event_id: i64,
+    event_name: &str,
+) -> Result<Option<Vec<u8>>, Box<dyn std::error::Error + Send + Sync>> {
+    let milestone_data = queries::get_event_milestones_with_counts(pool, event_id)
+        .await
+        .unwrap_or_default();
+
+    if milestone_data.is_empty() {
+        return Ok(None);
+    }
+
+    let milestones: Vec<EventMilestoneEntry> = milestone_data
+        .into_iter()
+        .map(|m| EventMilestoneEntry {
+            xp_threshold: m.xp_threshold,
+            user_count: m.user_count,
+        })
+        .collect();
+
+    let total_participants = queries::count_event_participants(pool, event_id).await?;
+
+    let params = EventMilestoneCardParams {
+        milestones,
+        total_participants,
+        event_name: event_name.to_string(),
+    };
+
+    Ok(Some(leaderboard_card::render_event_milestone_card(&params)))
 }

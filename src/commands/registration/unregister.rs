@@ -8,6 +8,10 @@ use crate::database::queries;
 use crate::shared::types::{Context, Error};
 
 /// Unregister your Minecraft account and stop tracking stats and earning XP.
+///
+/// This is a *soft* unregister: your user row and history remain in the database,
+/// but you will be marked inactive so tracking/leaderboards can ignore you.
+/// If you register again later, your stats will still be present.
 #[poise::command(slash_command, guild_only)]
 pub async fn unregister(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = ctx
@@ -25,9 +29,11 @@ pub async fn unregister(ctx: Context<'_>) -> Result<(), Error> {
     let guild_config: GuildConfig =
         serde_json::from_value(guild_row.config_json.clone()).unwrap_or_default();
 
-    queries::unregister_user(&data.db, discord_user_id, guild_id_i64).await?;
+    // Soft-unregister: mark inactive instead of deleting (preserves history and avoids FK issues).
+    let now = chrono::Utc::now();
+    queries::mark_user_inactive(&data.db, discord_user_id, guild_id_i64, &now).await?;
 
-    info!("User {} unregistered ", ctx.author().id);
+    info!("User {} unregistered (marked inactive)", ctx.author().id);
 
     if let Some(role_id) = guild_config.registered_role_id {
         let role = serenity::RoleId::new(role_id);
@@ -68,7 +74,9 @@ pub async fn unregister(ctx: Context<'_>) -> Result<(), Error> {
         .title("Unregistered")
         .color(0x00BFFF)
         .description(
-            "You have been successfully unregistered. Your stats will no longer be tracked.",
+            "You have been successfully unregistered.\n\
+             You are now marked as **inactive** and your stats will no longer be tracked.\n\
+             If you register again later, your previous stats will still be present.",
         );
     ctx.send(poise::CreateReply::default().embed(embed)).await?;
 

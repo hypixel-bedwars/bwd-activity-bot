@@ -9,7 +9,7 @@ use image::{DynamicImage, GenericImageView, ImageFormat, Rgba, RgbaImage};
 use tracing::debug;
 
 use crate::font::renderer::FontRenderer;
-use crate::hypixel::models::{HypixelRank, plus_color_to_rgba};
+use crate::hypixel::models::{plus_color_to_rgba, HypixelRank};
 
 // ---------------------------------------------------------------------------
 // Colour constants
@@ -253,14 +253,20 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         font.render_formatted(&mut img, cursor_x, y, " - ", scale, MUTED);
         cursor_x += font.measure_text(" - ", scale);
 
-        // level
-        let level_str = format!("Level {}", row.level);
-        font.render_formatted_shadowed(&mut img, cursor_x, y, &level_str, scale, LIGHT_BLUE);
-        cursor_x += font.measure_text(&level_str, scale);
+        if params.show_level {
+            // level
+            let level_str = format!("Level {}", row.level);
+            font.render_formatted_shadowed(&mut img, cursor_x, y, &level_str, scale, LIGHT_BLUE);
+            cursor_x += font.measure_text(&level_str, scale);
 
-        // xp
-        let xp_str = format!(" ({}xp)", format_xp(row.total_xp));
-        font.render_formatted_shadowed(&mut img, cursor_x, y, &xp_str, scale, MUTED);
+            // xp
+            let xp_str = format!(" ({}xp)", format_xp(row.total_xp));
+            font.render_formatted_shadowed(&mut img, cursor_x, y, &xp_str, scale, MUTED);
+        } else {
+            // event mode: show only XP, no level
+            let xp_str = format!("{}xp", format_xp(row.total_xp));
+            font.render_formatted_shadowed(&mut img, cursor_x, y, &xp_str, scale, LIGHT_BLUE);
+        }
     }
 
     // == EMPTY STATE ==========================================================
@@ -364,6 +370,116 @@ pub fn render_milestone_card(params: &MilestoneCardParams) -> Vec<u8> {
         .expect("PNG encoding should not fail");
     debug!(
         "leaderboard_card::render_milestone_card: finished encoding PNG (bytes={})",
+        buf.len()
+    );
+    buf
+}
+
+// ---------------------------------------------------------------------------
+// Event milestone card
+// ---------------------------------------------------------------------------
+
+/// A single event milestone entry with its reach count.
+pub struct EventMilestoneEntry {
+    /// The XP threshold for this milestone.
+    pub xp_threshold: f64,
+    /// Number of participants whose total event XP >= xp_threshold.
+    pub user_count: i64,
+}
+
+/// Parameters for rendering a standalone event milestone card.
+pub struct EventMilestoneCardParams {
+    /// Milestones to display, ordered by xp_threshold ascending.
+    pub milestones: Vec<EventMilestoneEntry>,
+    /// Total number of event participants (for context line).
+    pub total_participants: i64,
+    /// Event name shown as the card title.
+    pub event_name: String,
+}
+
+/// Render a standalone event milestone card and return the PNG bytes.
+///
+/// Mirrors `render_milestone_card` but uses `"X,XXX XP"` labels instead of
+/// `"Level N"` and shows the event name as a title row.
+pub fn render_event_milestone_card(params: &EventMilestoneCardParams) -> Vec<u8> {
+    debug!(
+        "leaderboard_card::render_event_milestone_card: event={} milestones={} total_participants={}",
+        params.event_name,
+        params.milestones.len(),
+        params.total_participants,
+    );
+
+    let font = FontRenderer::get();
+
+    let content_h = (params.milestones.len() as u32).max(1) * MILESTONE_ROW_H + 60;
+    let img_h = content_h.max(200);
+
+    let mut img = RgbaImage::from_pixel(IMG_W, img_h, BG);
+
+    // Event name title (top-left)
+    font.render_text(
+        &mut img,
+        MARGIN + 20,
+        MARGIN + 8,
+        &params.event_name,
+        3,
+        CYAN,
+    );
+
+    // Total participants right-aligned
+    let users_text = format!("{} participants", params.total_participants);
+    let users_w = font.measure_text(&users_text, 2);
+    let users_x = (IMG_W - MARGIN * 2).saturating_sub(20 + users_w) + MARGIN;
+    font.render_text(&mut img, users_x, MARGIN + 10, &users_text, 2, MUTED);
+
+    if params.milestones.is_empty() {
+        let msg = "No milestones configured for this event.";
+        let msg_w = font.measure_text(msg, 2);
+        let cx = (IMG_W - msg_w) / 2;
+        font.render_text(
+            &mut img,
+            cx,
+            MARGIN + MILESTONE_SECTION_HEADER_H + 10,
+            msg,
+            3,
+            MUTED,
+        );
+    } else {
+        let first_row_y = MARGIN + 40;
+        for (i, milestone) in params.milestones.iter().enumerate() {
+            let row_y = first_row_y + (i as u32) * MILESTONE_ROW_H;
+
+            // XP threshold badge
+            let threshold_text = format!("{} XP", format_xp(milestone.xp_threshold));
+            font.render_text(&mut img, MARGIN + 20, row_y + 8, &threshold_text, 3, GOLD);
+
+            // User count
+            let count_text = format!(
+                "{} player{} reached this milestone",
+                milestone.user_count,
+                if milestone.user_count == 1 {
+                    " has"
+                } else {
+                    "s have"
+                },
+            );
+            font.render_text(
+                &mut img,
+                MARGIN + 220,
+                row_y + (MILESTONE_ROW_H / 2) - 12,
+                &count_text,
+                3,
+                WHITE,
+            );
+        }
+    }
+
+    let mut buf: Vec<u8> = Vec::new();
+    DynamicImage::ImageRgba8(img)
+        .write_to(&mut Cursor::new(&mut buf), ImageFormat::Png)
+        .expect("PNG encoding should not fail");
+    debug!(
+        "leaderboard_card::render_event_milestone_card: finished encoding PNG (bytes={})",
         buf.len()
     );
     buf

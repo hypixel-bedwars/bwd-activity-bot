@@ -234,7 +234,9 @@ pub async fn force_unregister(
     let guild_config: GuildConfig =
         serde_json::from_value(guild_row.config_json.clone()).unwrap_or_default();
 
-    queries::unregister_user(&data.db, user_id, guild_id_i64).await?;
+    // Soft-unregister: preserve history and avoid FK constraint violations.
+    let now = chrono::Utc::now();
+    queries::mark_user_inactive(&data.db, user_id, guild_id_i64, &now).await?;
 
     if let Some(role_id) = guild_config.registered_role_id {
         let role = serenity::RoleId::new(role_id);
@@ -263,8 +265,8 @@ pub async fn force_unregister(
             return Ok(());
         }
 
-        // remove role from the member
-        let member = guild_id.member(ctx.http(), ctx.author().id).await?;
+        // remove role from the *target* member (not the admin invoking the command)
+        let member = guild_id.member(ctx.http(), user.id).await?;
 
         if member.roles.contains(&role) {
             member.remove_role(ctx.http(), role).await?;

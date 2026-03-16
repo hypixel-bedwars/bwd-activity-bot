@@ -374,6 +374,9 @@ pub struct DbPersistentEventLeaderboard {
     /// Discord message ID for the status / last-updated message.
     /// `0` means none has been sent yet.
     pub status_message_id: i64,
+    /// Discord message ID of the standalone event milestone card message.
+    /// `0` means no milestone message has been sent yet.
+    pub milestone_message_id: i64,
     pub created_at: DateTime<Utc>,
     pub last_updated: DateTime<Utc>,
 }
@@ -411,4 +414,29 @@ pub struct BackfillSummary {
     pub deltas_processed: i64,
     pub total_xp_awarded: f64,
     pub users_affected: i64,
+}
+
+// ---------------------------------------------------------------------------
+// event_milestones
+// ---------------------------------------------------------------------------
+
+/// A row from the `event_milestones` table.
+#[derive(Debug, Clone, FromRow)]
+pub struct DbEventMilestone {
+    pub id: i64,
+    pub event_id: i64,
+    /// XP threshold that defines this milestone.
+    pub xp_threshold: f64,
+    pub created_at: DateTime<Utc>,
+}
+
+/// An event milestone row joined with the count of users who have reached it.
+/// Returned by the `get_event_milestones_with_counts` query.
+#[derive(Debug, Clone, FromRow)]
+pub struct EventMilestoneWithCount {
+    pub id: i64,
+    pub event_id: i64,
+    pub xp_threshold: f64,
+    /// Number of participants whose total event XP is >= xp_threshold.
+    pub user_count: i64,
 }

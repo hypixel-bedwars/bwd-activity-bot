@@ -147,7 +147,9 @@ async fn autocomplete_event_stat<'a>(
         "stats_edit",
         "list",
         "backfill",
-        "status"
+        "status",
+        "milestones_add",
+        "milestones_remove"
     )
 )]
 pub async fn edit_event(_ctx: Context<'_>) -> Result<(), Error> {
@@ -981,6 +983,14 @@ pub async fn persist(
                 )
                 .await;
         }
+        if existing.milestone_message_id != 0 {
+            let _ = old_channel
+                .delete_message(
+                    &ctx.http(),
+                    serenity::MessageId::new(existing.milestone_message_id as u64),
+                )
+                .await;
+        }
 
         queries::delete_persistent_event_leaderboard(&ctx.data().db, event.id).await?;
     }
@@ -1027,7 +1037,33 @@ pub async fn persist(
         message_ids.push(msg.id.get());
     }
 
-    // Post status / last-updated message.
+    // Post milestone card if milestones exist for this event (before status message).
+    let milestone_message_id: i64 =
+        match lb_helpers::generate_event_milestone_card(&ctx.data().db, event.id, &event.name)
+            .await
+        {
+            Ok(Some(bytes)) => {
+                let attachment =
+                    CreateAttachment::bytes(bytes, "event_milestones.png");
+                match channel
+                    .send_message(&ctx.http(), CreateMessage::new().add_file(attachment))
+                    .await
+                {
+                    Ok(msg) => msg.id.get() as i64,
+                    Err(e) => {
+                        error!(event_id = event.id, error = %e, "Failed to post event milestone card.");
+                        0
+                    }
+                }
+            }
+            Ok(None) => 0,
+            Err(e) => {
+                error!(event_id = event.id, error = %e, "Failed to generate event milestone card.");
+                0
+            }
+        };
+
+    // Post status / last-updated message (always last, so it sits at the bottom).
     let unix_time = time::OffsetDateTime::now_utc().unix_timestamp();
     let status_content = if event.status == "ended" {
         format!(
@@ -1059,6 +1095,7 @@ pub async fn persist(
         channel.get() as i64,
         &message_ids_json,
         status_message_id,
+        milestone_message_id,
         &now,
         &now,
     )
@@ -1364,6 +1401,175 @@ pub async fn remove(
             "{} removed the persistent event status message for **{}**",
             ctx.author().name,
             event.name
+        ),
+    )
+    .await?;
+
+    Ok(())
+}
+
+/// Add XP-threshold milestones to an event (pending or active only).
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    rename = "milestones-add",
+    check = "crate::utils::permissions::admin_check"
+)]
+pub async fn milestones_add(
+    ctx: Context<'_>,
+    #[description = "Event name"]
+    #[autocomplete = "autocomplete_event_name"]
+    event_name: String,
+    #[description = "Comma-separated XP thresholds, e.g. 500, 1000, 5000"] milestones: String,
+) -> Result<(), Error> {
+    let guild_id = ctx
+        .guild_id()
+        .ok_or("This command can only be used in a server")?
+        .get() as i64;
+    let data = ctx.data();
+
+    let event = match queries::get_event_by_name(&data.db, guild_id, &event_name).await? {
+        Some(e) => e,
+        None => {
+            ctx.say(format!("Event **{event_name}** not found.")).await?;
+            return Ok(());
+        }
+    };
+
+    if event.status == "ended" {
+        ctx.say("Cannot add milestones to an event that has already ended.")
+            .await?;
+        return Ok(());
+    }
+
+    // Parse the comma-separated thresholds.
+    let thresholds: Vec<f64> = milestones
+        .split(',')
+        .filter_map(|s| {
+            let trimmed = s.trim();
+            if trimmed.is_empty() {
+                return None;
+            }
+            trimmed.parse::<f64>().ok()
+        })
+        .filter(|&v| v > 0.0)
+        .collect();
+
+    if thresholds.is_empty() {
+        ctx.say("No valid positive XP thresholds found. Use a format like `500, 1000, 5000`.")
+            .await?;
+        return Ok(());
+    }
+
+    let inserted = queries::add_event_milestones(&data.db, event.id, &thresholds).await?;
+
+    let threshold_list = thresholds
+        .iter()
+        .map(|v| format!("{v}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    ctx.say(format!(
+        "Added **{inserted}** new milestone(s) to **{event_name}** (thresholds: {threshold_list}).\n\
+         Use `/edit-event milestones-remove` to remove any."
+    ))
+    .await?;
+
+    logger(
+        ctx.serenity_context(),
+        data,
+        ctx.guild_id().unwrap(),
+        LogType::Info,
+        format!(
+            "{} added milestones to **{}**: {}",
+            ctx.author().name,
+            event_name,
+            threshold_list
+        ),
+    )
+    .await?;
+
+    Ok(())
+}
+
+/// Remove XP-threshold milestones from an event (pending or active only).
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    rename = "milestones-remove",
+    check = "crate::utils::permissions::admin_check"
+)]
+pub async fn milestones_remove(
+    ctx: Context<'_>,
+    #[description = "Event name"]
+    #[autocomplete = "autocomplete_event_name"]
+    event_name: String,
+    #[description = "Comma-separated XP thresholds to remove, e.g. 500, 1000"] milestones: String,
+) -> Result<(), Error> {
+    let guild_id = ctx
+        .guild_id()
+        .ok_or("This command can only be used in a server")?
+        .get() as i64;
+    let data = ctx.data();
+
+    let event = match queries::get_event_by_name(&data.db, guild_id, &event_name).await? {
+        Some(e) => e,
+        None => {
+            ctx.say(format!("Event **{event_name}** not found.")).await?;
+            return Ok(());
+        }
+    };
+
+    if event.status == "ended" {
+        ctx.say("Cannot remove milestones from an event that has already ended.")
+            .await?;
+        return Ok(());
+    }
+
+    // Parse the comma-separated thresholds.
+    let thresholds: Vec<f64> = milestones
+        .split(',')
+        .filter_map(|s| {
+            let trimmed = s.trim();
+            if trimmed.is_empty() {
+                return None;
+            }
+            trimmed.parse::<f64>().ok()
+        })
+        .filter(|&v| v > 0.0)
+        .collect();
+
+    if thresholds.is_empty() {
+        ctx.say("No valid XP thresholds found. Use a format like `500, 1000`.")
+            .await?;
+        return Ok(());
+    }
+
+    let removed = queries::remove_event_milestones(&data.db, event.id, &thresholds).await?;
+
+    let threshold_list = thresholds
+        .iter()
+        .map(|v| format!("{v}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    ctx.say(format!(
+        "Removed **{removed}** milestone(s) from **{event_name}** (thresholds: {threshold_list})."
+    ))
+    .await?;
+
+    logger(
+        ctx.serenity_context(),
+        data,
+        ctx.guild_id().unwrap(),
+        LogType::Info,
+        format!(
+            "{} removed milestones from **{}**: {}",
+            ctx.author().name,
+            event_name,
+            threshold_list
         ),
     )
     .await?;

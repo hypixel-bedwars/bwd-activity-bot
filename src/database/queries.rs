@@ -13,10 +13,10 @@ use tracing::{debug, error, info, warn};
 use uuid::Uuid;
 
 use super::models::{
-    BackfillSummary, DbDailySnapshot, DbEvent, DbEventStat, DbEventStatusMessage, DbGuild,
-    DbMilestone, DbPersistentEventLeaderboard, DbPersistentLeaderboard, DbStatDelta,
-    DbStatsSnapshot, DbSweepCursor, DbUser, DbXP, EventLeaderboardEntry, EventParticipant,
-    LeaderboardEntry, MilestoneWithCount,
+    BackfillSummary, DbDailySnapshot, DbEvent, DbEventMilestone, DbEventStat, DbEventStatusMessage,
+    DbGuild, DbMilestone, DbPersistentEventLeaderboard, DbPersistentLeaderboard, DbStatDelta,
+    DbStatsSnapshot, DbSweepCursor, DbUser, DbXP, EventLeaderboardEntry, EventMilestoneWithCount,
+    EventParticipant, LeaderboardEntry, MilestoneWithCount,
 };
 
 // =========================================================================
@@ -135,7 +135,9 @@ pub async fn register_user(
          VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT(discord_user_id, guild_id) DO UPDATE SET
              minecraft_uuid     = excluded.minecraft_uuid,
-             minecraft_username = excluded.minecraft_username",
+             minecraft_username = excluded.minecraft_username,
+             active             = TRUE,
+             left_at            = NULL",
     )
     .bind(discord_user_id)
     .bind(minecraft_uuid)
@@ -247,7 +249,10 @@ pub async fn get_first_discord_snapshot(
     .await
 }
 
-/// Look up a user by Discord ID within a specific guild.
+/// Look up an *active* user by Discord ID within a specific guild.
+///
+/// Inactive users are preserved for historical stats, but should be ignored by
+/// tracking and most commands.
 pub async fn get_user_by_discord_id(
     pool: &PgPool,
     discord_user_id: i64,
@@ -257,11 +262,40 @@ pub async fn get_user_by_discord_id(
         "queries::get_user_by_discord_id: discord_user_id={}, guild_id={}",
         discord_user_id, guild_id
     );
-    sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE discord_user_id = $1 AND guild_id = $2")
-        .bind(discord_user_id)
-        .bind(guild_id)
-        .fetch_optional(pool)
-        .await
+    sqlx::query_as::<_, DbUser>(
+        "SELECT * FROM users
+         WHERE discord_user_id = $1
+           AND guild_id = $2
+           AND active = TRUE",
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .fetch_optional(pool)
+    .await
+}
+
+/// Like `get_user_by_discord_id` but returns the row regardless of the
+/// `active` flag.  Used during registration to detect inactive (previously
+/// unregistered) users so they can be reactivated instead of treated as
+/// brand-new registrations.
+pub async fn get_user_by_discord_id_any(
+    pool: &PgPool,
+    discord_user_id: i64,
+    guild_id: i64,
+) -> Result<Option<DbUser>, sqlx::Error> {
+    debug!(
+        "queries::get_user_by_discord_id_any: discord_user_id={}, guild_id={}",
+        discord_user_id, guild_id
+    );
+    sqlx::query_as::<_, DbUser>(
+        "SELECT * FROM users
+         WHERE discord_user_id = $1
+           AND guild_id = $2",
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .fetch_optional(pool)
+    .await
 }
 
 /// Get all registered users across every guild. Used by the sweeper.
@@ -392,7 +426,18 @@ pub async fn set_user_head_texture(
     Ok(())
 }
 
-/// Unregister a user by deleting their row from the database.
+/// Unregister a user.
+///
+/// This project uses **soft unregister** via `mark_user_inactive` to preserve
+/// historical stats and avoid foreign-key constraint issues.
+///
+/// This legacy hard-delete function is kept for admin/maintenance use only.
+/// Prefer `mark_user_inactive` for user-facing flows.
+///
+/// Deprecated: use `mark_user_inactive`.
+#[deprecated(
+    note = "Use mark_user_inactive (soft unregister) to preserve history and avoid FK issues."
+)]
 pub async fn unregister_user(
     pool: &PgPool,
     discord_user_id: i64,
@@ -2139,22 +2184,24 @@ pub async fn upsert_persistent_event_leaderboard(
     channel_id: i64,
     message_ids: &serde_json::Value,
     status_message_id: i64,
+    milestone_message_id: i64,
     created_at: &DateTime<Utc>,
     last_updated: &DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
     debug!(
-        "queries::upsert_persistent_event_leaderboard: event_id={}, guild_id={}, channel_id={}",
-        event_id, guild_id, channel_id
+        "queries::upsert_persistent_event_leaderboard: event_id={}, guild_id={}, channel_id={}, milestone_message_id={}",
+        event_id, guild_id, channel_id, milestone_message_id
     );
     sqlx::query(
         "INSERT INTO persistent_event_leaderboards
-         (event_id, guild_id, channel_id, message_ids, status_message_id, created_at, last_updated)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         (event_id, guild_id, channel_id, message_ids, status_message_id, milestone_message_id, created_at, last_updated)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          ON CONFLICT(event_id) DO UPDATE SET
              guild_id = excluded.guild_id,
              channel_id = excluded.channel_id,
              message_ids = excluded.message_ids,
              status_message_id = excluded.status_message_id,
+             milestone_message_id = excluded.milestone_message_id,
              created_at = excluded.created_at,
              last_updated = excluded.last_updated",
     )
@@ -2163,6 +2210,7 @@ pub async fn upsert_persistent_event_leaderboard(
     .bind(channel_id)
     .bind(message_ids)
     .bind(status_message_id)
+    .bind(milestone_message_id)
     .bind(created_at)
     .bind(last_updated)
     .execute(pool)
@@ -2585,6 +2633,155 @@ pub async fn backfill_event_xp(
     );
 
     Ok(summary)
+}
+
+// =========================================================================
+// event_milestones
+// =========================================================================
+
+/// Insert multiple XP-threshold milestones for an event.
+/// Silently skips thresholds that already exist (ON CONFLICT DO NOTHING).
+/// Returns the number of rows actually inserted.
+pub async fn add_event_milestones(
+    pool: &PgPool,
+    event_id: i64,
+    thresholds: &[f64],
+) -> Result<u64, sqlx::Error> {
+    debug!(
+        "queries::add_event_milestones: event_id={}, count={}",
+        event_id,
+        thresholds.len()
+    );
+    let mut inserted = 0u64;
+    for &threshold in thresholds {
+        let rows = sqlx::query(
+            "INSERT INTO event_milestones (event_id, xp_threshold)
+             VALUES ($1, $2)
+             ON CONFLICT (event_id, xp_threshold) DO NOTHING",
+        )
+        .bind(event_id)
+        .bind(threshold)
+        .execute(pool)
+        .await?
+        .rows_affected();
+        inserted += rows;
+    }
+    Ok(inserted)
+}
+
+/// Delete specific XP-threshold milestones for an event.
+/// Returns the number of rows deleted.
+pub async fn remove_event_milestones(
+    pool: &PgPool,
+    event_id: i64,
+    thresholds: &[f64],
+) -> Result<u64, sqlx::Error> {
+    debug!(
+        "queries::remove_event_milestones: event_id={}, count={}",
+        event_id,
+        thresholds.len()
+    );
+    let rows = sqlx::query(
+        "DELETE FROM event_milestones
+         WHERE event_id = $1 AND xp_threshold = ANY($2)",
+    )
+    .bind(event_id)
+    .bind(thresholds)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    Ok(rows)
+}
+
+/// Get all milestones for an event, ordered ascending by xp_threshold.
+pub async fn get_event_milestones(
+    pool: &PgPool,
+    event_id: i64,
+) -> Result<Vec<DbEventMilestone>, sqlx::Error> {
+    debug!("queries::get_event_milestones: event_id={}", event_id);
+    sqlx::query_as::<_, DbEventMilestone>(
+        "SELECT * FROM event_milestones WHERE event_id = $1 ORDER BY xp_threshold ASC",
+    )
+    .bind(event_id)
+    .fetch_all(pool)
+    .await
+}
+
+/// Get all milestones for an event with the count of users who have reached each one.
+pub async fn get_event_milestones_with_counts(
+    pool: &PgPool,
+    event_id: i64,
+) -> Result<Vec<EventMilestoneWithCount>, sqlx::Error> {
+    debug!(
+        "queries::get_event_milestones_with_counts: event_id={}",
+        event_id
+    );
+    sqlx::query_as::<_, EventMilestoneWithCount>(
+        "SELECT em.id, em.event_id, em.xp_threshold,
+                COUNT(sub.user_id) AS user_count
+         FROM event_milestones em
+         LEFT JOIN (
+             SELECT user_id, SUM(xp_earned) AS total_xp
+             FROM event_xp
+             WHERE event_id = $1
+             GROUP BY user_id
+         ) sub ON sub.total_xp >= em.xp_threshold
+         WHERE em.event_id = $1
+         GROUP BY em.id
+         ORDER BY em.xp_threshold ASC",
+    )
+    .bind(event_id)
+    .fetch_all(pool)
+    .await
+}
+
+/// Get the discord_user_ids of all users who have reached a given XP threshold in an event.
+pub async fn get_event_milestone_completers(
+    pool: &PgPool,
+    event_id: i64,
+    xp_threshold: f64,
+) -> Result<Vec<i64>, sqlx::Error> {
+    debug!(
+        "queries::get_event_milestone_completers: event_id={}, xp_threshold={}",
+        event_id, xp_threshold
+    );
+    let rows: Vec<(i64,)> = sqlx::query_as(
+        "SELECT u.discord_user_id
+         FROM event_xp ex
+         JOIN users u ON u.id = ex.user_id
+         WHERE ex.event_id = $1
+           AND u.active = TRUE
+         GROUP BY u.discord_user_id
+         HAVING SUM(ex.xp_earned) >= $2
+         ORDER BY SUM(ex.xp_earned) DESC",
+    )
+    .bind(event_id)
+    .bind(xp_threshold)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows.into_iter().map(|(id,)| id).collect())
+}
+
+/// Update only the milestone_message_id for a persistent event leaderboard.
+pub async fn update_persistent_event_leaderboard_milestone_message(
+    pool: &PgPool,
+    event_id: i64,
+    milestone_message_id: i64,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::update_persistent_event_leaderboard_milestone_message: event_id={}, milestone_message_id={}",
+        event_id, milestone_message_id
+    );
+    sqlx::query(
+        "UPDATE persistent_event_leaderboards
+         SET milestone_message_id = $1
+         WHERE event_id = $2",
+    )
+    .bind(milestone_message_id)
+    .bind(event_id)
+    .execute(pool)
+    .await?;
+    Ok(())
 }
 
 // =========================================================================

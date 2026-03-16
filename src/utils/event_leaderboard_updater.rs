@@ -224,6 +224,42 @@ async fn update_single_event_leaderboard(
         }
     }
 
+    // Update milestone card if one exists.
+    if record.milestone_message_id != 0 {
+        match helpers::generate_event_milestone_card(pool, record.event_id, &event.name).await {
+            Ok(Some(bytes)) => {
+                let attachment =
+                    CreateAttachment::bytes(bytes, "event_milestones.png");
+                let edit = EditMessage::new().new_attachment(attachment);
+                if let Err(e) = channel
+                    .edit_message(
+                        http,
+                        serenity::MessageId::new(record.milestone_message_id as u64),
+                        edit,
+                    )
+                    .await
+                {
+                    warn!(
+                        event_id = record.event_id,
+                        milestone_message_id = record.milestone_message_id,
+                        error = %e,
+                        "Event leaderboard updater: failed to update milestone card."
+                    );
+                }
+            }
+            Ok(None) => {
+                // No milestones configured — nothing to update.
+            }
+            Err(e) => {
+                warn!(
+                    event_id = record.event_id,
+                    error = %e,
+                    "Event leaderboard updater: failed to generate milestone card."
+                );
+            }
+        }
+    }
+
     // Persist the updated timestamp so we know this tick was processed.
     let now = chrono::Utc::now();
     let message_ids_json = record.message_ids.clone();
