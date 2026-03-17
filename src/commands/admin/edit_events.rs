@@ -13,8 +13,11 @@
 /// - `stats-add`           — add a stat to an event
 /// - `stats-remove`        — remove a stat from an event
 /// - `stats-edit`          — edit XP per unit for a stat
-/// - `list`                — list all events
-/// - `backfill`            — backfill XP for an event
+/// - `list`                     — list all events
+/// - `backfill`                 — backfill XP for an event
+/// - `milestones-add`           — add XP-threshold milestones to an event
+/// - `milestones-remove`        — remove milestones from an event
+/// - `milestones-completers`    — participant-centric view of milestone completers
 ///
 /// All subcommands are ephemeral and require the admin check.
 use poise::serenity_prelude::{
@@ -150,6 +153,7 @@ async fn autocomplete_event_stat<'a>(
         "status",
         "milestones_add",
         "milestones_remove",
+        "milestones_completers",
         "leaderboard_remove"
     )
 )]
@@ -1730,6 +1734,117 @@ pub async fn milestones_remove(
         ),
     )
     .await?;
+
+    Ok(())
+}
+
+/// Show a participant-centric view of milestone completers for an event.
+///
+/// For each participant who completed at least one milestone, lists the
+/// milestones they reached. Admin-only, ephemeral.
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    rename = "milestones-completers",
+    check = "crate::utils::permissions::admin_check"
+)]
+pub async fn milestones_completers(
+    ctx: Context<'_>,
+    #[description = "Event name (defaults to most recent)"]
+    #[autocomplete = "autocomplete_any_event_name"]
+    event_name: Option<String>,
+) -> Result<(), Error> {
+    ctx.defer_ephemeral().await?;
+
+    let guild_id = ctx
+        .guild_id()
+        .ok_or("This command can only be used in a server")?
+        .get() as i64;
+    let data = ctx.data();
+
+    let event_name = match event_name {
+        Some(n) => n,
+        None => queries::get_latest_event_name(&data.db, guild_id)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("No active or ended events found"))?,
+    };
+
+    let event = match queries::get_event_by_name(&data.db, guild_id, &event_name).await? {
+        Some(e) => e,
+        None => {
+            ctx.say(format!("Event **{event_name}** not found."))
+                .await?;
+            return Ok(());
+        }
+    };
+
+    let milestones = queries::get_event_milestones(&data.db, event.id).await?;
+
+    if milestones.is_empty() {
+        ctx.say(format!(
+            "No milestones have been configured for **{}** yet. Use `/edit-event milestones-add` to add some.",
+            event.name
+        ))
+        .await?;
+        return Ok(());
+    }
+
+    // Build a map: participant discord_user_id -> Vec of thresholds they completed.
+    use std::collections::HashMap;
+    let mut participant_milestones: HashMap<i64, Vec<f64>> = HashMap::new();
+
+    for milestone in &milestones {
+        let completers =
+            queries::get_event_milestone_completers(&data.db, event.id, milestone.xp_threshold)
+                .await
+                .unwrap_or_default();
+
+        for user_id in completers {
+            participant_milestones
+                .entry(user_id)
+                .or_default()
+                .push(milestone.xp_threshold);
+        }
+    }
+
+    if participant_milestones.is_empty() {
+        ctx.say(format!(
+            "No participants have completed any milestones for **{}** yet.",
+            event.name
+        ))
+        .await?;
+        return Ok(());
+    }
+
+    // Sort participants by number of milestones completed (desc), then by user_id for stability.
+    let mut sorted: Vec<(i64, Vec<f64>)> = participant_milestones.into_iter().collect();
+    sorted.sort_by(|a, b| b.1.len().cmp(&a.1.len()).then(a.0.cmp(&b.0)));
+
+    let mut embed = poise::serenity_prelude::CreateEmbed::new()
+        .title(format!("Milestone Completers — {}", event.name))
+        .color(0x00BFFF)
+        .description(format!(
+            "{} participant(s) have completed at least one milestone.",
+            sorted.len()
+        ));
+
+    // One field per participant (cap at Discord's 25-field limit).
+    for (user_id, mut thresholds) in sorted.into_iter().take(25) {
+        // Show thresholds in ascending order.
+        thresholds.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+        let field_name = format!("<@{user_id}>");
+        let threshold_strs: Vec<String> = thresholds
+            .iter()
+            .map(|&t| format!("{} XP", t as i64))
+            .collect();
+        let value = threshold_strs.join(", ");
+
+        embed = embed.field(field_name, value, false);
+    }
+
+    ctx.send(poise::CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }
