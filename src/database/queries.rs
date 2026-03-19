@@ -479,16 +479,12 @@ pub async fn set_user_head_texture(
 ///
 /// This legacy hard-delete function is kept for admin/maintenance use only.
 /// Prefer `mark_user_inactive` for user-facing flows.
-///
-/// Deprecated: use `mark_user_inactive`.
-#[deprecated(
-    note = "Use mark_user_inactive (soft unregister) to preserve history and avoid FK issues."
-)]
 pub async fn unregister_user(
     pool: &PgPool,
     discord_user_id: i64,
     guild_id: i64,
 ) -> Result<(), sqlx::Error> {
+    // Find the user row to get the internal user id
     let user: Option<DbUser> =
         sqlx::query_as("SELECT * FROM users WHERE discord_user_id = $1 AND guild_id = $2")
             .bind(discord_user_id)
@@ -500,48 +496,11 @@ pub async fn unregister_user(
         return Ok(());
     };
 
-    let user_id = user.id;
-
-    // delete dependent rows
-    sqlx::query("DELETE FROM sweep_cursor WHERE user_id = $1")
-        .bind(user_id)
+    // Just delete the user; all dependent rows will be deleted via ON DELETE CASCADE
+    sqlx::query("DELETE FROM users WHERE id = $1")
+        .bind(user.id)
         .execute(pool)
         .await?;
-
-    sqlx::query("DELETE FROM xp WHERE user_id = $1")
-        .bind(user_id)
-        .execute(pool)
-        .await?;
-
-    sqlx::query("DELETE FROM stat_deltas WHERE user_id = $1")
-        .bind(user_id)
-        .execute(pool)
-        .await?;
-
-    sqlx::query("DELETE FROM xp_events WHERE user_id = $1")
-        .bind(user_id)
-        .execute(pool)
-        .await?;
-
-    sqlx::query("DELETE FROM hypixel_stats_snapshot WHERE user_id = $1")
-        .bind(user_id)
-        .execute(pool)
-        .await?;
-
-    sqlx::query("DELETE FROM discord_stats_snapshot WHERE user_id = $1")
-        .bind(user_id)
-        .execute(pool)
-        .await?;
-
-    // finally delete user
-    sqlx::query(
-        "DELETE FROM users
-         WHERE discord_user_id = $1 AND guild_id = $2",
-    )
-    .bind(discord_user_id)
-    .bind(guild_id)
-    .execute(pool)
-    .await?;
 
     Ok(())
 }

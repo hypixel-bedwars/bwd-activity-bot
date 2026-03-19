@@ -75,7 +75,7 @@ pub async fn force_register(
         .title("Already Registered")
         .color(0xFFAA00)
         .description(format!(
-            "User is already registered as **{}** (UUID `{}`). If you want to change the linked Minecraft account, please unregister first with `/unregister`.",
+            "User is already registered as **{}** (UUID `{}`). If you want to change the linked Minecraft account, please unregister first with `/force-unregister`.",
             existing_user.minecraft_uuid, existing_user.minecraft_uuid
         ));
         ctx.send(poise::CreateReply::default().embed(embed)).await?;
@@ -237,9 +237,7 @@ pub async fn force_unregister(
     let guild_config: GuildConfig =
         serde_json::from_value(guild_row.config_json.clone()).unwrap_or_default();
 
-    // Soft-unregister: preserve history and avoid FK constraint violations.
-    let now = chrono::Utc::now();
-    queries::mark_user_inactive(&data.db, user_id, guild_id_i64, &now).await?;
+    queries::unregister_user(&data.db, user_id, guild_id_i64).await?;
 
     if let Some(role_id) = guild_config.registered_role_id {
         let role = serenity::RoleId::new(role_id);
