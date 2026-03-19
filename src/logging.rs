@@ -198,7 +198,7 @@ pub fn init_logging() -> LoggingSetup {
     // Reads the RUST_LOG environment variable; falls back to INFO for this
     // crate and WARN for all transitive dependencies.
     let env_filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("memum_activity_bot=info,warn"));
+        .unwrap_or_else(|_| EnvFilter::new("bwd_activity_bot=info,warn"));
 
     // ── Console layer ─────────────────────────────────────────────────────────
     // Coloured output with file + line information for easy triage.

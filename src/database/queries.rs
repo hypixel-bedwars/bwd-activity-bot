@@ -479,11 +479,26 @@ pub async fn set_user_head_texture(
 ///
 /// This legacy hard-delete function is kept for admin/maintenance use only.
 /// Prefer `mark_user_inactive` for user-facing flows.
+///
+/// Deletes a user and all related data via ON DELETE CASCADE. This will remove:
+/// - hypixel_stats_snapshot
+/// - discord_stats_snapshot
+/// - xp
+/// - sweep_cursor
+/// - stat_deltas
+/// - xp_events
+/// - daily_snapshots
+/// - event_xp
 pub async fn unregister_user(
     pool: &PgPool,
     discord_user_id: i64,
     guild_id: i64,
 ) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::unregister_user: discord_user_id={}, guild_id={}",
+        discord_user_id, guild_id
+    );
+
     // Find the user row to get the internal user id
     let user: Option<DbUser> =
         sqlx::query_as("SELECT * FROM users WHERE discord_user_id = $1 AND guild_id = $2")
@@ -493,14 +508,28 @@ pub async fn unregister_user(
             .await?;
 
     let Some(user) = user else {
+        warn!(
+            discord_user_id,
+            guild_id, "Attempted to unregister user but no matching user found"
+        );
         return Ok(());
     };
 
     // Just delete the user; all dependent rows will be deleted via ON DELETE CASCADE
-    sqlx::query("DELETE FROM users WHERE id = $1")
+    let result = sqlx::query("DELETE FROM users WHERE id = $1")
         .bind(user.id)
         .execute(pool)
         .await?;
+
+    let rows_deleted = result.rows_affected();
+    info!(
+        discord_user_id,
+        guild_id,
+        user_id = user.id,
+        minecraft_uuid = %user.minecraft_uuid,
+        rows_deleted,
+        "User unregistered successfully - all related data cascaded"
+    );
 
     Ok(())
 }
