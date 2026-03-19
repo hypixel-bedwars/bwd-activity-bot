@@ -11,6 +11,7 @@ use poise::serenity_prelude::{
 };
 use tracing::debug;
 
+use crate::database::queries;
 use crate::shared::cache::TimedCache;
 use crate::shared::types::{Context, Error};
 
@@ -27,14 +28,22 @@ pub fn new_cache(ttl_seconds: u64) -> LeaderboardCache {
 
 /// Show a leaderboard image with pagination buttons.
 #[poise::command(slash_command, guild_only)]
-pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn leaderboard(
+    ctx: Context<'_>,
+    #[description = "The page of the leaderboard to display(Defaults to 1)"] page: Option<u32>,
+) -> Result<(), Error> {
     ctx.defer().await?;
 
     let guild_id = ctx
         .guild_id()
         .ok_or("This command can only be used in a server.")?;
 
-    let page: u32 = 1;
+    // Check if the user has provided a number that is greater than the total pages
+    let requested_page = page.unwrap_or(1);
+
+    let total_pages = get_total_pages(&ctx.data().db, guild_id.get() as i64).await?;
+    let page = requested_page.clamp(1, total_pages);
+
     let (png_bytes, total_pages) = get_or_generate(ctx.data(), guild_id.get(), page).await?;
 
     let attachment = CreateAttachment::bytes(png_bytes, "leaderboard.png".to_string());
@@ -50,6 +59,15 @@ pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
     debug!("Sent leaderboard page {} for guild {}", page, guild_id);
 
     Ok(())
+}
+
+/// Get the total number of pages for a guild's leaderboard without generating the image.
+pub async fn get_total_pages(db: &sqlx::PgPool, guild_id: i64) -> Result<u32, Error> {
+    // Example:
+    let total_users = queries::count_users_in_guild(db, guild_id).await?;
+    let per_page = 10;
+
+    Ok(((total_users as f32) / (per_page as f32)).ceil() as u32)
 }
 
 /// Get a cached leaderboard page or generate a fresh one.
@@ -111,14 +129,20 @@ pub async fn handle_pagination(
 ) -> Result<(), Error> {
     let custom_id = &component.data.custom_id;
 
-    let page: u32 = custom_id
+    let requested_page: u32 = custom_id
         .strip_prefix("lb_page_")
         .and_then(|s| s.parse().ok())
         .unwrap_or(1);
 
     let guild_id = component.guild_id.ok_or("Not in a guild")?;
 
-    let (png_bytes, total_pages) = get_or_generate(data, guild_id.get(), page).await?;
+    let total_pages = get_total_pages(&data.db, guild_id.get() as i64)
+        .await?
+        .max(1); // prevent 0 edge case
+
+    let page = requested_page.clamp(1, total_pages);
+
+    let (png_bytes, _) = get_or_generate(data, guild_id.get(), page).await?;
 
     let attachment = CreateAttachment::bytes(png_bytes, "leaderboard.png".to_string());
     let components = pagination_buttons(page, total_pages);
