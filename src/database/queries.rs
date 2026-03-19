@@ -2953,7 +2953,7 @@ pub async fn get_guild_statistics(
         "SELECT COALESCE(SUM(x.total_xp), 0)
          FROM xp x
          JOIN users u ON u.id = x.user_id
-         WHERE u.guild_id = $1 AND u.active = TRUE",
+         WHERE u.guild_id = $1",
     )
     .bind(guild_id)
     .fetch_one(pool)
@@ -2964,7 +2964,7 @@ pub async fn get_guild_statistics(
         "SELECT sd.stat_name, COALESCE(SUM(sd.delta)::bigint, 0) as total
          FROM stat_deltas sd
          JOIN users u ON u.id = sd.user_id
-         WHERE u.guild_id = $1 AND u.active = TRUE AND sd.delta > 0
+         WHERE u.guild_id = $1 AND sd.delta > 0
          GROUP BY sd.stat_name
          ORDER BY total DESC",
     )
