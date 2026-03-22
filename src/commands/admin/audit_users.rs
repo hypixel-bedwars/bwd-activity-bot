@@ -57,12 +57,10 @@ pub async fn audit_users(
                 present_and_active += 1;
             }
             (true, false) => {
-                // present but marked inactive in DB
                 present_but_inactive += 1;
                 to_reactivate.push(u.discord_user_id);
             }
             (false, true) => {
-                // absent but still active in DB
                 absent_but_active += 1;
                 to_deactivate.push(u.discord_user_id);
             }
@@ -72,7 +70,6 @@ pub async fn audit_users(
         }
     }
 
-    // Optionally fix mismatches
     let do_fix = fix.unwrap_or(false);
     let mut reactivated = 0usize;
     let mut deactivated = 0usize;
@@ -103,7 +100,6 @@ pub async fn audit_users(
         }
     }
 
-    // Build a concise report for the admin (include a few example IDs)
     let mut description = String::new();
     description.push_str(&format!(
         "Total registered users scanned: {}\n\n",
@@ -130,7 +126,6 @@ pub async fn audit_users(
     ));
     description.push_str(&format!("Absent & inactive: {}\n\n", absent_and_inactive));
 
-    // Add short example lists (up to 10) for quick inspection
     let examples_show = 10usize;
     if !to_reactivate.is_empty() {
         let sample: Vec<String> = to_reactivate

@@ -194,7 +194,6 @@ pub async fn new(
         return Ok(());
     }
 
-    // Check for duplicate name.
     if queries::get_event_by_name(&data.db, guild_id, &name)
         .await?
         .is_some()
@@ -206,7 +205,6 @@ pub async fn new(
         return Ok(());
     }
 
-    // Create the event.
     let event = queries::create_event(
         &data.db,
         guild_id,
@@ -217,7 +215,6 @@ pub async fn new(
     )
     .await?;
 
-    // Seed event_stats from guild xp_config.
     let guild_config: GuildConfig = match queries::get_guild(&data.db, guild_id).await? {
         Some(g) => serde_json::from_value(g.config_json).unwrap_or_default(),
         None => GuildConfig::default(),
@@ -1534,7 +1531,6 @@ pub async fn remove(
         .await?
         .ok_or_else(|| anyhow::anyhow!("Event **{}** not found.", resolved_name))?;
 
-    // Fetch the stored status message information
     if let Some(existing) = queries::get_event_status_message(&ctx.data().db, event.id).await? {
         // Attempt to delete the message from Discord
         let old_channel = serenity::ChannelId::new(existing.channel_id as u64);
@@ -1543,9 +1539,8 @@ pub async fn remove(
                 &ctx.http(),
                 serenity::MessageId::new(existing.message_id as u64),
             )
-            .await; // Ignore errors if message already deleted or no permission
+            .await;
 
-        // Remove the stored record from the database
         queries::delete_event_status_message(&ctx.data().db, event.id).await?;
     }
 

@@ -1,5 +1,3 @@
-/// Reusable permission checks for Poise commands.
-///
 /// The `admin_check` function is designed to be used as a `check` attribute on
 /// any command that should be restricted to admins. It checks whether the
 /// invoking member holds any of the roles listed in `AppConfig.admin_role_ids`.
@@ -22,8 +20,10 @@ use tracing::warn;
 ///
 /// Note: We intentionally swallow send errors — the check must not fail with
 /// an internal error just because we couldn't notify the user.
+#[deprecated(
+    note = "This function is deprecated. Implement permission checks directly in command handlers. Made this since i did not know about the command handlers"
+)]
 pub async fn admin_check(ctx: Context<'_>) -> Result<bool, Error> {
-    // Try to fetch the guild member; if we can't, deny and notify.
     let member = match ctx.author_member().await {
         Some(m) => m,
         None => {
@@ -44,7 +44,6 @@ pub async fn admin_check(ctx: Context<'_>) -> Result<bool, Error> {
 
     let admin_role_ids = &ctx.data().config.admin_role_ids;
 
-    // If the invoking member has any configured admin role, allow.
     let is_admin = member
         .roles
         .iter()
@@ -54,7 +53,6 @@ pub async fn admin_check(ctx: Context<'_>) -> Result<bool, Error> {
         return Ok(true);
     }
 
-    // Deny: send an ephemeral message so the user sees a helpful reason and log it.
     let _ = ctx
         .send(
             poise::CreateReply::default()
