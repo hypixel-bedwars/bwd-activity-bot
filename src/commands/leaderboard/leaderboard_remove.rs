@@ -17,7 +17,8 @@ use crate::shared::types::{Context, Error};
     slash_command,
     guild_only,
     rename = "leaderboard-remove",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn leaderboard_remove(ctx: Context<'_>) -> Result<(), Error> {
     ctx.defer_ephemeral().await?;

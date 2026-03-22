@@ -167,7 +167,8 @@ pub async fn edit_stats(_ctx: Context<'_>) -> Result<(), Error> {
     guild_only,
     ephemeral,
     rename = "add-bedwars",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn add_bedwars(
     ctx: Context<'_>,
@@ -262,7 +263,8 @@ pub async fn add_bedwars(
     guild_only,
     ephemeral,
     rename = "add-discord",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn add_discord(
     ctx: Context<'_>,
@@ -337,7 +339,8 @@ pub async fn add_discord(
     guild_only,
     ephemeral,
     rename = "edit",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn edit_stat(
     ctx: Context<'_>,
@@ -397,7 +400,8 @@ pub async fn edit_stat(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn remove(
     ctx: Context<'_>,

@@ -13,7 +13,8 @@ use crate::shared::types::{Context, Error};
     guild_only,
     ephemeral,
     rename = "audit-users",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn audit_users(
     ctx: Context<'_>,

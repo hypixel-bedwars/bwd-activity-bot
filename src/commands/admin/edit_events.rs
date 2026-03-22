@@ -166,7 +166,8 @@ pub async fn edit_event(_ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn new(
     ctx: Context<'_>,
@@ -330,7 +331,8 @@ pub async fn new(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn edit(
     ctx: Context<'_>,
@@ -415,7 +417,8 @@ pub async fn edit(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn delete(
     ctx: Context<'_>,
@@ -478,7 +481,8 @@ pub async fn delete(
     guild_only,
     ephemeral,
     rename = "stats-add",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn stats_add(
     ctx: Context<'_>,
@@ -544,7 +548,8 @@ pub async fn stats_add(
     guild_only,
     ephemeral,
     rename = "stats-remove",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn stats_remove(
     ctx: Context<'_>,
@@ -604,7 +609,8 @@ pub async fn stats_remove(
     guild_only,
     ephemeral,
     rename = "stats-edit",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn stats_edit(
     ctx: Context<'_>,
@@ -669,7 +675,8 @@ pub async fn stats_edit(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = ctx
@@ -733,7 +740,8 @@ pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn backfill(
     ctx: Context<'_>,
@@ -867,7 +875,8 @@ async fn autocomplete_persisted_event_name<'a>(
     guild_only,
     ephemeral,
     rename = "leaderboard-remove",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn leaderboard_remove(
     ctx: Context<'_>,
@@ -976,7 +985,8 @@ pub async fn leaderboard_remove(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn start(
     ctx: Context<'_>,
@@ -1004,7 +1014,8 @@ pub async fn start(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn end(
     ctx: Context<'_>,
@@ -1032,7 +1043,8 @@ pub async fn end(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn participants(
     ctx: Context<'_>,
@@ -1079,7 +1091,12 @@ pub async fn edit_event_leaderboard(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(slash_command, guild_only, required_permissions = "ADMINISTRATOR")]
+#[poise::command(
+    slash_command,
+    guild_only,
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
+)]
 pub async fn persist(
     ctx: Context<'_>,
     #[autocomplete = "autocomplete_any_event_name"] event_name: Option<String>,
@@ -1385,7 +1402,8 @@ pub async fn status(_ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn create(
     ctx: Context<'_>,
@@ -1488,7 +1506,8 @@ pub async fn create(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn remove(
     ctx: Context<'_>,
@@ -1569,7 +1588,8 @@ pub async fn remove(
     guild_only,
     ephemeral,
     rename = "milestones-add",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn milestones_add(
     ctx: Context<'_>,
@@ -1655,7 +1675,8 @@ pub async fn milestones_add(
     guild_only,
     ephemeral,
     rename = "milestones-remove",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn milestones_remove(
     ctx: Context<'_>,
@@ -1743,7 +1764,8 @@ pub async fn milestones_remove(
     guild_only,
     ephemeral,
     rename = "milestones-completers",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn milestones_completers(
     ctx: Context<'_>,

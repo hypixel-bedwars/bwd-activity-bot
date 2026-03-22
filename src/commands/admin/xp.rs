@@ -20,7 +20,8 @@ use crate::database::queries::award_admin_event_xp;
     guild_only,
     ephemeral,
     subcommands("add", "remove"),
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn xp(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
@@ -31,7 +32,8 @@ pub async fn xp(_ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn add(
     ctx: Context<'_>,
@@ -112,7 +114,8 @@ pub async fn add(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn remove(
     ctx: Context<'_>,

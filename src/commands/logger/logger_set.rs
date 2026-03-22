@@ -8,7 +8,8 @@ use poise::serenity_prelude::{self as serenity};
     guild_only,
     ephemeral,
     rename = "logger-set",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn logger_set(
     ctx: Context<'_>,

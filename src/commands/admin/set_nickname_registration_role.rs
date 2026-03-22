@@ -20,7 +20,8 @@ use crate::shared::types::{Context, Error};
     guild_only,
     ephemeral,
     rename = "set-nickname-registration-role",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn set_nickname_registration_role(
     ctx: Context<'_>,
@@ -97,7 +98,8 @@ pub async fn set_nickname_registration_role(
     guild_only,
     ephemeral,
     rename = "clear-nickname-registration-role",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn clear_nickname_registration_role(ctx: Context<'_>) -> Result<(), Error> {
     debug!("Invoked /clear-nickname-registration-role");

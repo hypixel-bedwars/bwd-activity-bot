@@ -18,7 +18,8 @@ use crate::shared::types::{Context, Error};
     slash_command,
     guild_only,
     rename = "force-register",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn force_register(
     ctx: Context<'_>,
@@ -215,7 +216,8 @@ pub async fn force_register(
     slash_command,
     guild_only,
     rename = "force-unregister",
-    required_permissions = "ADMINISTRATOR"
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn force_unregister(
     ctx: Context<'_>,
