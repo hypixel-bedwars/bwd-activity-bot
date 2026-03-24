@@ -12,7 +12,7 @@ use crate::database::queries;
 use crate::shared::types::{Context, Error};
 use crate::sweeper;
 use crate::utils::stats_definitions::{display_name_for_key, is_discord_stat};
-use crate::xp::calculator::xp_for_level;
+use crate::xp::calculator::{calculate_level, xp_for_level};
 
 /// Fetch the player's Crafatar face avatar (80×80 px).
 /// Non-fatal — returns `None` on any error.
@@ -83,7 +83,7 @@ pub async fn level(
     // Read both total_xp and the level stored by the pipeline.
     // The pipeline writes the correct level inside every transaction, so we
     // never need to recalculate it here.
-    let (total_xp, level) = xp_row
+    let (total_xp, stored_level) = xp_row
         .as_ref()
         .map(|x| (x.total_xp, x.level))
         .unwrap_or((0.0, 1));
@@ -91,8 +91,10 @@ pub async fn level(
     let base_xp = data.config.base_level_xp;
     let exponent = data.config.level_exponent;
 
-    let xp_at_level = xp_for_level(level, base_xp, exponent);
-    let xp_at_next = xp_for_level(level + 1, base_xp, exponent);
+    let user_level = calculate_level(total_xp, base_xp, exponent) as i32;
+
+    let xp_at_level = xp_for_level(user_level, base_xp, exponent);
+    let xp_at_next = xp_for_level(user_level + 1, base_xp, exponent);
     let xp_this_level = total_xp - xp_at_level;
     let xp_for_next_level = xp_at_next - xp_at_level;
 
@@ -198,7 +200,16 @@ pub async fn level(
     let rank = queries::get_user_rank_in_guild(&data.db, db_user.id, guild_id_i64).await?;
 
     let milestones = queries::get_milestones(&data.db, guild_id_i64).await?;
-    let user_level = level; // already fetched in your code
+
+    // Recompute the user's level from the canonical total_xp so the card shows
+    // the freshest value. If it differs from the stored pipeline value, persist
+    // the update immediately so the user sees the corrected level.
+    if user_level != stored_level {
+        let now = chrono::Utc::now();
+        // Persist the updated level in the xp table.
+        queries::update_level(&data.db, db_user.id, user_level, &now).await?;
+    }
+
     let milestone_progress: Vec<(i32, bool)> = milestones
         .iter()
         .map(|m| (m.level, user_level >= m.level))
@@ -206,7 +217,7 @@ pub async fn level(
 
     let params = LevelCardParams {
         minecraft_username: mc_name,
-        level,
+        level: user_level,
         total_xp,
         xp_this_level,
         xp_for_next_level,
