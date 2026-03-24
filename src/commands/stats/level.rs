@@ -64,7 +64,7 @@ pub async fn level(
                 .title("Not Registered")
                 .color(0xFF4444)
                 .description(format!(
-                    "**{}** is not registered. Use `/register` to link a Minecraft account.",
+                    "**{}** is not registered. Please go to the signup channel and use the button",
                     target.name
                 ));
             ctx.send(poise::CreateReply::default().embed(embed)).await?;
