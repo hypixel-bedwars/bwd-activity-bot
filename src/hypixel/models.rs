@@ -217,10 +217,10 @@ impl HypixelRank {
     /// - VIP / VIP+  → green  `#55FF55`
     /// - MVP / MVP+  → blue   `#55FFFF`
     /// - MVP++       → gold   `#FFD700`
-    /// - None        → white
+    /// - None        → gray
     pub fn name_color(&self) -> image::Rgba<u8> {
         match self {
-            Self::None => image::Rgba([0xff, 0xff, 0xff, 0xff]),
+            Self::None => image::Rgba([0x88, 0x88, 0xaa, 0xff]),
             Self::Vip | Self::VipPlus => image::Rgba([0x55, 0xff, 0x55, 0xff]),
             Self::Mvp | Self::MvpPlus => image::Rgba([0x55, 0xff, 0xff, 0xff]),
             Self::MvpPlusPlus => image::Rgba([0xff, 0xaa, 0x00, 0xff]),
