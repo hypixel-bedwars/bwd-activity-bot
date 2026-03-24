@@ -219,27 +219,43 @@ pub async fn recalculate_xp(
         embed = embed.description("✅ XP corrections have been applied successfully.");
     }
 
-    // Add corrections details (limited to first 10 to avoid message length issues)
+    // Add corrections details (limited to avoid Discord's 1024 char field limit)
     if !corrections.is_empty() {
-        let preview_count = corrections.len().min(10);
-        let corrections_text = corrections[..preview_count].join("\n");
+        let mut corrections_text = String::new();
+        let mut shown_count = 0;
+
+        // Add corrections until we approach the 1024 character limit (leave buffer for safety)
+        for correction in &corrections {
+            if corrections_text.len() + correction.len() + 1 > 950 {
+                break;
+            }
+            if shown_count > 0 {
+                corrections_text.push('\n');
+            }
+            corrections_text.push_str(correction);
+            shown_count += 1;
+        }
 
         embed = embed.field(
             format!(
                 "Corrections (showing {} of {})",
-                preview_count,
+                shown_count,
                 corrections.len()
             ),
-            corrections_text,
+            if corrections_text.is_empty() {
+                "Too many corrections to display. Check logs for details.".to_string()
+            } else {
+                corrections_text
+            },
             false,
         );
 
-        if corrections.len() > 10 {
+        if corrections.len() > shown_count {
             embed = embed.field(
                 "Note",
                 format!(
                     "{} more corrections not shown. Check logs for full details.",
-                    corrections.len() - 10
+                    corrections.len() - shown_count
                 ),
                 false,
             );
