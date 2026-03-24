@@ -1,6 +1,6 @@
 use serenity::all::{FullEvent, GuildId, RoleId};
 use sqlx::PgPool;
-use tracing::{debug, error, warn};
+use tracing::{debug, error};
 
 use chrono::Utc;
 
