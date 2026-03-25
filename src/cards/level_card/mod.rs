@@ -179,18 +179,14 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
     );
 
     if !params.event_mode {
-        if params.is_disqualified {
-            font.render_text(&mut img, 124, 62, "DISQUALIFIED", 2, RED);
-        } else {
-            font.render_text(
-                &mut img,
-                124,
-                62,
-                &format!("LEVEL {}", params.level),
-                2,
-                CYAN,
-            );
-        }
+        font.render_text(
+            &mut img,
+            124,
+            62,
+            &format!("LEVEL {}", params.level),
+            2,
+            CYAN,
+        );
     }
 
     let rank_colour = if let Some(rank) = params.rank {
@@ -231,9 +227,21 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
 
     // == PROGRESS BAR / EVENT XP =============================================
     if params.event_mode {
-        // In event mode: show total event XP as a label instead of a progress bar.
-        let xp_label = format!("TOTAL EVENT XP: {:.0}", params.total_xp);
-        font.render_text(&mut img, 28, 136, &xp_label, 2, CYAN);
+        if params.is_disqualified {
+            // 🔴 Override everything if disqualified
+            font.render_text(
+                &mut img,
+                28,
+                136,
+                "DISQUALIFIED",
+                3, // slightly bigger for emphasis
+                RED,
+            );
+        } else {
+            // In event mode: show total event XP as a label instead of a progress bar.
+            let xp_label = format!("TOTAL EVENT XP: {:.0}", params.total_xp);
+            font.render_text(&mut img, 28, 136, &xp_label, 2, CYAN);
+        }
     } else {
         fill_rounded_rect(&mut img, 28, 120, 944, 18, 9, BAR_BG);
 
