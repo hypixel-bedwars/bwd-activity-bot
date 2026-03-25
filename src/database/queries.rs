@@ -3258,7 +3258,7 @@ pub async fn is_user_disqualified_in_any_active_event(
 ) -> Result<bool, sqlx::Error> {
     let exists: Option<i64> = sqlx::query_scalar(
         r#"
-        SELECT 1
+        SELECT 1::bigint
         FROM event_participants ep
         JOIN events e ON e.id = ep.event_id
         WHERE ep.user_id = $1
@@ -3282,7 +3282,7 @@ pub async fn is_user_disqualified_from_event(
     user_id: i64,
 ) -> Result<bool, sqlx::Error> {
     let exists: Option<i64> = sqlx::query_scalar(
-        "SELECT 1
+        "SELECT 1::bigint
          FROM event_participants
          WHERE event_id = $1
            AND user_id = $2
