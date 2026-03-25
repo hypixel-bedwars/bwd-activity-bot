@@ -1779,14 +1779,16 @@ pub async fn milestones_completers(
     #[autocomplete = "autocomplete_any_event_name"]
     event_name: Option<String>,
 ) -> Result<(), Error> {
-    ctx.defer_ephemeral().await?;
+    ctx.defer().await?;
 
     let guild_id = ctx
         .guild_id()
         .ok_or("This command can only be used in a server")?
         .get() as i64;
+
     let data = ctx.data();
 
+    // Resolve event name
     let event_name = match event_name {
         Some(n) => n,
         None => queries::get_latest_event_name(&data.db, guild_id)
@@ -1794,6 +1796,7 @@ pub async fn milestones_completers(
             .ok_or_else(|| anyhow::anyhow!("No active or ended events found"))?,
     };
 
+    // Fetch event
     let event = match queries::get_event_by_name(&data.db, guild_id, &event_name).await? {
         Some(e) => e,
         None => {
@@ -1803,32 +1806,36 @@ pub async fn milestones_completers(
         }
     };
 
+    // Fetch milestones
     let milestones = queries::get_event_milestones(&data.db, event.id).await?;
 
     if milestones.is_empty() {
         ctx.say(format!(
-            "No milestones have been configured for **{}** yet. Use `/edit-event milestones-add` to add some.",
+            "No milestones configured for **{}** yet.",
             event.name
         ))
         .await?;
         return Ok(());
     }
 
-    // Build a map: participant discord_user_id -> Vec of thresholds they completed.
     use std::collections::HashMap;
-    let mut participant_milestones: HashMap<i64, Vec<f64>> = HashMap::new();
 
+    // user_id -> (mc_name, milestones)
+    let mut participant_milestones: HashMap<i64, (String, Vec<f64>)> = HashMap::new();
+
+    // Collect data
     for milestone in &milestones {
         let completers =
             queries::get_event_milestone_completers(&data.db, event.id, milestone.xp_threshold)
                 .await
                 .unwrap_or_default();
 
-        for user_id in completers {
-            participant_milestones
+        for (user_id, mc_name, _xp) in completers {
+            let entry = participant_milestones
                 .entry(user_id)
-                .or_default()
-                .push(milestone.xp_threshold);
+                .or_insert((mc_name.clone(), Vec::new()));
+
+            entry.1.push(milestone.xp_threshold);
         }
     }
 
@@ -1841,34 +1848,40 @@ pub async fn milestones_completers(
         return Ok(());
     }
 
-    // Sort participants by number of milestones completed (desc), then by user_id for stability.
-    let mut sorted: Vec<(i64, Vec<f64>)> = participant_milestones.into_iter().collect();
-    sorted.sort_by(|a, b| b.1.len().cmp(&a.1.len()).then(a.0.cmp(&b.0)));
+    // Sort by number of milestones desc
+    let mut sorted: Vec<(i64, (String, Vec<f64>))> = participant_milestones.into_iter().collect();
 
-    let mut embed = poise::serenity_prelude::CreateEmbed::new()
-        .title(format!("Milestone Completers — {}", event.name))
-        .color(0x00BFFF)
-        .description(format!(
-            "{} participant(s) have completed at least one milestone.",
-            sorted.len()
-        ));
+    sorted.sort_by(|a, b| b.1.1.len().cmp(&a.1.1.len()).then(a.0.cmp(&b.0)));
 
-    // One field per participant (cap at Discord's 25-field limit).
-    for (user_id, mut thresholds) in sorted.into_iter().take(25) {
-        // Show thresholds in ascending order.
-        thresholds.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    // Build output
+    let mut content = format!("Milestone Completers — {}\n\n", event.name);
 
-        let field_name = format!("<@{user_id}>");
+    for (user_id, (mc_name, mut thresholds)) in sorted {
+        thresholds.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
         let threshold_strs: Vec<String> = thresholds
             .iter()
             .map(|&t| format!("{} XP", t as i64))
             .collect();
-        let value = threshold_strs.join(", ");
 
-        embed = embed.field(field_name, value, false);
+        let line = format!(
+            "{} - {} - {}\n",
+            user_id,
+            mc_name,
+            threshold_strs.join(", ")
+        );
+
+        // prevent Discord 2000 char limit
+        if content.len() + line.len() > 1900 {
+            content.push_str("...\n(truncated)");
+            break;
+        }
+
+        content.push_str(&line);
     }
 
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    // Send result
+    ctx.say(content).await?;
 
     Ok(())
 }

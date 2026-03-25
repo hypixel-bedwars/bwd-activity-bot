@@ -561,12 +561,12 @@ pub async fn get_user_rank_in_guild(
     );
     sqlx::query_scalar::<_, i64>(
         "SELECT rank FROM (
-			 SELECT u.id AS user_id, RANK() OVER (ORDER BY COALESCE(x.total_xp, 0) DESC) AS rank
-			 FROM users u
-			 LEFT JOIN xp x ON x.user_id = u.id
-			 WHERE u.guild_id = $1 AND u.active = TRUE
-		 ) sub
-		 WHERE user_id = $2",
+             SELECT u.id AS user_id, RANK() OVER (ORDER BY COALESCE(x.total_xp, 0) DESC) AS rank
+             FROM users u
+             LEFT JOIN xp x ON x.user_id = u.id
+             WHERE u.guild_id = $1 AND u.active = TRUE
+         ) sub
+         WHERE user_id = $2",
     )
     .bind(guild_id)
     .bind(user_id)
@@ -2102,7 +2102,7 @@ pub async fn get_event_leaderboard(
             u.id
         ORDER BY
             total_event_xp DESC,
-            u.id ASC 
+            u.id ASC
         LIMIT $2 OFFSET $3
         "#,
     )
@@ -2916,6 +2916,13 @@ pub async fn get_event_milestones_with_counts(
              JOIN users u ON u.id = ex.user_id
              WHERE ex.event_id = $1
                AND u.active = TRUE
+               AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
+               AND NOT EXISTS (
+                SELECT 1 FROM event_participants ep
+                   WHERE ep.event_id = ex.event_id
+                     AND ep.user_id = ex.user_id
+                     AND COALESCE(ep.disqualified, FALSE) = TRUE
+               )
              GROUP BY ex.user_id
          ) sub ON sub.total_xp >= em.xp_threshold
          WHERE em.event_id = $1
@@ -2932,26 +2939,37 @@ pub async fn get_event_milestone_completers(
     pool: &PgPool,
     event_id: i64,
     xp_threshold: f64,
-) -> Result<Vec<i64>, sqlx::Error> {
+) -> Result<Vec<(i64, String, f64)>, sqlx::Error> {
     debug!(
         "queries::get_event_milestone_completers: event_id={}, xp_threshold={}",
         event_id, xp_threshold
     );
-    let rows: Vec<(i64,)> = sqlx::query_as(
-        "SELECT u.discord_user_id
+    let rows: Vec<(i64, String, f64)> = sqlx::query_as(
+        "SELECT 
+            u.discord_user_id,
+            u.minecraft_username,
+            SUM(ex.xp_earned) as total_xp
          FROM event_xp ex
          JOIN users u ON u.id = ex.user_id
          WHERE ex.event_id = $1
            AND u.active = TRUE
-         GROUP BY u.discord_user_id
-         HAVING SUM(ex.xp_earned) >= $2
-         ORDER BY SUM(ex.xp_earned) DESC",
+           AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
+           AND NOT EXISTS (
+               SELECT 1
+               FROM event_participants ep
+               WHERE ep.user_id = u.id
+                 AND ep.event_id = $1
+                 AND ep.disqualified = TRUE
+           )
+         GROUP BY u.id, u.discord_user_id, u.minecraft_username
+         HAVING SUM(ex.xp_earned)::DOUBLE PRECISION >= $2
+         ORDER BY total_xp DESC",
     )
     .bind(event_id)
     .bind(xp_threshold)
     .fetch_all(pool)
     .await?;
-    Ok(rows.into_iter().map(|(id,)| id).collect())
+    Ok(rows)
 }
 
 /// Update only the milestone_message_id for a persistent event leaderboard.

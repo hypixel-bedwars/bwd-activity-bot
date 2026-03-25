@@ -471,9 +471,6 @@ pub async fn statistics(
 }
 
 /// Show milestone completers for an event as a Discord embed.
-///
-/// Each milestone gets one embed field listing how many players reached it
-/// and their Discord mentions (up to Discord's 25-field / 1024-char limits).
 #[poise::command(slash_command, guild_only, ephemeral)]
 pub async fn milestones(
     ctx: Context<'_>,
@@ -481,7 +478,7 @@ pub async fn milestones(
     #[autocomplete = "autocomplete_event_name"]
     event_name: Option<String>,
 ) -> Result<(), Error> {
-    ctx.defer_ephemeral().await?;
+    ctx.defer().await?;
 
     let guild_id = ctx.guild_id().unwrap().get() as i64;
 
@@ -512,11 +509,8 @@ pub async fn milestones(
         return Ok(());
     }
 
-    let mut embed = poise::serenity_prelude::CreateEmbed::new()
-        .title(format!("Milestones — {}", event.name))
-        .color(0x00BFFF);
+    let mut full_content = String::new();
 
-    // Build one field per milestone (cap at Discord's 25-field limit).
     for milestone in milestones.iter().take(25) {
         let completers = queries::get_event_milestone_completers(
             &ctx.data().db,
@@ -526,32 +520,26 @@ pub async fn milestones(
         .await
         .unwrap_or_default();
 
-        let count = completers.len();
-        let field_name = format!("{} XP", milestone.xp_threshold as i64);
+        full_content.push_str(&format!("\n=== {} XP ===\n", milestone.xp_threshold as i64));
 
-        // Build mention list, respecting Discord's 1024-char field value limit.
-        let mut value = if count == 0 {
-            "No players have reached this milestone yet.".to_string()
+        if completers.is_empty() {
+            full_content.push_str("No players reached this milestone.\n");
         } else {
-            let mut s = format!("**{count} player{}**\n", if count == 1 { "" } else { "s" });
-            for uid in &completers {
-                let mention = format!("<@{uid}> ");
-                if s.len() + mention.len() > 1020 {
-                    s.push_str("…");
+            for (discord_id, mc_name, xp) in completers {
+                let line = format!("{discord_id} - {mc_name} - {xp}\n");
+
+                if full_content.len() + line.len() > 1900 {
+                    full_content.push_str("...\n(truncated)");
                     break;
                 }
-                s.push_str(&mention);
+
+                full_content.push_str(&line);
             }
-            s
-        };
-
-        // Discord field values must be non-empty and ≤ 1024 chars.
-        value.truncate(1024);
-
-        embed = embed.field(field_name, value, false);
+        }
     }
 
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    ctx.send(poise::CreateReply::default().content(full_content))
+        .await?;
 
     Ok(())
 }
