@@ -431,12 +431,10 @@ async fn apply_stat_deltas(
 
     // Award event XP for each committed delta (post-commit, pool-only).
     let mut total_event_xp = 0.0_f64;
-    let participant = queries::get_event_participant_for_active_event(pool, user.id).await?;
+    let blocked_from_active_events =
+        queries::is_user_disqualified_in_any_active_event(pool, user.guild_id, user.id).await?;
 
-    let can_participate =
-        crate::database::models::can_user_participate_in_event(user, participant.as_ref());
-
-    if !can_participate {
+    if blocked_from_active_events {
         debug!(
             user_id = user.id,
             "Skipping event XP — user is disqualified or globally banned."

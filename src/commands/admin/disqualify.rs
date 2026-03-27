@@ -42,7 +42,6 @@ async fn autocomplete_event_name<'a>(
 pub async fn disqualify(
     ctx: Context<'_>,
     user: serenity::User,
-    duration: Option<i64>,
     #[autocomplete = "autocomplete_event_name"] event: Option<i64>,
     reason: Option<String>,
 ) -> Result<(), Error> {
@@ -52,100 +51,15 @@ pub async fn disqualify(
     let guild_i64 = guild_id.get() as i64;
     let pool = &ctx.data().db;
 
-    // Validate mutually exclusive inputs
-    match (duration, event) {
-        (Some(_), Some(_)) => {
-            ctx.say("Provide either `duration` (global ban) or `event`, not both.")
-                .await?;
-            return Ok(());
-        }
-        (None, None) => {
-            ctx.say("You must provide either a `duration` or an `event`.")
-                .await?;
-            return Ok(());
-        }
-        _ => {}
-    }
-
     // Load user
     let db_user = queries::get_user_by_discord_id_any(pool, user.id.get() as i64, guild_i64)
         .await?
         .ok_or("User is not registered in this guild")?;
 
-    if let Some(days) = duration {
-        if days <= 0 {
-            ctx.say("Duration must be a positive number of days.")
-                .await?;
-            return Ok(());
-        }
-
-        let ban_until = Utc::now() + Duration::days(days);
-
-        queries::ban_user_from_events(pool, db_user.id, days, reason.as_deref()).await?;
-
-        let embed = CreateEmbed::new()
-            .title("Global Event Ban Applied")
-            .description(format!(
-                "User <@{}> is banned from **all events** until <t:{}:F>.\nReason: {}",
-                user.id,
-                ban_until.timestamp(),
-                reason.as_deref().unwrap_or("No reason provided.")
-            ))
-            .color(0xFF0000);
-
-        ctx.send(poise::CreateReply::default().embed(embed)).await?;
-
-        info!(
-            admin = %ctx.author().name,
-            target = %user.id,
-            duration_days = days,
-            "Applied global event ban"
-        );
-
-        logger(
-            ctx.serenity_context(),
-            ctx.data(),
-            guild_id,
-            LogType::Warn,
-            format!(
-                "{} globally banned <@{}> for {} day(s)",
-                ctx.author().name,
-                user.id,
-                days
-            ),
-        )
-        .await?;
-
-        let embed = CreateEmbed::new()
-            .title("⚠️ Global Disqualification")
-            .color(0xFFA500)
-            .fields(vec![
-                ("User", format!("<@{}>", user.id), true),
-                ("Moderator", ctx.author().name.clone(), true),
-                ("Duration", days.to_string(), true),
-                (
-                    "Reason",
-                    reason
-                        .as_deref()
-                        .unwrap_or("No reason provided.")
-                        .to_string(),
-                    false,
-                ),
-            ])
-            .timestamp(chrono::Utc::now());
-
-        ChannelId::new(LOG_CHANNEL)
-            .send_message(&ctx.http(), serenity::CreateMessage::new().embed(embed))
-            .await?;
-    } else if let Some(event_id) = event {
+    if let Some(event_id) = event {
         let event_row = queries::get_event_by_id(pool, event_id)
             .await?
             .ok_or("Event not found")?;
-
-        if event_row.guild_id != guild_i64 {
-            ctx.say("That event does not belong to this guild.").await?;
-            return Ok(());
-        }
 
         let already = queries::is_user_disqualified_from_event(pool, event_id, db_user.id).await?;
 
@@ -155,7 +69,15 @@ pub async fn disqualify(
             return Ok(());
         }
 
-        queries::disqualify_user_from_event(pool, event_id, db_user.id).await?;
+        queries::disqualify_user_from_event(
+            pool,
+            event_id,
+            db_user.id,
+            ctx.author().id.get() as i64,
+            guild_i64,
+            reason.as_deref(),
+        )
+        .await?;
 
         let embed = CreateEmbed::new()
             .title("Event Disqualification Applied")
@@ -176,7 +98,7 @@ pub async fn disqualify(
             "Applied event DQ"
         );
 
-        logger(
+        let _ = logger(
             ctx.serenity_context(),
             ctx.data(),
             guild_id,
@@ -188,7 +110,7 @@ pub async fn disqualify(
                 event_row.name
             ),
         )
-        .await?;
+        .await;
 
         let embed = CreateEmbed::new()
             .title("⚠️ Event Disqualification")
@@ -208,9 +130,9 @@ pub async fn disqualify(
             ])
             .timestamp(chrono::Utc::now());
 
-        ChannelId::new(LOG_CHANNEL)
+        let _ = ChannelId::new(LOG_CHANNEL)
             .send_message(&ctx.http(), serenity::CreateMessage::new().embed(embed))
-            .await?;
+            .await;
     }
 
     Ok(())
@@ -227,8 +149,8 @@ pub async fn undisqualify(
     ctx: Context<'_>,
     #[description = "User to re-qualify"] user: serenity::User,
     #[autocomplete = "autocomplete_event_name"]
-    #[description = "Event ID (leave empty to remove global ban)"]
-    event: Option<i64>,
+    #[description = "Event ID"]
+    event: i64,
 ) -> Result<(), Error> {
     let guild_id = ctx.guild_id().ok_or("Must be in a server")?;
     let guild_i64 = guild_id.get() as i64;
@@ -238,40 +160,43 @@ pub async fn undisqualify(
         .await?
         .ok_or("User not found")?;
 
-    if let Some(event_id) = event {
-        queries::requalify_user_for_event(pool, event_id, db_user.id).await?;
+    let event_row = queries::get_event_by_id(pool, event)
+        .await?
+        .ok_or("Event not found")?;
 
-        let embed = CreateEmbed::new()
-            .title("Event Requalification")
-            .description(format!(
-                "<@{}> is no longer disqualified from event {}.",
-                user.id, event_id
-            ))
-            .color(0x00FF00);
-
-        ctx.send(poise::CreateReply::default().embed(embed)).await?;
-    } else {
-        queries::remove_global_event_ban(pool, db_user.id).await?;
-
-        let embed = CreateEmbed::new()
-            .title("Global Ban Removed")
-            .description(format!(
-                "<@{}> can now participate in events again.",
-                user.id
-            ))
-            .color(0x00FF00);
-
-        ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    if event_row.guild_id != guild_i64 {
+        ctx.say("That event does not belong to this guild.").await?;
+        return Ok(());
     }
 
-    logger(
+    queries::requalify_user_for_event(
+        pool,
+        event,
+        db_user.id,
+        ctx.author().id.get() as i64,
+        guild_i64,
+        None,
+    )
+    .await?;
+
+    let embed = CreateEmbed::new()
+        .title("Event Requalification")
+        .description(format!(
+            "<@{}> is no longer disqualified from event {}.",
+            user.id, event
+        ))
+        .color(0x00FF00);
+
+    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+
+    let _ = logger(
         ctx.serenity_context(),
         ctx.data(),
         guild_id,
         LogType::Info,
         format!("{} undisqualified <@{}>", ctx.author().name, user.id),
     )
-    .await?;
+    .await;
 
     let embed = CreateEmbed::new()
         .title("⚠️ Disqualification Removed")
@@ -279,19 +204,260 @@ pub async fn undisqualify(
         .fields(vec![
             ("User", format!("<@{}>", user.id), true),
             ("Moderator", ctx.author().name.clone(), true),
+            ("Event", event.to_string(), true),
+        ])
+        .timestamp(chrono::Utc::now());
+
+    let _ = ChannelId::new(LOG_CHANNEL)
+        .send_message(&ctx.http(), serenity::CreateMessage::new().embed(embed))
+        .await;
+
+    Ok(())
+}
+
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    required_permissions = "BAN_MEMBERS",
+    default_member_permissions = "BAN_MEMBERS"
+)]
+pub async fn ban(
+    ctx: Context<'_>,
+    #[description = "User to ban"] user: serenity::User,
+    #[description = "Reason for ban"] reason: Option<String>,
+    #[description = "Duration of ban, e.g use 1d, 2w, 1y (leave empty for permanent)"]
+    input_duration: Option<String>,
+) -> Result<(), Error> {
+    let guild_id = ctx.guild_id().ok_or("Must be in a server")?;
+    let guild_i64 = guild_id.get() as i64;
+    let pool = &ctx.data().db;
+
+    let duration: Option<Duration> = if let Some(input) = input_duration {
+        let input = input.trim();
+
+        if input.len() < 2 {
+            ctx.say("Invalid duration format.").await?;
+            return Ok(());
+        }
+
+        let (num_part, unit) = input.split_at(input.len() - 1);
+
+        let value = match num_part.parse::<i64>() {
+            Ok(n) => n,
+            Err(_) => {
+                ctx.say("Invalid duration format. Use `1h`, `1d`, `2w`, or `1y`.")
+                    .await?;
+                return Ok(());
+            }
+        };
+
+        let dur = match unit {
+            "h" => Duration::hours(value),
+            "d" => Duration::days(value),
+            "w" => Duration::weeks(value),
+            "y" => Duration::days(value * 365),
+            _ => {
+                ctx.say("Invalid unit. Use `h`, `d`, `w`, or `y`.").await?;
+                return Ok(());
+            }
+        };
+
+        Some(dur)
+    } else {
+        None
+    };
+
+    let db_user = queries::get_user_by_discord_id_any(pool, user.id.get() as i64, guild_i64)
+        .await?
+        .ok_or("User not found")?;
+
+    let expires_at = duration.map(|d| Utc::now() + d);
+
+    queries::ban_user_from_events(
+        pool,
+        db_user.id,
+        ctx.author().id.get() as i64,
+        guild_i64,
+        expires_at,
+        reason.as_deref(),
+    )
+    .await?;
+
+    info!(
+        admin = %ctx.author().name,
+        target = %user.id,
+        duration = ?duration,
+        "Applied global ban"
+    );
+
+    let _ = logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Error,
+        format!(
+            "{} globally banned <@{}> for {}",
+            ctx.author().name,
+            user.id,
+            reason.as_deref().unwrap_or("No reason provided.")
+        ),
+    )
+    .await;
+
+    let embed = CreateEmbed::new()
+        .title("⚠️ Global Disqualification")
+        .color(0xFFA500)
+        .fields(vec![
+            ("User", format!("<@{}>", user.id), true),
+            ("Moderator", ctx.author().name.clone(), true),
             (
-                "Event",
-                event
-                    .map(|id| id.to_string())
-                    .unwrap_or("Global Ban".to_string()),
+                "Duration",
+                duration
+                    .map(|d| format!("{} seconds", d.num_seconds()))
+                    .unwrap_or("Permanent".to_string()),
                 true,
+            ),
+            (
+                "Reason",
+                reason
+                    .as_deref()
+                    .unwrap_or("No reason provided.")
+                    .to_string(),
+                false,
             ),
         ])
         .timestamp(chrono::Utc::now());
 
-    ChannelId::new(LOG_CHANNEL)
+    let _ = ChannelId::new(LOG_CHANNEL)
         .send_message(&ctx.http(), serenity::CreateMessage::new().embed(embed))
-        .await?;
+        .await;
+
+    Ok(())
+}
+
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    required_permissions = "BAN_MEMBERS",
+    default_member_permissions = "BAN_MEMBERS"
+)]
+pub async fn unban(
+    ctx: Context<'_>,
+    #[description = "User to unban"] user: serenity::User,
+    #[description = "Reason for unban"] reason: Option<String>,
+) -> Result<(), Error> {
+    let guild_id = ctx.guild_id().ok_or("Must be in a server")?;
+    let guild_i64 = guild_id.get() as i64;
+    let pool = &ctx.data().db;
+
+    let db_user = queries::get_user_by_discord_id_any(pool, user.id.get() as i64, guild_i64)
+        .await?
+        .ok_or("User not found")?;
+
+    queries::unban_user_from_events(
+        pool,
+        db_user.id,
+        ctx.author().id.get() as i64,
+        guild_i64,
+        reason.as_deref(),
+    )
+    .await?;
+
+    let _ = logger(
+        ctx.serenity_context(),
+        ctx.data(),
+        guild_id,
+        LogType::Info,
+        format!("{} lifted global ban on <@{}>", ctx.author().name, user.id),
+    )
+    .await;
+
+    let embed = CreateEmbed::new()
+        .title("⚠️ User Unbanned")
+        .color(0x00FF00)
+        .fields(vec![
+            ("User", format!("<@{}>", user.id), true),
+            ("Moderator", ctx.author().name.clone(), true),
+        ])
+        .timestamp(chrono::Utc::now());
+
+    let _ = ChannelId::new(LOG_CHANNEL)
+        .send_message(
+            &ctx.http(),
+            serenity::CreateMessage::new().embed(embed.clone()),
+        )
+        .await;
+
+    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+
+    Ok(())
+}
+
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    rename = "list-punishments",
+    required_permissions = "BAN_MEMBERS",
+    default_member_permissions = "BAN_MEMBERS"
+)]
+pub async fn punishments(ctx: Context<'_>) -> Result<(), Error> {
+    let pool = &ctx.data().db;
+    let guild_id = ctx.guild_id().unwrap().get() as i64;
+
+    let rows = queries::get_active_punishments(pool, guild_id).await?;
+
+    if rows.is_empty() {
+        ctx.say("No active punishments.").await?;
+        return Ok(());
+    }
+
+    let mut desc = String::new();
+
+    for (user_id, action, event_id, expiry, reason, _) in rows.iter().take(20) {
+        let line = match action.as_str() {
+            "ban" => {
+                let expiry_text = expiry
+                    .map(|t| format!("<t:{}:R>", t.timestamp()))
+                    .unwrap_or_else(|| "Permanent".to_string());
+
+                format!(
+                    "🔴 <@{}> banned ({})\n> {}\n\n",
+                    user_id, expiry_text, reason
+                )
+            }
+
+            "disqualify" => {
+                format!(
+                    "🟠 <@{}> disqualified from event `{}`\n> {}\n\n",
+                    user_id,
+                    event_id.unwrap_or(0),
+                    reason
+                )
+            }
+
+            _ => continue, // should never happen
+        };
+
+        desc.push_str(&line);
+    }
+
+    // truncate if too long (Discord limit ~4096 chars)
+    if desc.len() > 4000 {
+        desc.truncate(4000);
+        desc.push_str("\n...and more");
+    }
+
+    ctx.send(
+        poise::CreateReply::default().embed(
+            serenity::CreateEmbed::new()
+                .title("Active Punishments")
+                .description(desc),
+        ),
+    )
+    .await?;
 
     Ok(())
 }

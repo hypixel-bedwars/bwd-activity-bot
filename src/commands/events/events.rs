@@ -1,4 +1,3 @@
-use chrono::Utc;
 /// `/event` and `/edit-event` command groups.
 ///
 /// Public commands:
@@ -358,15 +357,10 @@ pub async fn level(
         },
     };
 
-    let globally_banned = db_user
-        .event_ban_until
-        .map(|t| t > Utc::now())
-        .unwrap_or(false);
-
     let event_dq =
         queries::is_user_disqualified_from_event(&ctx.data().db, event.id, db_user.id).await?;
 
-    let is_disqualified = globally_banned || event_dq;
+    let is_disqualified = event_dq;
 
     // Build card params — reuse the level card with event-specific data:
     //   level             = 0   (not applicable for events; hides level display)

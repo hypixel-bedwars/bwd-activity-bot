@@ -12,8 +12,6 @@ use std::collections::HashMap;
 use tracing::{debug, error, info, warn};
 use uuid::Uuid;
 
-use crate::database::models::DbEventParticipant;
-
 use super::models::{
     BackfillSummary, DbDailySnapshot, DbEvent, DbEventMilestone, DbEventStat, DbEventStatusMessage,
     DbGuild, DbMilestone, DbPersistentEventLeaderboard, DbPersistentLeaderboard, DbStatDelta,
@@ -1904,13 +1902,9 @@ pub async fn get_event_participants(
                u.minecraft_username
         FROM event_xp ex
         JOIN users u ON u.id = ex.user_id
-        LEFT JOIN event_participants ep
-            ON ep.event_id = ex.event_id
-           AND ep.user_id = ex.user_id
         WHERE ex.event_id = $1
           AND u.active = TRUE
-          AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-          AND COALESCE(ep.disqualified, FALSE) = FALSE
+                    AND is_player_allowed(u.id, $1) = TRUE
         ORDER BY u.minecraft_username NULLS LAST, u.discord_user_id",
     )
     .bind(event_id)
@@ -1966,17 +1960,13 @@ pub async fn award_event_xp_for_delta(
         FROM event_stats es
         JOIN events e ON e.id = es.event_id
         JOIN users u ON u.id = $2 AND u.guild_id = $1
-        LEFT JOIN event_participants ep
-               ON ep.event_id = es.event_id
-              AND ep.user_id = $2
         WHERE e.guild_id = $1
           AND e.status = 'active'
           AND e.start_date <= $6
           AND e.end_date > $6
           AND es.stat_name = $3
           AND u.active = TRUE
-          AND (u.event_ban_until IS NULL OR u.event_ban_until < $6)
-          AND COALESCE(ep.disqualified, FALSE) = FALSE
+          AND is_player_allowed($2, es.event_id) = TRUE
         ON CONFLICT (event_id, delta_id) DO NOTHING
         RETURNING xp_earned
         "#,
@@ -2033,14 +2023,10 @@ pub async fn award_admin_event_xp(
                $6 AS created_at
         FROM events e
         JOIN users u ON u.id = $2
-        LEFT JOIN event_participants ep
-               ON ep.event_id = e.id
-              AND ep.user_id = u.id
         WHERE e.guild_id = $1
-          AND e.status = 'active'
-          AND u.active = TRUE
-          AND (u.event_ban_until IS NULL OR u.event_ban_until < $6)
-          AND COALESCE(ep.disqualified, FALSE) = FALSE
+            AND e.status = 'active'
+            AND u.active = TRUE
+            AND is_player_allowed($2, e.id) = TRUE
         ON CONFLICT (event_id, delta_id) DO NOTHING
         RETURNING xp_earned
         "#,
@@ -2085,14 +2071,10 @@ pub async fn get_event_leaderboard(
         FROM event_xp ex
         JOIN users u ON u.id = ex.user_id
         JOIN events e ON e.id = ex.event_id
-        LEFT JOIN event_participants ep
-            ON ep.event_id = ex.event_id
-           AND ep.user_id = ex.user_id
         WHERE ex.event_id = $1
-          AND e.id = $1
-          AND u.active = TRUE
-          AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-          AND COALESCE(ep.disqualified, FALSE) = FALSE
+            AND e.id = $1
+            AND u.active = TRUE
+            AND is_player_allowed(ex.user_id, $1) = TRUE
         GROUP BY
             u.discord_user_id,
             u.minecraft_username,
@@ -2127,14 +2109,10 @@ pub async fn get_user_event_stats(
         "SELECT ex.stat_name, COALESCE(SUM(ex.xp_earned), 0.0) AS total_xp, COALESCE(SUM(ex.units), 0)::BIGINT AS total_units
          FROM event_xp ex
          JOIN users u ON u.id = ex.user_id
-         LEFT JOIN event_participants ep
-           ON ep.event_id = ex.event_id
-          AND ep.user_id = ex.user_id
          WHERE ex.event_id = $1
-           AND ex.user_id = $2
-           AND u.active = TRUE
-           AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-           AND COALESCE(ep.disqualified, FALSE) = FALSE
+            AND ex.user_id = $2
+            AND u.active = TRUE
+            AND is_player_allowed(ex.user_id, $1) = TRUE
          GROUP BY ex.stat_name
          ORDER BY total_xp DESC",
     )
@@ -2164,13 +2142,9 @@ pub async fn get_user_event_rank(
             RANK() OVER (ORDER BY SUM(ex.xp_earned) DESC, ex.user_id ASC)
             FROM event_xp ex
             JOIN users u ON u.id = ex.user_id
-            LEFT JOIN event_participants ep
-                ON ep.event_id = ex.event_id
-                AND ep.user_id = ex.user_id
             WHERE ex.event_id = $1
                 AND u.active = TRUE
-                AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-                AND COALESCE(ep.disqualified, FALSE) = FALSE
+                AND is_player_allowed(ex.user_id, $1) = TRUE
             GROUP BY ex.user_id
         ) sub
         WHERE user_id = $2
@@ -2242,17 +2216,26 @@ pub async fn disqualify_user_from_event(
     pool: &PgPool,
     event_id: i64,
     user_id: i64,
+    moderator_id: i64,
+    guild_id: i64,
+    reason: Option<&str>,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+    debug!(
+        "queries::disqualify_user_from_event: event_id={}, user_id={}, moderator_id={}, guild_id={}",
+        event_id, user_id, moderator_id, guild_id
+    );
+
+    sqlx::query(
         r#"
-        INSERT INTO event_participants (event_id, user_id, disqualified)
-        VALUES ($1, $2, TRUE)
-        ON CONFLICT (event_id, user_id)
-        DO UPDATE SET disqualified = TRUE
+        INSERT INTO modrec (user_id, moderator_id, guild_id, action_type, event_id, reason)
+        VALUES ($1, $2, $3, 'disqualify', $4, $5)
         "#,
-        event_id,
-        user_id
     )
+    .bind(user_id)
+    .bind(moderator_id)
+    .bind(guild_id)
+    .bind(event_id)
+    .bind(reason)
     .execute(pool)
     .await?;
 
@@ -2263,17 +2246,26 @@ pub async fn requalify_user_for_event(
     pool: &PgPool,
     event_id: i64,
     user_id: i64,
+    moderator_id: i64,
+    guild_id: i64,
+    reason: Option<&str>,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+    debug!(
+        "queries::requalify_user_for_event: event_id={}, user_id={}, moderator_id={}, guild_id={}",
+        event_id, user_id, moderator_id, guild_id
+    );
+
+    sqlx::query(
         r#"
-        UPDATE event_participants
-        SET disqualified = FALSE
-        WHERE event_id = $1
-          AND user_id = $2
+        INSERT INTO modrec (user_id, moderator_id, guild_id, action_type, event_id, reason)
+        VALUES ($1, $2, $3, 'undisqualify', $4, $5)
         "#,
-        event_id,
-        user_id
     )
+    .bind(user_id)
+    .bind(moderator_id)
+    .bind(guild_id)
+    .bind(event_id)
+    .bind(reason)
     .execute(pool)
     .await?;
 
@@ -2283,38 +2275,55 @@ pub async fn requalify_user_for_event(
 pub async fn ban_user_from_events(
     pool: &PgPool,
     user_id: i64,
-    duration_days: i64,
+    moderator_id: i64,
+    guild_id: i64,
+    expires_at: Option<DateTime<Utc>>,
     reason: Option<&str>,
 ) -> Result<(), sqlx::Error> {
-    let ban_until = chrono::Utc::now() + chrono::Duration::days(duration_days);
+    debug!(
+        "queries::ban_user_from_events: user_id={}, moderator_id={}, guild_id={}, expires_at={:?}",
+        user_id, moderator_id, guild_id, expires_at
+    );
 
-    sqlx::query!(
+    sqlx::query(
         r#"
-        UPDATE users
-        SET event_ban_until = $1,
-            event_ban_reason = $2
-        WHERE id = $3
+        INSERT INTO modrec (user_id, moderator_id, guild_id, action_type, ban_expires_at, reason)
+        VALUES ($1, $2, $3, 'ban', $4, $5)
         "#,
-        ban_until,
-        reason,
-        user_id
     )
+    .bind(user_id)
+    .bind(moderator_id)
+    .bind(guild_id)
+    .bind(expires_at)
+    .bind(reason)
     .execute(pool)
     .await?;
 
     Ok(())
 }
 
-pub async fn unban_user_from_events(pool: &PgPool, user_id: i64) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+pub async fn unban_user_from_events(
+    pool: &PgPool,
+    user_id: i64,
+    moderator_id: i64,
+    guild_id: i64,
+    reason: Option<&str>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::unban_user_from_events: user_id={}, moderator_id={}, guild_id={}",
+        user_id, moderator_id, guild_id
+    );
+
+    sqlx::query(
         r#"
-        UPDATE users
-        SET event_ban_until = NULL,
-            event_ban_reason = NULL
-        WHERE id = $1
+        INSERT INTO modrec (user_id, moderator_id, guild_id, action_type, reason)
+        VALUES ($1, $2, $3, 'unban', $4)
         "#,
-        user_id
     )
+    .bind(user_id)
+    .bind(moderator_id)
+    .bind(guild_id)
+    .bind(reason)
     .execute(pool)
     .await?;
 
@@ -2332,13 +2341,9 @@ pub async fn count_event_participants(pool: &PgPool, event_id: i64) -> Result<i6
         "SELECT COUNT(DISTINCT ex.user_id)
         FROM event_xp ex
         JOIN users u ON u.id = ex.user_id
-        LEFT JOIN event_participants ep
-            ON ep.event_id = ex.event_id
-           AND ep.user_id = ex.user_id
         WHERE ex.event_id = $1
           AND u.active = TRUE
-          AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-          AND COALESCE(ep.disqualified, FALSE) = FALSE",
+          AND is_player_allowed(ex.user_id, $1) = TRUE",
     )
     .bind(event_id)
     .fetch_one(pool)
@@ -2616,13 +2621,9 @@ async fn process_batch(
                    $7 AS xp_earned,
                    NOW() AS created_at
             FROM users u
-            LEFT JOIN event_participants ep
-                   ON ep.event_id = $1
-                  AND ep.user_id = u.id
             WHERE u.id = $2
               AND u.active = TRUE
-              AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-              AND COALESCE(ep.disqualified, FALSE) = FALSE
+                            AND is_player_allowed(u.id, $1) = TRUE
             ON CONFLICT (event_id, delta_id) DO NOTHING
             RETURNING xp_earned
             "#,
@@ -2916,13 +2917,7 @@ pub async fn get_event_milestones_with_counts(
              JOIN users u ON u.id = ex.user_id
              WHERE ex.event_id = $1
                AND u.active = TRUE
-               AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-               AND NOT EXISTS (
-                SELECT 1 FROM event_participants ep
-                   WHERE ep.event_id = ex.event_id
-                     AND ep.user_id = ex.user_id
-                     AND COALESCE(ep.disqualified, FALSE) = TRUE
-               )
+                             AND is_player_allowed(ex.user_id, $1) = TRUE
              GROUP BY ex.user_id
          ) sub ON sub.total_xp >= em.xp_threshold
          WHERE em.event_id = $1
@@ -2953,14 +2948,7 @@ pub async fn get_event_milestone_completers(
          JOIN users u ON u.id = ex.user_id
          WHERE ex.event_id = $1
            AND u.active = TRUE
-           AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-           AND NOT EXISTS (
-               SELECT 1
-               FROM event_participants ep
-               WHERE ep.user_id = u.id
-                 AND ep.event_id = $1
-                 AND ep.disqualified = TRUE
-           )
+                     AND is_player_allowed(ex.user_id, $1) = TRUE
          GROUP BY u.id, u.discord_user_id, u.minecraft_username
          HAVING SUM(ex.xp_earned)::DOUBLE PRECISION >= $2
          ORDER BY total_xp DESC",
@@ -3176,13 +3164,9 @@ pub async fn get_event_statistics(
         "SELECT COALESCE(SUM(ex.xp_earned)::DOUBLE PRECISION, 0.0)
          FROM event_xp ex
          JOIN users u ON u.id = ex.user_id
-         LEFT JOIN event_participants ep
-           ON ep.event_id = ex.event_id
-          AND ep.user_id = ex.user_id
          WHERE ex.event_id = $1
            AND u.active = TRUE
-           AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-           AND COALESCE(ep.disqualified, FALSE) = FALSE",
+                     AND is_player_allowed(ex.user_id, $1) = TRUE",
     )
     .bind(event_id)
     .fetch_one(pool)
@@ -3193,13 +3177,9 @@ pub async fn get_event_statistics(
         "SELECT ex.stat_name, COALESCE(SUM(ex.units)::bigint, 0) AS total
          FROM event_xp ex
          JOIN users u ON u.id = ex.user_id
-         LEFT JOIN event_participants ep
-           ON ep.event_id = ex.event_id
-          AND ep.user_id = ex.user_id
          WHERE ex.event_id = $1
            AND u.active = TRUE
-           AND (u.event_ban_until IS NULL OR u.event_ban_until < NOW())
-           AND COALESCE(ep.disqualified, FALSE) = FALSE
+                     AND is_player_allowed(ex.user_id, $1) = TRUE
          GROUP BY ex.stat_name
          ORDER BY total DESC",
     )
@@ -3237,36 +3217,14 @@ pub async fn get_event_statistics(
     })
 }
 
-pub async fn get_event_participant_for_active_event(
+pub async fn remove_global_event_ban(
     pool: &PgPool,
     user_id: i64,
-) -> Result<Option<DbEventParticipant>, sqlx::Error> {
-    sqlx::query_as::<_, DbEventParticipant>(
-        r#"
-        SELECT ep.*
-        FROM event_participants ep
-        JOIN events e ON e.id = ep.event_id
-        WHERE ep.user_id = $1
-          AND e.status = 'active'
-        LIMIT 1
-        "#,
-    )
-    .bind(user_id)
-    .fetch_optional(pool)
-    .await
-}
-
-pub async fn remove_global_event_ban(pool: &PgPool, user_id: i64) -> Result<(), sqlx::Error> {
-    sqlx::query(
-        "UPDATE users
-         SET event_ban_until = NULL,
-             event_ban_reason = NULL
-         WHERE id = $1",
-    )
-    .bind(user_id)
-    .execute(pool)
-    .await?;
-    Ok(())
+    moderator_id: i64,
+    guild_id: i64,
+    reason: Option<&str>,
+) -> Result<(), sqlx::Error> {
+    unban_user_from_events(pool, user_id, moderator_id, guild_id, reason).await
 }
 
 pub async fn is_user_disqualified_in_any_active_event(
@@ -3274,24 +3232,23 @@ pub async fn is_user_disqualified_in_any_active_event(
     guild_id: i64,
     user_id: i64,
 ) -> Result<bool, sqlx::Error> {
-    let exists: Option<i64> = sqlx::query_scalar(
+    let exists: bool = sqlx::query_scalar(
         r#"
-        SELECT 1::bigint
-        FROM event_participants ep
-        JOIN events e ON e.id = ep.event_id
-        WHERE ep.user_id = $1
-          AND ep.disqualified = TRUE
-          AND e.guild_id = $2
-          AND e.status = 'active'
-        LIMIT 1
+        SELECT EXISTS (
+            SELECT 1
+            FROM events e
+            WHERE e.guild_id = $1
+              AND e.status = 'active'
+              AND NOT is_player_allowed($2, e.id)
+        )
         "#,
     )
-    .bind(user_id)
     .bind(guild_id)
-    .fetch_optional(pool)
+    .bind(user_id)
+    .fetch_one(pool)
     .await?;
 
-    Ok(exists.is_some())
+    Ok(exists)
 }
 
 pub async fn is_user_disqualified_from_event(
@@ -3299,18 +3256,124 @@ pub async fn is_user_disqualified_from_event(
     event_id: i64,
     user_id: i64,
 ) -> Result<bool, sqlx::Error> {
-    let exists: Option<i64> = sqlx::query_scalar(
-        "SELECT 1::bigint
-         FROM event_participants
-         WHERE event_id = $1
-           AND user_id = $2
-           AND disqualified = TRUE
-         LIMIT 1",
+    let allowed: bool = sqlx::query_scalar("SELECT is_player_allowed($1, $2)")
+        .bind(user_id)
+        .bind(event_id)
+        .fetch_one(pool)
+        .await?;
+
+    Ok(!allowed)
+}
+
+/// Check whether a user currently has an active global event ban based on
+/// their latest modrec ban/unban action.
+pub async fn is_user_globally_banned(pool: &PgPool, user_id: i64) -> Result<bool, sqlx::Error> {
+    let banned: Option<bool> = sqlx::query_scalar(
+        r#"
+        SELECT CASE
+                 WHEN action_type = 'ban'
+                      AND (ban_expires_at IS NULL OR ban_expires_at > NOW())
+                 THEN TRUE
+                 ELSE FALSE
+               END
+        FROM modrec
+        WHERE user_id = $1
+          AND action_type IN ('ban', 'unban')
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        "#,
     )
-    .bind(event_id)
     .bind(user_id)
     .fetch_optional(pool)
     .await?;
 
-    Ok(exists.is_some())
+    Ok(banned.unwrap_or(false))
+}
+
+pub async fn get_active_punishments(
+    pool: &PgPool,
+    guild_id: i64,
+) -> Result<
+    Vec<(
+        i64,
+        String,
+        Option<i64>,
+        Option<DateTime<Utc>>,
+        String,
+        DateTime<Utc>,
+    )>,
+    sqlx::Error,
+> {
+    debug!("queries::get_active_punishments: guild_id={}", guild_id);
+
+    let rows = sqlx::query_as::<
+        _,
+        (
+            i64,
+            String,
+            Option<i64>,
+            Option<DateTime<Utc>>,
+            String,
+            DateTime<Utc>,
+        ),
+    >(
+        r#"
+        WITH latest_bans AS (
+            SELECT DISTINCT ON (m.user_id)
+                m.user_id,
+                m.action_type,
+                m.ban_expires_at,
+                m.reason,
+                m.created_at
+            FROM modrec m
+            WHERE m.guild_id = $1
+              AND m.action_type IN ('ban', 'unban')
+            ORDER BY m.user_id, m.created_at DESC, m.id DESC
+        ),
+        latest_dq AS (
+            SELECT DISTINCT ON (m.user_id, m.event_id)
+                m.user_id,
+                m.event_id,
+                m.action_type,
+                m.reason,
+                m.created_at
+            FROM modrec m
+            WHERE m.guild_id = $1
+              AND m.action_type IN ('disqualify', 'undisqualify')
+            ORDER BY m.user_id, m.event_id, m.created_at DESC, m.id DESC
+        )
+
+        -- Active bans
+        SELECT
+            u.discord_user_id as user_id,
+            lb.action_type::text,
+            NULL::BIGINT as event_id,
+            lb.ban_expires_at,
+            lb.reason,
+            lb.created_at
+        FROM latest_bans lb
+        JOIN users u ON u.id = lb.user_id
+        WHERE lb.action_type = 'ban'
+          AND (lb.ban_expires_at IS NULL OR lb.ban_expires_at > NOW())
+
+        UNION ALL
+
+        -- Active disqualifications
+        SELECT
+            u.discord_user_id as user_id,
+            ld.action_type::text,
+            ld.event_id,
+            NULL::TIMESTAMPTZ,
+            ld.reason,
+            ld.created_at
+        FROM latest_dq ld
+        JOIN users u ON u.id = ld.user_id
+        WHERE ld.action_type = 'disqualify'
+        "#,
+    )
+    .bind(guild_id)
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows)
 }

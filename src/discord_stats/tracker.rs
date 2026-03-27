@@ -273,12 +273,19 @@ async fn increment_stat_by(
         return;
     }
 
-    if user.event_ban_until.map(|t| t > now).unwrap_or(false) {
-        debug!(
-            user_id = user.id,
-            "Skipping XP + event XP — user is globally banned."
-        );
-        return;
+    match queries::is_user_globally_banned(pool, user.id).await {
+        Ok(true) => {
+            debug!(
+                user_id = user.id,
+                "Skipping XP + event XP — user is globally banned."
+            );
+            return;
+        }
+        Ok(false) => {}
+        Err(e) => {
+            error!(error = %e, "failed to check modrec global ban status");
+            return;
+        }
     }
 
     // ----------------------------------------------------
