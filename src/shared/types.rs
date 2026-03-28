@@ -12,7 +12,7 @@ use sqlx::PgPool;
 
 use crate::commands::leaderboard::leaderboard::LeaderboardCache;
 use crate::config::{AppConfig, GuildConfig};
-use crate::database::models::{MessageValidationState, VoiceSessionState};
+use crate::database::models::MessageValidationState;
 use crate::hypixel::client::HypixelClient;
 use poise::serenity_prelude as serenity;
 
@@ -53,11 +53,6 @@ pub struct Data {
     /// if a message is valid for XP (e.g. not a bot command, not a duplicate, etc.).
     pub message_validation: MessageValidationState,
 
-    /// In-memory voice session tracker — maps discord_user_id to the UTC time
-    /// they joined a voice channel. Populated on VoiceStateUpdate join events,
-    /// consumed on leave events to compute `voice_minutes`.
-    pub voice_sessions: VoiceSessionState,
-
     /// Discord HTTP client for sending messages outside command contexts.
     pub http: Arc<serenity::Http>,
 
@@ -68,6 +63,10 @@ pub struct Data {
     /// `AtomicBool::swap` to claim the flag atomically before spawning a
     /// sweep, and `store(false)` once the sweep finishes.
     pub is_full_sweep_running: Arc<AtomicBool>,
+
+    /// Cache of daily VC minutes: (user_id, guild_id, date_naive) -> minutes
+    /// Invalidated at UTC midnight via a background task
+    pub vc_daily_minutes: Arc<DashMap<(i64, i64, chrono::NaiveDate), f64>>,
 }
 
 /// Represents a change in a single stat for a single user between two snapshots.

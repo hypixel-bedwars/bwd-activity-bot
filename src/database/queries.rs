@@ -7,7 +7,7 @@ use serde_json::Value;
 ///
 /// Some functions are not yet called but exist as part of the public query API
 /// for extensions and future commands.
-use sqlx::{PgPool, Postgres, Transaction};
+use sqlx::{PgPool, Postgres, Row, Transaction};
 use std::collections::HashMap;
 use tracing::{debug, error, info, warn};
 use uuid::Uuid;
@@ -15,8 +15,8 @@ use uuid::Uuid;
 use super::models::{
     BackfillSummary, DbDailySnapshot, DbEvent, DbEventMilestone, DbEventStat, DbEventStatusMessage,
     DbGuild, DbMilestone, DbPersistentEventLeaderboard, DbPersistentLeaderboard, DbStatDelta,
-    DbStatsSnapshot, DbSweepCursor, DbUser, DbXP, EventLeaderboardEntry, EventMilestoneWithCount,
-    EventParticipant, LeaderboardEntry, MilestoneWithCount,
+    DbStatsSnapshot, DbSweepCursor, DbUser, DbVcSession, DbXP, EventLeaderboardEntry,
+    EventMilestoneWithCount, EventParticipant, LeaderboardEntry, MilestoneWithCount,
 };
 
 // =========================================================================
@@ -3376,4 +3376,195 @@ pub async fn get_active_punishments(
     .await?;
 
     Ok(rows)
+}
+
+// =========================================================================
+// VC Session queries
+// =========================================================================
+
+pub async fn add_vc_session(
+    pool: &PgPool,
+    discord_user_id: i64,
+    guild_id: i64,
+    join_time: DateTime<Utc>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::add_vc_session: discord_user_id={}, guild_id={}, join_time={}",
+        discord_user_id, guild_id, join_time
+    );
+
+    sqlx::query(
+        r#"
+        INSERT INTO vc_sessions (user_id, guild_id, join_time)
+        SELECT id, guild_id, $3
+        FROM users
+        WHERE discord_user_id = $1 AND guild_id = $2
+        "#,
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .bind(join_time)
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn end_vc_session(
+    pool: &PgPool,
+    discord_user_id: i64,
+    guild_id: i64,
+    leave_time: DateTime<Utc>,
+) -> Result<Option<DateTime<Utc>>, sqlx::Error> {
+    debug!(
+        "queries::end_vc_session: discord_user_id={}, guild_id={}, leave_time={}",
+        discord_user_id, guild_id, leave_time
+    );
+
+    let row = sqlx::query(
+        r#"
+        UPDATE vc_sessions
+        SET leave_time = $3
+        WHERE id = (
+            SELECT s.id
+            FROM vc_sessions s
+            JOIN users u ON u.id = s.user_id
+            WHERE u.discord_user_id = $1
+            AND u.guild_id = $2
+            AND s.leave_time IS NULL
+            ORDER BY s.join_time DESC
+            LIMIT 1
+        )
+        RETURNING join_time;
+        "#,
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .bind(leave_time)
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(row.map(|r| r.get::<DateTime<Utc>, _>("join_time")))
+}
+
+pub async fn get_active_vc_session(
+    pool: &PgPool,
+    discord_user_id: i64,
+    guild_id: i64,
+) -> Result<Option<DbVcSession>, sqlx::Error> {
+    debug!(
+        "queries::get_active_vc_session: discord_user_id={}, guild_id={}",
+        discord_user_id, guild_id
+    );
+
+    sqlx::query_as::<_, DbVcSession>(
+        r#"
+        SELECT s.id, s.user_id, s.guild_id, s.join_time, s.leave_time
+        FROM vc_sessions s
+        JOIN users u ON u.id = s.user_id
+        WHERE u.discord_user_id = $1
+          AND u.guild_id = $2
+          AND s.leave_time IS NULL
+        ORDER BY s.join_time DESC
+        LIMIT 1
+        "#,
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .fetch_optional(pool)
+    .await
+}
+
+pub async fn end_all_active_vc_sessions_for_guild(
+    pool: &PgPool,
+    guild_id: i64,
+    leave_time: DateTime<Utc>,
+) -> Result<(), sqlx::Error> {
+    debug!(
+        "queries::end_all_active_vc_sessions_for_guild: guild_id={}, leave_time={}",
+        guild_id, leave_time
+    );
+
+    let result = sqlx::query(
+        r#"
+        UPDATE vc_sessions
+        SET leave_time = $2
+        WHERE guild_id = $1
+          AND leave_time IS NULL
+        "#,
+    )
+    .bind(guild_id)
+    .bind(leave_time)
+    .execute(pool)
+    .await?;
+
+    info!(
+        guild_id,
+        sessions_updated = result.rows_affected(),
+        "Ended all active VC sessions for guild."
+    );
+
+    Ok(())
+}
+
+pub async fn get_vc_sessions_for_user(
+    pool: &PgPool,
+    discord_user_id: i64,
+) -> Result<Vec<DbVcSession>, sqlx::Error> {
+    debug!(
+        "queries::get_vc_sessions_for_user: discord_user_id={}",
+        discord_user_id
+    );
+
+    sqlx::query_as::<_, DbVcSession>(
+        r#"
+        SELECT s.id, s.user_id, s.guild_id, s.join_time, s.leave_time
+        FROM vc_sessions s
+        JOIN users u ON u.id = s.user_id
+        WHERE u.discord_user_id = $1
+        ORDER BY s.join_time DESC
+        "#,
+    )
+    .bind(discord_user_id)
+    .fetch_all(pool)
+    .await
+}
+
+pub async fn get_vc_sessions_user_for_day(
+    pool: &PgPool,
+    discord_user_id: i64,
+    guild_id: i64,
+    date: DateTime<Utc>,
+) -> Result<Vec<DbVcSession>, sqlx::Error> {
+    debug!(
+        "queries::get_vc_sessions_user_for_day: discord_user_id={}, guild_id={}, date={}",
+        discord_user_id, guild_id, date
+    );
+
+    let date_naive = date.date_naive();
+
+    let day_start = date_naive.and_hms_opt(0, 0, 0).unwrap().and_utc();
+    let day_end = (date_naive + chrono::Duration::days(1))
+        .and_hms_opt(0, 0, 0)
+        .unwrap()
+        .and_utc();
+
+    sqlx::query_as::<_, DbVcSession>(
+        r#"
+        SELECT s.id, s.user_id, s.guild_id, s.join_time, s.leave_time
+        FROM vc_sessions s
+        JOIN users u ON u.id = s.user_id
+        WHERE u.discord_user_id = $1
+          AND u.guild_id = $2
+          AND s.join_time < $4
+          AND (s.leave_time IS NULL OR s.leave_time > $3)
+        ORDER BY s.join_time DESC
+        "#,
+    )
+    .bind(discord_user_id)
+    .bind(guild_id)
+    .bind(day_start)
+    .bind(day_end)
+    .fetch_all(pool)
+    .await
 }

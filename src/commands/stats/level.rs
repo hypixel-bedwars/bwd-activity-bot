@@ -128,14 +128,20 @@ pub async fn level(
                 .map(|s| s.stat_value)
                 .unwrap_or(0);
 
-            let initial = queries::get_first_discord_snapshot(&data.db, db_user.id, key)
-                .await
-                .map_err(|e| {
-                    tracing::error!(error = %e, "get_latest_discord_snapshot failed");
-                    e
-                })?
-                .map(|s| s.stat_value)
-                .unwrap_or(0);
+            let initial;
+
+            if key == "voice_minutes" {
+                initial = 0;
+            } else {
+                initial = queries::get_first_discord_snapshot(&data.db, db_user.id, key)
+                    .await
+                    .map_err(|e| {
+                        tracing::error!(error = %e, "get_latest_discord_snapshot failed");
+                        e
+                    })?
+                    .map(|s| s.stat_value)
+                    .unwrap_or(0);
+            };
 
             (latest, initial)
         } else {

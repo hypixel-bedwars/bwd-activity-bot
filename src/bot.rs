@@ -3,10 +3,10 @@
 /// Configures and builds the Poise framework, registers commands, sets up
 /// Discord gateway intents, wires the event handler for Discord stats
 /// tracking, and starts the background stat sweeper and leaderboard updater.
-use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use chrono::Utc;
 use dashmap::DashMap;
 use poise::serenity_prelude as serenity;
 use sqlx::PgPool;
@@ -99,9 +99,9 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
                     leaderboard_cache,
                     guild_configs: DashMap::new(),
                     message_validation: MessageValidationState::default(),
-                    voice_sessions: Arc::new(std::sync::Mutex::new(HashMap::new())),
                     http: ctx.http.clone(),
                     is_full_sweep_running: Arc::new(AtomicBool::new(false)),
+                    vc_daily_minutes: Arc::new(DashMap::new()),
                 };
 
                 // Create Arc for background tasks
@@ -109,6 +109,28 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
 
                 // Hypixel sweeper
                 let sweeper_data = Arc::clone(&data_arc);
+
+                // clears out vc_daily_minutes every midnight
+                tokio::spawn({
+                    let vc_daily_minutes = data.vc_daily_minutes.clone();
+                    async move {
+                        loop {
+                            let now = Utc::now();
+                            let next_midnight = (now.date_naive() + chrono::Duration::days(1))
+                                .and_hms_opt(0, 0, 0)
+                                .unwrap()
+                                .and_utc();
+                            let delay = next_midnight
+                                .signed_duration_since(now)
+                                .to_std()
+                                .unwrap_or_default();
+
+                            tokio::time::sleep(delay).await;
+                            vc_daily_minutes.clear();
+                            info!("VC daily minutes cache cleared at midnight");
+                        }
+                    }
+                });
 
                 tokio::spawn(async move {
                     info!("Hypixel background sweeper started.");

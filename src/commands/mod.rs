@@ -38,6 +38,8 @@ pub fn all() -> Vec<poise::Command<Data, Error>> {
         admin::force_register::force_unregister(),
         admin::xp::xp(),
         admin::recalculate_xp::recalculate_xp(),
+        admin::set_afk_vc::set_afk_vc(),
+        admin::set_afk_vc::clear_afk_vc(),
         admin::edit_events::edit_event(),
         admin::audit_users::audit_users(),
         admin::disqualify::disqualify(),

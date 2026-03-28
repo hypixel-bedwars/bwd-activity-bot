@@ -16,6 +16,7 @@ pub mod edit_events;
 pub mod edit_stats;
 pub mod force_register;
 pub mod recalculate_xp;
+pub mod set_afk_vc;
 pub mod set_nickname_registration_role;
 pub mod set_register_role;
 pub mod xp;

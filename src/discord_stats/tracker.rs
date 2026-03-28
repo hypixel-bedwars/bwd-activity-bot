@@ -1,3 +1,5 @@
+use std::cmp::{max, min};
+
 use serenity::all::{FullEvent, GuildId, RoleId};
 use sqlx::PgPool;
 use tracing::{debug, error};
@@ -136,76 +138,190 @@ pub async fn handle_event(event: &FullEvent, data: &Data) -> Result<(), Error> {
     Ok(())
 }
 
+/// Fetch guild config with 5-minute caching to reduce database load.
+/// This is shared by both increment_stat_by and handle_vc_xp.
+async fn get_guild_config_cached(pool: &PgPool, data: &Data, guild_id: i64) -> GuildConfig {
+    const GUILD_CONFIG_TTL: std::time::Duration = std::time::Duration::from_secs(300);
+
+    // Check cache
+    let cached = data.guild_configs.get(&guild_id).and_then(|entry| {
+        let (cfg, cached_at) = entry.value();
+        if cached_at.elapsed() < GUILD_CONFIG_TTL {
+            Some(cfg.clone())
+        } else {
+            None
+        }
+    });
+
+    if let Some(config) = cached {
+        return config;
+    }
+
+    // Cache miss - fetch from database
+    let fetched = match queries::get_guild(pool, guild_id).await {
+        Ok(Some(g)) => serde_json::from_value(g.config_json).unwrap_or_default(),
+        Ok(None) => GuildConfig::default(),
+        Err(e) => {
+            error!(error = %e, "failed to fetch guild config");
+            GuildConfig::default()
+        }
+    };
+
+    data.guild_configs
+        .insert(guild_id, (fetched.clone(), std::time::Instant::now()));
+
+    fetched
+}
+
 /// Handle a voice state transition and record voice_minutes when a user leaves.
 async fn handle_voice_state_update(
     data: &Data,
     old: Option<&serenity::all::VoiceState>,
     new: &serenity::all::VoiceState,
 ) {
-    // Ignore bots — serenity doesn't expose `member.user.bot` directly on
-    // VoiceState, but guild_id lets us gate on guild context at least.
     let Some(guild_id) = new.guild_id else {
         return;
     };
+    let guild_id_i64 = guild_id.get() as i64;
 
     let discord_user_id = new.user_id.get() as i64;
 
-    let was_in_voice = old.as_ref().and_then(|v| v.channel_id).is_some();
-    let is_in_voice = new.channel_id.is_some();
+    let guild_config = get_guild_config_cached(&data.db, data, guild_id_i64).await;
+    let afk_channel_id = guild_config
+        .afk_voice_channel_id
+        .map(serenity::all::ChannelId::new);
 
-    match (was_in_voice, is_in_voice) {
-        // User joined a voice channel — record start time.
+    let old_channel_id = old.as_ref().and_then(|v| v.channel_id);
+    let new_channel_id = new.channel_id;
+
+    let was_trackable_voice = old_channel_id.is_some() && old_channel_id != afk_channel_id;
+    let is_trackable_voice = new_channel_id.is_some() && new_channel_id != afk_channel_id;
+
+    match (was_trackable_voice, is_trackable_voice) {
         (false, true) => {
-            let mut sessions = data.voice_sessions.lock().unwrap();
-            sessions.insert(discord_user_id, Utc::now());
+            queries::add_vc_session(&data.db, discord_user_id, guild_id_i64, Utc::now())
+                .await
+                .unwrap_or_else(|e| {
+                    error!(error = %e, "Failed to record VC join");
+                });
             debug!(discord_user_id, "Voice session started.");
         }
 
-        // User left all voice channels — compute duration and record minutes.
         (true, false) => {
-            let join_time = {
-                let mut sessions = data.voice_sessions.lock().unwrap();
-                sessions.remove(&discord_user_id)
-            };
+            let now = Utc::now();
+
+            let join_time = queries::end_vc_session(&data.db, discord_user_id, guild_id_i64, now)
+                .await
+                .unwrap_or_else(|e| {
+                    error!(error = %e, "Failed to record VC leave");
+                    None
+                });
 
             let Some(join_time) = join_time else {
-                // Session started before bot was running; nothing to record.
                 return;
             };
 
-            let duration = Utc::now().signed_duration_since(join_time);
-            let minutes = duration.num_minutes();
+            let duration = now.signed_duration_since(join_time);
 
-            if minutes < 1 {
-                debug!(
-                    discord_user_id,
-                    minutes, "Voice session too short — skipped."
-                );
+            if duration.num_seconds() < 60 {
+                // Ignore very short sessions to reduce noise from accidental joins, brief disconnects, etc.
                 return;
             }
 
-            debug!(
-                discord_user_id,
-                minutes, "Voice session ended — recording minutes."
-            );
-
-            increment_stat_by(
-                &data.db,
-                data,
-                discord_user_id,
-                guild_id.get() as i64,
-                "voice_minutes",
-                minutes,
-            )
-            .await;
+            // Call your XP logic
+            handle_vc_xp(&data.db, data, discord_user_id, guild_id_i64, duration).await;
         }
 
-        // User moved between channels — keep the existing session going.
+        // User remained in trackable voice (including moving between normal voice channels).
         (true, true) => {}
 
-        // Already not in voice; no-op.
+        // User remained outside trackable voice (not in VC, or in AFK VC).
         (false, false) => {}
     }
+}
+
+fn calculate_integral_xp(total_minutes: f64, c_initial: f64) -> f64 {
+    let x_limit = (c_initial - 0.5) / 0.0375;
+
+    let f_integral = |t: f64| -> f64 {
+        if t <= x_limit {
+            c_initial * t - 0.01875 * (t * t)
+        } else {
+            // XP earned up to the limit + flat 0.5/min thereafter
+            let xp_at_limit = c_initial * x_limit - 0.01875 * (x_limit * x_limit);
+            xp_at_limit + 0.5 * (t - x_limit)
+        }
+    };
+
+    f_integral(total_minutes)
+}
+
+pub async fn handle_vc_xp(
+    pool: &PgPool,
+    data: &Data,
+    discord_user_id: i64,
+    guild_id: i64,
+    session_duration: chrono::Duration,
+) {
+    let session_mins = session_duration.num_minutes() as f64;
+    if session_mins < 1.0 {
+        return;
+    }
+
+    let now = Utc::now();
+    let today = now.date_naive();
+
+    let cache_key = (discord_user_id, guild_id, today);
+    let prior_minutes_today = if let Some(cached) = data.vc_daily_minutes.get(&cache_key) {
+        *cached.value()
+    } else {
+        let sessions_today =
+            queries::get_vc_sessions_user_for_day(pool, discord_user_id, guild_id, now)
+                .await
+                .unwrap_or_default();
+
+        let mut total_minutes: f64 = 0.0;
+        let day_start = today.and_hms_opt(0, 0, 0).unwrap().and_utc();
+        let day_end = (today + chrono::Duration::days(1))
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
+            .and_utc();
+
+        for s in sessions_today {
+            let start = max(s.join_time, day_start);
+            let end = min(s.leave_time.unwrap_or(now), day_end);
+            let duration = end.signed_duration_since(start);
+
+            if duration.num_seconds() > 0 {
+                total_minutes += duration.num_minutes() as f64;
+            }
+        }
+
+        total_minutes
+    };
+
+    // Update cache with new session included
+    let updated_minutes = prior_minutes_today + session_mins;
+    data.vc_daily_minutes.insert(cache_key, updated_minutes);
+
+    let guild_config = get_guild_config_cached(pool, data, guild_id).await;
+    let xp_config = XPConfig::new(guild_config.xp_config.clone());
+    let total_xp_earned = if let Some(c_initial) = xp_config.rewards.get("voice_minutes").copied() {
+        calculate_integral_xp(updated_minutes, c_initial)
+            - calculate_integral_xp(prior_minutes_today, c_initial)
+    } else {
+        0.0
+    };
+
+    increment_vc_stat_with_custom_xp(
+        pool,
+        data,
+        discord_user_id,
+        guild_id,
+        session_mins as i64,
+        total_xp_earned,
+    )
+    .await;
 }
 
 /// Record command usage (called from command hook)
@@ -298,44 +414,7 @@ async fn increment_stat_by(
         return;
     }
 
-    // ----------------------------------------------------
-    // Load guild XP config so we use per-guild multipliers.
-    // The cache entry is valid for GUILD_CONFIG_TTL. After that the config is
-    // re-fetched from the DB so changes made by direct DB edits (or any path
-    // that bypasses the in-memory update) are eventually picked up without a
-    // bot restart. Admin commands (edit_stats, set_register_role, etc.) still
-    // update the cache immediately on write.
-    // ----------------------------------------------------
-    const GUILD_CONFIG_TTL: std::time::Duration = std::time::Duration::from_secs(300);
-
-    let guild_config = {
-        // Check cache — drop the Ref before the await so we don't hold the
-        // DashMap shard lock across an async boundary.
-        let cached = data.guild_configs.get(&guild_id).and_then(|entry| {
-            let (cfg, cached_at) = entry.value();
-            if cached_at.elapsed() < GUILD_CONFIG_TTL {
-                Some(cfg.clone())
-            } else {
-                None
-            }
-        });
-
-        if let Some(config) = cached {
-            config
-        } else {
-            let fetched = match queries::get_guild(pool, guild_id).await {
-                Ok(Some(g)) => serde_json::from_value(g.config_json).unwrap_or_default(),
-                Ok(None) => GuildConfig::default(),
-                Err(e) => {
-                    error!(error = %e, "failed to fetch guild config");
-                    GuildConfig::default()
-                }
-            };
-            data.guild_configs
-                .insert(guild_id, (fetched.clone(), std::time::Instant::now()));
-            fetched
-        }
-    };
+    let guild_config = get_guild_config_cached(pool, data, guild_id).await;
 
     let xp_config = XPConfig::new(guild_config.xp_config.clone());
 
@@ -519,5 +598,197 @@ async fn increment_stat_by(
         xp_awarded = total_xp,
         event_xp_awarded = event_xp,
         "Discord stat processed"
+    );
+}
+
+async fn increment_vc_stat_with_custom_xp(
+    pool: &PgPool,
+    data: &Data,
+    discord_user_id: i64,
+    guild_id: i64,
+    minutes: i64,
+    xp_earned: f64,
+) {
+    if minutes <= 0 {
+        return;
+    }
+
+    let now = Utc::now();
+    let stat_name = "voice_minutes";
+
+    let user = match queries::get_user_by_discord_id(pool, discord_user_id, guild_id).await {
+        Ok(Some(u)) => u,
+        Ok(None) => {
+            return;
+        }
+        Err(e) => {
+            error!(error = %e, "failed to fetch user for VC XP");
+            return;
+        }
+    };
+
+    let current = match queries::get_latest_discord_snapshot(pool, user.id, stat_name).await {
+        Ok(Some(s)) => s.stat_value as i64,
+        Ok(None) => 0,
+        Err(e) => {
+            error!(error = %e, "failed to fetch voice_minutes snapshot");
+            return;
+        }
+    };
+
+    let new_value = current + minutes;
+
+    if let Err(e) = queries::insert_discord_snapshot(pool, user.id, stat_name, new_value, now).await
+    {
+        error!(error = %e, "failed to insert voice_minutes snapshot");
+        return;
+    }
+
+    match queries::is_user_globally_banned(pool, user.id).await {
+        Ok(true) => {
+            debug!(
+                user_id = user.id,
+                "Skipping VC XP — user is globally banned."
+            );
+            return;
+        }
+        Ok(false) => {}
+        Err(e) => {
+            error!(error = %e, "failed to check global ban status");
+            return;
+        }
+    }
+
+    let mut tx = match pool.begin().await {
+        Ok(tx) => tx,
+        Err(e) => {
+            error!(error = %e, "failed to start VC XP transaction");
+            return;
+        }
+    };
+
+    let delta_id = match queries::insert_stat_delta_in_tx(
+        &mut tx, user.id, stat_name, current, new_value, minutes, "discord", &now,
+    )
+    .await
+    {
+        Ok(id) => id,
+        Err(e) => {
+            error!(error = %e, "failed inserting VC stat delta");
+            return;
+        }
+    };
+
+    let xp_per_unit = if minutes > 0 {
+        xp_earned / (minutes as f64)
+    } else {
+        0.0
+    };
+
+    if xp_earned > 0.0 {
+        if let Err(e) = queries::insert_xp_event_in_tx(
+            &mut tx,
+            user.id,
+            stat_name,
+            delta_id,
+            minutes as i32,
+            xp_per_unit,
+            xp_earned,
+            &now,
+        )
+        .await
+        {
+            error!(error = %e, "failed inserting VC xp event");
+            return;
+        }
+    }
+
+    if xp_earned > 0.0 {
+        if let Err(e) = sqlx::query(
+            "INSERT INTO xp (user_id, total_xp, last_updated)
+             VALUES ($1, $2, $3)
+             ON CONFLICT(user_id) DO UPDATE SET
+                 total_xp = xp.total_xp + excluded.total_xp,
+                 last_updated = excluded.last_updated",
+        )
+        .bind(user.id)
+        .bind(xp_earned)
+        .bind(&now)
+        .execute(&mut *tx)
+        .await
+        {
+            error!(error = %e, "failed upserting VC xp");
+            return;
+        }
+
+        // Fetch updated XP total
+        let xp_row = match sqlx::query_as::<_, crate::database::models::DbXP>(
+            "SELECT * FROM xp WHERE user_id = $1",
+        )
+        .bind(user.id)
+        .fetch_optional(&mut *tx)
+        .await
+        {
+            Ok(Some(row)) => row,
+            Ok(None) => {
+                error!(user_id = user.id, "xp row missing after VC upsert");
+                return;
+            }
+            Err(e) => {
+                error!(error = %e, "failed fetching xp row for VC");
+                return;
+            }
+        };
+
+        // Recalculate level
+        let new_level = calculate_level(
+            xp_row.total_xp,
+            data.config.base_level_xp,
+            data.config.level_exponent,
+        );
+
+        if new_level != xp_row.level {
+            if let Err(e) =
+                sqlx::query("UPDATE xp SET level = $1, last_updated = $2 WHERE user_id = $3")
+                    .bind(new_level)
+                    .bind(&now)
+                    .bind(user.id)
+                    .execute(&mut *tx)
+                    .await
+            {
+                error!(error = %e, "failed updating level for VC");
+                return;
+            }
+        }
+    }
+
+    if let Err(e) = tx.commit().await {
+        error!(error = %e, "VC XP transaction commit failed");
+        return;
+    }
+
+    let event_xp = if xp_earned > 0.0 {
+        match queries::award_event_xp_for_delta(
+            pool, guild_id, user.id, stat_name, delta_id, minutes, &now,
+        )
+        .await
+        {
+            Ok(xp) => xp,
+            Err(e) => {
+                error!(error = %e, "failed to award VC event XP");
+                0.0
+            }
+        }
+    } else {
+        0.0
+    };
+
+    debug!(
+        user_id = user.id,
+        minutes,
+        new_value,
+        xp_awarded = xp_earned,
+        event_xp_awarded = event_xp,
+        "Voice channel activity processed"
     );
 }

@@ -164,6 +164,12 @@ pub struct GuildConfig {
     /// feature is disabled and users must use `/register <username>`.
     #[serde(default)]
     pub nickname_registration_role_id: Option<u64>,
+
+    /// Voice channel ID treated as AFK for VC tracking.
+    ///
+    /// Time spent in this channel does not count toward `voice_minutes`.
+    #[serde(default)]
+    pub afk_voice_channel_id: Option<u64>,
 }
 
 impl Default for GuildConfig {
@@ -173,6 +179,7 @@ impl Default for GuildConfig {
             xp_config: default_xp_config(),
             discord_stats_enabled: false,
             nickname_registration_role_id: None,
+            afk_voice_channel_id: None,
         }
     }
 }

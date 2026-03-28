@@ -400,14 +400,6 @@ pub struct DbEventStatusMessage {
 }
 
 // ---------------------------------------------------------------------------
-// Voice session state
-// ---------------------------------------------------------------------------
-
-/// In-memory map from `discord_user_id` to the UTC timestamp when they
-/// joined a voice channel. Used to compute voice_minutes on leave.
-pub type VoiceSessionState = Arc<Mutex<HashMap<i64, DateTime<Utc>>>>;
-
-// ---------------------------------------------------------------------------
 // Backfill
 // ---------------------------------------------------------------------------
 
@@ -442,4 +434,17 @@ pub struct EventMilestoneWithCount {
     pub xp_threshold: f64,
     /// Number of participants whose total event XP is >= xp_threshold.
     pub user_count: i64,
+}
+
+// ---------------------------------------------------------------------------
+// VC sessions
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, FromRow)]
+pub struct DbVcSession {
+    pub id: i64,
+    pub user_id: i64,
+    pub guild_id: i64,
+    pub join_time: DateTime<Utc>,
+    pub leave_time: Option<DateTime<Utc>>,
 }
