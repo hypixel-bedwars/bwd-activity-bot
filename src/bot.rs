@@ -9,6 +9,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use chrono::Utc;
 use dashmap::DashMap;
 use poise::serenity_prelude as serenity;
+use serenity::gateway::ActivityData;
+use serenity::model::user::OnlineStatus;
 use sqlx::PgPool;
 use tracing::info;
 
@@ -17,7 +19,7 @@ use crate::commands::leaderboard::leaderboard as lb;
 use crate::config::AppConfig;
 use crate::database::models::MessageValidationState;
 use crate::discord_stats::tracker;
-use crate::events::events;
+use crate::events::interactions;
 use crate::hypixel::client::HypixelClient;
 use crate::shared::types::{Data, Error};
 use crate::sweeper;
@@ -51,7 +53,7 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
             event_handler: |ctx, event, _framework, data| {
                 Box::pin(async move {
                     // Calls event handler for buttons and other custom interactions (if any).
-                    if let Err(e) = events::event_handler(ctx, event, data).await {
+                    if let Err(e) = interactions::interaction_handler(ctx, event, data).await {
                         tracing::error!(error = %e, "Custom events handler failed");
                     }
 
@@ -87,6 +89,11 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
         .initialize_owners(false)
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
+                let activity = ActivityData::playing("I am spying on all of you 👀");
+                let status = OnlineStatus::Online;
+
+                ctx.set_presence(Some(activity), status);
+
                 info!("Bot is connected and ready!");
 
                 let leaderboard_cache = lb::new_cache(config.leaderboard_cache_seconds);

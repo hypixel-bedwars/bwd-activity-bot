@@ -19,7 +19,7 @@ use crate::config::GuildConfig;
 use crate::database::queries;
 use crate::shared::types::{Data, Error};
 
-pub async fn event_handler(
+pub async fn interaction_handler(
     ctx: &serenity::Context,
     event: &serenity::FullEvent,
     data: &Data,
