@@ -10,3 +10,4 @@ nul
 /.sqlx
 /logs
 *.py
+/test_output

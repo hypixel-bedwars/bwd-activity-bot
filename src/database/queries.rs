@@ -12,6 +12,8 @@ use std::collections::HashMap;
 use tracing::{debug, error, info, warn};
 use uuid::Uuid;
 
+use crate::database::models::{EventMessageRequirementDetail, RequirementStatus};
+
 use super::models::{
     BackfillSummary, DbDailySnapshot, DbEvent, DbEventMilestone, DbEventStat, DbEventStatusMessage,
     DbGuild, DbMilestone, DbPersistentEventLeaderboard, DbPersistentLeaderboard, DbStatDelta,
@@ -2330,6 +2332,39 @@ pub async fn unban_user_from_events(
     Ok(())
 }
 
+/// Get the total number of messages a user has sent during a specific event.
+///
+/// This sums the `units` column in `event_xp` for the given user and event
+/// where the stat is "messages".
+pub async fn get_event_user_message_count(
+    pool: &PgPool,
+    event_id: i64,
+    user_id: i64,
+) -> Result<i32, sqlx::Error> {
+    debug!(
+        "queries::get_event_user_message_count: event_id={}, user_id={}",
+        event_id, user_id
+    );
+
+    // Summing units as i32. We use COALESCE to return 0 if the user hasn't sent any messages yet.
+    let count: i32 = sqlx::query_scalar!(
+        r#"
+        SELECT COALESCE(SUM(units), 0)::INT
+        FROM event_xp
+        WHERE event_id = $1 
+          AND user_id = $2 
+          AND stat_name = 'messages'
+        "#,
+        event_id,
+        user_id
+    )
+    .fetch_one(pool)
+    .await?
+    .unwrap_or(0);
+
+    Ok(count)
+}
+
 // =========================================================================
 // persistent_event_leaderboards
 // =========================================================================
@@ -3567,4 +3602,135 @@ pub async fn get_vc_sessions_user_for_day(
     .bind(day_end)
     .fetch_all(pool)
     .await
+}
+
+// =========================================================================
+// event_message_requirements & leaderboard_positions
+// =========================================================================
+
+/// Add a new message requirement for an event
+pub async fn add_event_message_requirement(
+    pool: &PgPool,
+    event_id: i64,
+    min_messages: i32,
+    positions: Vec<i32>,
+) -> Result<i64, sqlx::Error> {
+    let row = sqlx::query!(
+        r#"
+        INSERT INTO event_message_requirements (event_id, min_messages, positions)
+        VALUES ($1, $2, $3)
+        RETURNING id
+        "#,
+        event_id,
+        min_messages,
+        &positions
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(row.id)
+}
+
+/// Get all message requirements for an event
+pub async fn get_event_message_requirements(
+    pool: &PgPool,
+    event_id: i64,
+) -> Result<Vec<EventMessageRequirementDetail>, sqlx::Error> {
+    sqlx::query_as!(
+        EventMessageRequirementDetail,
+        r#"
+        SELECT id, event_id, min_messages, positions as "positions!", created_at
+        FROM event_message_requirements
+        WHERE event_id = $1
+        ORDER BY min_messages DESC, id
+        "#,
+        event_id
+    )
+    .fetch_all(pool)
+    .await
+}
+
+/// Validates a user's progress against an event requirement.
+///
+/// If the user's position is not in the required list, it returns `false`
+/// with `messages_required` set to 0.
+pub fn check_requirement_completion(
+    requirement: &EventMessageRequirementDetail,
+    user_position: i32,
+    user_messages: i32,
+) -> RequirementStatus {
+    if !requirement.positions.contains(&user_position) {
+        return RequirementStatus {
+            is_completed: false,
+            messages_required: 0,
+            current_messages: user_messages,
+        };
+    }
+
+    let is_completed = user_messages >= requirement.min_messages;
+
+    let messages_required = if is_completed {
+        0
+    } else {
+        requirement.min_messages - user_messages
+    };
+
+    RequirementStatus {
+        is_completed,
+        messages_required,
+        current_messages: user_messages,
+    }
+}
+
+/// Get a specific requirement by ID
+pub async fn get_event_requirement(
+    pool: &PgPool,
+    requirement_id: i64,
+) -> Result<Option<EventMessageRequirementDetail>, sqlx::Error> {
+    sqlx::query_as!(
+        EventMessageRequirementDetail,
+        r#"
+        SELECT id, event_id, min_messages, positions as "positions!", created_at
+        FROM event_message_requirements
+        WHERE id = $1
+        "#,
+        requirement_id
+    )
+    .fetch_optional(pool)
+    .await
+}
+
+/// Remove specific ranks from requirements, deleting requirements that become empty
+pub async fn remove_event_message_requirement_positions(
+    pool: &PgPool,
+    event_id: i64,
+    positions_to_remove: Vec<i32>,
+) -> Result<Vec<i64>, sqlx::Error> {
+    // Use SQL to filter out positions and delete if empty
+    let rows = sqlx::query!(
+        r#"
+        WITH updated AS (
+            UPDATE event_message_requirements
+            SET positions = (
+                SELECT ARRAY_AGG(pos)
+                FROM UNNEST(positions) AS pos
+                WHERE pos <> ALL($2::int[])
+            )
+            WHERE event_id = $1
+            AND positions && $2::int[]  -- Only update if there's overlap
+            RETURNING id, positions
+        )
+        DELETE FROM event_message_requirements
+        WHERE id IN (
+            SELECT id FROM updated WHERE positions IS NULL OR array_length(positions, 1) = 0
+        )
+        RETURNING id
+        "#,
+        event_id,
+        &positions_to_remove
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|r| r.id).collect())
 }

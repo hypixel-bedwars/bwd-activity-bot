@@ -18,6 +18,9 @@
 /// - `milestones-add`           — add XP-threshold milestones to an event
 /// - `milestones-remove`        — remove milestones from an event
 /// - `milestones-completers`    — participant-centric view of milestone completers
+/// - `requirements-add`         — add a requirement to an event
+/// - `requirements-remove`      — remove a requirement from an event
+/// - `requirements-list`        — list all requirements for an event
 ///
 /// All subcommands are ephemeral and require the admin check.
 use poise::serenity_prelude::{
@@ -131,6 +134,184 @@ async fn autocomplete_event_stat<'a>(
         .collect()
 }
 
+async fn autocomplete_event_id<'a>(
+    ctx: Context<'_>,
+    partial: &'a str,
+) -> Vec<serenity::AutocompleteChoice> {
+    let guild_id = match ctx.guild_id() {
+        Some(id) => id.get() as i64,
+        None => return Vec::new(),
+    };
+
+    let events = queries::list_events(&ctx.data().db, guild_id)
+        .await
+        .unwrap_or_default();
+
+    let partial_lower = partial.to_lowercase();
+
+    events
+        .iter()
+        .filter(|e| {
+            e.name.to_lowercase().contains(&partial_lower)
+                || e.id.to_string().contains(&partial_lower)
+        })
+        .take(25)
+        .map(|e| {
+            let label = format!("{} [{}] (ID: {})", e.name, e.status, e.id);
+
+            serenity::AutocompleteChoice::new(label, e.id.to_string())
+        })
+        .collect()
+}
+
+async fn autocomplete_msg_requirements(
+    ctx: Context<'_>,
+    event_id: String,
+    partial: &str,
+) -> Vec<serenity::AutocompleteChoice> {
+    // Parse event_id
+    let event_id: i64 = match event_id.parse() {
+        Ok(id) => id,
+        Err(_) => return Vec::new(), // Event not selected yet
+    };
+
+    let data = ctx.data();
+
+    // Get all requirements for this event
+    let requirements = match queries::get_event_message_requirements(&data.db, event_id).await {
+        Ok(r) => r,
+        Err(_) => return Vec::new(),
+    };
+
+    // Filter by partial match if provided
+    let partial_lower = partial.to_lowercase();
+
+    requirements
+        .iter()
+        .filter(|r| {
+            if partial.is_empty() {
+                return true;
+            }
+            // Allow filtering by min messages or position numbers
+            r.min_messages.to_string().contains(&partial_lower)
+                || format_ranks(&r.positions)
+                    .to_lowercase()
+                    .contains(&partial_lower)
+        })
+        .take(25)
+        .map(|r| {
+            let label = format!(
+                "Ranks {} | Min: {} msgs",
+                format_ranks(&r.positions),
+                r.min_messages
+            );
+
+            // Return the requirement ID as the value
+            serenity::AutocompleteChoice::new(label, r.id.to_string())
+        })
+        .collect()
+}
+
+/// Parse rank specifications: "1", "1-3", "1,3,5", "1-3,5,7-9"
+fn parse_ranks(input: &str) -> Result<Vec<i32>, String> {
+    let mut ranks = Vec::new();
+
+    for part in input.split(',') {
+        let part = part.trim();
+
+        if part.contains('-') {
+            // Range like "1-5"
+            let range_parts: Vec<&str> = part.split('-').collect();
+            if range_parts.len() != 2 {
+                return Err(format!(
+                    "Invalid range format: '{}'. Use format like '1-5'",
+                    part
+                ));
+            }
+
+            let start: i32 = range_parts[0]
+                .trim()
+                .parse()
+                .map_err(|_| format!("Invalid number in range: '{}'", range_parts[0]))?;
+            let end: i32 = range_parts[1]
+                .trim()
+                .parse()
+                .map_err(|_| format!("Invalid number in range: '{}'", range_parts[1]))?;
+
+            if start <= 0 || end <= 0 {
+                return Err(format!(
+                    "Ranks must be positive numbers (got {}-{})",
+                    start, end
+                ));
+            }
+
+            if start > end {
+                return Err(format!(
+                    "Invalid range {}-{}: start must be <= end",
+                    start, end
+                ));
+            }
+
+            ranks.extend(start..=end);
+        } else {
+            // Single number like "3"
+            let num: i32 = part
+                .parse()
+                .map_err(|_| format!("Invalid number: '{}'", part))?;
+
+            if num <= 0 {
+                return Err(format!("Ranks must be positive numbers (got {})", num));
+            }
+
+            ranks.push(num);
+        }
+    }
+
+    if ranks.is_empty() {
+        return Err("No ranks specified".to_string());
+    }
+
+    // Sort and deduplicate
+    ranks.sort_unstable();
+    ranks.dedup();
+
+    Ok(ranks)
+}
+
+/// Format ranks for display: [1,2,3,7,8,9] -> "1-3, 7-9"
+fn format_ranks(ranks: &[i32]) -> String {
+    if ranks.is_empty() {
+        return String::new();
+    }
+
+    let mut result = Vec::new();
+    let mut start = ranks[0];
+    let mut prev = ranks[0];
+
+    for &rank in &ranks[1..] {
+        if rank == prev + 1 {
+            prev = rank;
+        } else {
+            if start == prev {
+                result.push(start.to_string());
+            } else {
+                result.push(format!("{}-{}", start, prev));
+            }
+            start = rank;
+            prev = rank;
+        }
+    }
+
+    // Add final range/number
+    if start == prev {
+        result.push(start.to_string());
+    } else {
+        result.push(format!("{}-{}", start, prev));
+    }
+
+    result.join(", ")
+}
+
 /// Manage guild events. Admin only.
 #[poise::command(
     slash_command,
@@ -154,8 +335,13 @@ async fn autocomplete_event_stat<'a>(
         "milestones_add",
         "milestones_remove",
         "milestones_completers",
-        "leaderboard_remove"
-    )
+        "leaderboard_remove",
+        "msg_requirements_add",
+        "msg_requirements_remove",
+        "msg_requirements_list"
+    ),
+    required_permissions = "ADMINISTRATOR",
+    default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn edit_event(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
@@ -166,7 +352,6 @@ pub async fn edit_event(_ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn new(
@@ -328,7 +513,6 @@ pub async fn new(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn edit(
@@ -414,7 +598,6 @@ pub async fn edit(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn delete(
@@ -478,7 +661,6 @@ pub async fn delete(
     guild_only,
     ephemeral,
     rename = "stats-add",
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn stats_add(
@@ -545,7 +727,6 @@ pub async fn stats_add(
     guild_only,
     ephemeral,
     rename = "stats-remove",
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn stats_remove(
@@ -606,7 +787,6 @@ pub async fn stats_remove(
     guild_only,
     ephemeral,
     rename = "stats-edit",
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn stats_edit(
@@ -672,7 +852,6 @@ pub async fn stats_edit(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
@@ -737,7 +916,6 @@ pub async fn list(ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn backfill(
@@ -872,7 +1050,6 @@ async fn autocomplete_persisted_event_name<'a>(
     guild_only,
     ephemeral,
     rename = "leaderboard-remove",
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn leaderboard_remove(
@@ -982,7 +1159,6 @@ pub async fn leaderboard_remove(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn start(
@@ -1011,7 +1187,6 @@ pub async fn start(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn end(
@@ -1040,7 +1215,6 @@ pub async fn end(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn participants(
@@ -1091,7 +1265,6 @@ pub async fn edit_event_leaderboard(_ctx: Context<'_>) -> Result<(), Error> {
 #[poise::command(
     slash_command,
     guild_only,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn persist(
@@ -1410,7 +1583,6 @@ pub async fn status(_ctx: Context<'_>) -> Result<(), Error> {
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn create(
@@ -1514,7 +1686,6 @@ pub async fn create(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn remove(
@@ -1594,7 +1765,6 @@ pub async fn remove(
     guild_only,
     ephemeral,
     rename = "milestones-add",
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn milestones_add(
@@ -1681,7 +1851,6 @@ pub async fn milestones_add(
     guild_only,
     ephemeral,
     rename = "milestones-remove",
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn milestones_remove(
@@ -1770,7 +1939,6 @@ pub async fn milestones_remove(
     guild_only,
     ephemeral,
     rename = "milestones-completers",
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn milestones_completers(
@@ -1882,6 +2050,221 @@ pub async fn milestones_completers(
 
     // Send result
     ctx.say(content).await?;
+
+    Ok(())
+}
+
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    rename = "requirements-add",
+    default_member_permissions = "ADMINISTRATOR"
+)]
+pub async fn msg_requirements_add(
+    ctx: Context<'_>,
+    #[description = "Event to add requirement to"]
+    #[autocomplete = "autocomplete_event_id"]
+    event_id: String,
+    #[description = "Eligible ranks. Supports single (1), ranges (1-3), and lists (1,3,5,7-9)"]
+    ranks: String,
+    #[description = "Minimum messages required"] min_messages: i32,
+) -> Result<(), Error> {
+    let data = ctx.data();
+
+    // Parse event_id
+    let event_id: i64 = event_id.parse().map_err(|_| "Invalid event ID format")?;
+
+    // Verify event exists
+    let event = queries::get_event_by_id(&data.db, event_id)
+        .await?
+        .ok_or("Event not found")?;
+
+    // Validate min_messages
+    if min_messages <= 0 {
+        ctx.say("❌ Minimum messages must be greater than 0")
+            .await?;
+        return Ok(());
+    }
+
+    // Parse ranks
+    let positions = match parse_ranks(&ranks) {
+        Ok(p) => p,
+        Err(e) => {
+            ctx.say(format!("❌ Invalid rank format: {}", e)).await?;
+            return Ok(());
+        }
+    };
+
+    // Add requirement
+    match queries::add_event_message_requirement(
+        &data.db,
+        event_id,
+        min_messages,
+        positions.clone(),
+    )
+    .await
+    {
+        Ok(req_id) => {
+            let response = format!(
+                "✅ **Message requirement added**\n\
+                 Event: **{}**\n\
+                 Ranks: **{}**\n\
+                 Min Messages: **{}**\n\
+                 Requirement ID: `{}`",
+                event.name,
+                format_ranks(&positions),
+                min_messages,
+                req_id
+            );
+            ctx.say(response).await?;
+
+            info!(
+                "Added message requirement for event '{}' (ID: {}): ranks {:?}, min {}",
+                event.name, event_id, positions, min_messages
+            );
+        }
+        Err(e) => {
+            error!("Failed to add message requirement: {:?}", e);
+            ctx.say("❌ Failed to add requirement. This may be a duplicate.")
+                .await?;
+        }
+    }
+
+    Ok(())
+}
+
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    rename = "requirements-remove",
+    default_member_permissions = "ADMINISTRATOR"
+)]
+pub async fn msg_requirements_remove(
+    ctx: Context<'_>,
+    #[description = "Event to remove requirement from"]
+    #[autocomplete = "autocomplete_event_id"]
+    event_id: String,
+    #[description = "Ranks to remove from requirements. Supports single (1), ranges (1-3), and lists (1,3,5)"]
+    ranks: String,
+) -> Result<(), Error> {
+    let data = ctx.data();
+
+    // Parse event_id
+    let event_id: i64 = event_id.parse().map_err(|_| "Invalid event ID format")?;
+
+    // Verify event exists
+    let event = queries::get_event_by_id(&data.db, event_id)
+        .await?
+        .ok_or("Event not found")?;
+
+    // Parse ranks to remove
+    let positions_to_remove = match parse_ranks(&ranks) {
+        Ok(p) => p,
+        Err(e) => {
+            ctx.say(format!("❌ Invalid rank format: {}", e)).await?;
+            return Ok(());
+        }
+    };
+
+    // Remove positions from requirements
+    match queries::remove_event_message_requirement_positions(
+        &data.db,
+        event_id,
+        positions_to_remove.clone(),
+    )
+    .await
+    {
+        Ok(deleted_ids) => {
+            if deleted_ids.is_empty() {
+                ctx.say(format!(
+                    "ℹ️ No requirements were affected.\n\
+                     Event: **{}**\n\
+                     Ranks specified: **{}**",
+                    event.name,
+                    format_ranks(&positions_to_remove)
+                ))
+                .await?;
+            } else {
+                let response = format!(
+                    "✅ **Ranks removed from requirements**\n\
+                     Event: **{}**\n\
+                     Ranks removed: **{}**\n\
+                     Requirements deleted: **{}**",
+                    event.name,
+                    format_ranks(&positions_to_remove),
+                    deleted_ids.len()
+                );
+                ctx.say(response).await?;
+
+                info!(
+                    "Removed ranks {:?} from event '{}' (ID: {}), deleted {} requirements",
+                    positions_to_remove,
+                    event.name,
+                    event_id,
+                    deleted_ids.len()
+                );
+            }
+        }
+        Err(e) => {
+            error!("Failed to remove requirement positions: {:?}", e);
+            ctx.say("❌ Failed to remove requirement positions").await?;
+        }
+    }
+
+    Ok(())
+}
+
+#[poise::command(
+    slash_command,
+    guild_only,
+    ephemeral,
+    rename = "requirements-list",
+    default_member_permissions = "ADMINISTRATOR"
+)]
+pub async fn msg_requirements_list(
+    ctx: Context<'_>,
+    #[description = "Event to list requirements for"]
+    #[autocomplete = "autocomplete_event_id"]
+    event_id: String,
+) -> Result<(), Error> {
+    let data = ctx.data();
+
+    // Parse event_id
+    let event_id: i64 = event_id.parse().map_err(|_| "Invalid event ID format")?;
+
+    // Verify event exists
+    let event = queries::get_event_by_id(&data.db, event_id)
+        .await?
+        .ok_or("Event not found")?;
+
+    // Get all requirements
+    let requirements = queries::get_event_message_requirements(&data.db, event_id).await?;
+
+    if requirements.is_empty() {
+        ctx.say(format!(
+            "ℹ️ No message requirements for event **{}**",
+            event.name
+        ))
+        .await?;
+        return Ok(());
+    }
+
+    // Build response
+    let mut response = format!("📋 **Message Requirements for: {}**\n\n", event.name);
+
+    for req in &requirements {
+        response.push_str(&format!(
+            "**Ranks {}** → **{} messages**\n",
+            format_ranks(&req.positions),
+            req.min_messages
+        ));
+    }
+
+    response.push_str(&format!("\n*Total requirements: {}*", requirements.len()));
+
+    ctx.say(response).await?;
 
     Ok(())
 }

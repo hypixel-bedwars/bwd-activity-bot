@@ -32,6 +32,8 @@ const DIVIDER: Rgba<u8> = Rgba([0x30, 0x30, 0x50, 0xff]);
 const HEADER_BG: Rgba<u8> = Rgba([0x16, 0x16, 0x28, 0xff]);
 const RANK_GREEN: Rgba<u8> = Rgba([0x55, 0xff, 0x55, 0xff]);
 const LIGHT_BLUE: Rgba<u8> = Rgba([0x55, 0xff, 0xff, 0xff]);
+const STATUS_GREEN: Rgba<u8> = Rgba([0x55, 0xff, 0x55, 0xff]);
+const STATUS_RED: Rgba<u8> = Rgba([0xff, 0x55, 0x55, 0xff]);
 
 // ---------------------------------------------------------------------------
 // Image dimensions
@@ -77,6 +79,8 @@ pub struct LeaderboardRow {
     pub hypixel_rank: Option<String>,
     /// The colour of the `+` symbol in the player's rank badge (e.g. `"GOLD"`, `"RED"`).
     pub hypixel_rank_plus_color: Option<String>,
+    /// Whether the player meets the min message requirement for a event
+    pub requirement_met: Option<bool>,
 }
 
 /// A single milestone entry with its reach count.
@@ -259,6 +263,20 @@ pub fn render(params: &LeaderboardCardParams) -> Vec<u8> {
         // username
         font.render_formatted_shadowed(&mut img, cursor_x, y, &row.username, scale, name_col);
         cursor_x += font.measure_text(&row.username, scale);
+
+        if !params.show_level {
+            if let Some(status) = row.requirement_met {
+                let dot_color = if status { STATUS_GREEN } else { STATUS_RED };
+
+                let dot_radius = 4;
+                let dot_x = cursor_x + 10; // spacing after username
+                let dot_y = y + 10; // vertical alignment tweak
+
+                draw_circle(&mut img, dot_x, dot_y, dot_radius, dot_color);
+
+                cursor_x += 20; // spacing after dot
+            }
+        }
 
         // dash
         font.render_formatted(&mut img, cursor_x, y, " - ", scale, MUTED);
@@ -568,19 +586,19 @@ fn draw_avatar(img: &mut RgbaImage, x: u32, y: u32, avatar_bytes: &Option<Vec<u8
 // Drawing primitives
 // ---------------------------------------------------------------------------
 
-fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8>) {
-    let img_w = img.width();
-    let img_h = img.height();
-    for dy in 0..h {
-        for dx in 0..w {
-            let px = x + dx;
-            let py = y + dy;
-            if px < img_w && py < img_h {
-                img.put_pixel(px, py, color);
-            }
-        }
-    }
-}
+// fn fill_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, color: Rgba<u8>) {
+//     let img_w = img.width();
+//     let img_h = img.height();
+//     for dy in 0..h {
+//         for dx in 0..w {
+//             let px = x + dx;
+//             let py = y + dy;
+//             if px < img_w && py < img_h {
+//                 img.put_pixel(px, py, color);
+//             }
+//         }
+//     }
+// }
 
 fn is_inside_rounded_rect(px: u32, py: u32, w: u32, h: u32, r: u32) -> bool {
     let in_left = px < r;
@@ -612,5 +630,510 @@ fn fill_rounded_rect(img: &mut RgbaImage, x: u32, y: u32, w: u32, h: u32, r: u32
                 }
             }
         }
+    }
+}
+
+fn draw_circle(img: &mut RgbaImage, cx: u32, cy: u32, r: u32, color: Rgba<u8>) {
+    let r_sq = (r * r) as i32;
+
+    for dy in -(r as i32)..=(r as i32) {
+        for dx in -(r as i32)..=(r as i32) {
+            if dx * dx + dy * dy <= r_sq {
+                let px = cx as i32 + dx;
+                let py = cy as i32 + dy;
+
+                if px >= 0 && py >= 0 && (px as u32) < img.width() && (py as u32) < img.height() {
+                    img.put_pixel(px as u32, py as u32, color);
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod visual_tests {
+    use super::*;
+    use std::fs;
+
+    /// Generate sample rows for GLOBAL leaderboard (requirement_met = None)
+    fn sample_global_rows() -> Vec<LeaderboardRow> {
+        vec![
+            LeaderboardRow {
+                rank: 1,
+                username: "GlobalChampion".to_string(),
+                level: 250,
+                total_xp: 1250000.5,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("AQUA".to_string()),
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 2,
+                username: "WWWWWWWWWWWWWWWW".to_string(),
+                level: 99,
+                total_xp: 999999.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("GOLD".to_string()),
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 3,
+                username: "AdminPlayer".to_string(),
+                level: 80,
+                total_xp: 850000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("ADMIN".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 4,
+                username: "XpGrinder".to_string(),
+                level: 75,
+                total_xp: 750000.25,
+                avatar_bytes: None,
+                hypixel_rank: Some("VIP_PLUS".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 5,
+                username: "RegularJoe".to_string(),
+                level: 42,
+                total_xp: 50000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 6,
+                username: "Player6".to_string(),
+                level: 30,
+                total_xp: 35000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("VIP".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 7,
+                username: "Player7".to_string(),
+                level: 28,
+                total_xp: 32000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 8,
+                username: "Player8".to_string(),
+                level: 25,
+                total_xp: 28000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 9,
+                username: "Player9".to_string(),
+                level: 22,
+                total_xp: 24000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 10,
+                username: "Player10".to_string(),
+                level: 20,
+                total_xp: 20000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("VIP_PLUS".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+        ]
+    }
+
+    /// Generate sample rows for EVENT leaderboard with MIXED requirement statuses
+    fn sample_event_rows_mixed() -> Vec<LeaderboardRow> {
+        vec![
+            LeaderboardRow {
+                rank: 1,
+                username: "EventKing".to_string(),
+                level: 50,
+                total_xp: 125000.5,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("RED".to_string()),
+                requirement_met: Some(true),
+            },
+            LeaderboardRow {
+                rank: 2,
+                username: "AlmostThere".to_string(),
+                level: 45,
+                total_xp: 98000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("GOLD".to_string()),
+                requirement_met: Some(false),
+            },
+            LeaderboardRow {
+                rank: 3,
+                username: "Qualified".to_string(),
+                level: 42,
+                total_xp: 87500.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(true),
+            },
+            LeaderboardRow {
+                rank: 4,
+                username: "NotEnough".to_string(),
+                level: 40,
+                total_xp: 75000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("VIP_PLUS".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+            LeaderboardRow {
+                rank: 5,
+                username: "GoodToGo".to_string(),
+                level: 38,
+                total_xp: 68000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(true),
+            },
+            LeaderboardRow {
+                rank: 6,
+                username: "NeedsMore".to_string(),
+                level: 35,
+                total_xp: 60000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("VIP".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+            LeaderboardRow {
+                rank: 7,
+                username: "Exempt".to_string(),
+                level: 32,
+                total_xp: 55000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("ADMIN".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 8,
+                username: "PassedCheck".to_string(),
+                level: 30,
+                total_xp: 50000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(true),
+            },
+            LeaderboardRow {
+                rank: 9,
+                username: "StillWorking".to_string(),
+                level: 28,
+                total_xp: 45000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+            LeaderboardRow {
+                rank: 10,
+                username: "Completed".to_string(),
+                level: 25,
+                total_xp: 40000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("AQUA".to_string()),
+                requirement_met: Some(true),
+            },
+        ]
+    }
+
+    /// Generate sample rows for EVENT leaderboard where ALL qualified
+    fn sample_event_rows_all_qualified() -> Vec<LeaderboardRow> {
+        vec![
+            LeaderboardRow {
+                rank: 1,
+                username: "Perfect1".to_string(),
+                level: 50,
+                total_xp: 125000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("GOLD".to_string()),
+                requirement_met: Some(true),
+            },
+            LeaderboardRow {
+                rank: 2,
+                username: "Perfect2".to_string(),
+                level: 45,
+                total_xp: 98000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(true),
+            },
+            LeaderboardRow {
+                rank: 3,
+                username: "Perfect3".to_string(),
+                level: 40,
+                total_xp: 85000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(true),
+            },
+        ]
+    }
+
+    /// Generate sample rows for EVENT leaderboard where NONE qualified
+    fn sample_event_rows_none_qualified() -> Vec<LeaderboardRow> {
+        vec![
+            LeaderboardRow {
+                rank: 1,
+                username: "Failed1".to_string(),
+                level: 30,
+                total_xp: 65000.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("VIP_PLUS".to_string()),
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+            LeaderboardRow {
+                rank: 2,
+                username: "Failed2".to_string(),
+                level: 28,
+                total_xp: 58000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+            LeaderboardRow {
+                rank: 3,
+                username: "Failed3".to_string(),
+                level: 25,
+                total_xp: 50000.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+        ]
+    }
+
+    #[test]
+    fn generate_comprehensive_leaderboard_tests() {
+        fs::create_dir_all("test_output/leaderboard").unwrap();
+
+        let global_page1 = LeaderboardCardParams {
+            rows: sample_global_rows(),
+            page: 1,
+            total_pages: 3,
+            title: None,
+            show_level: true,
+            custom_empty_message: None,
+            display_limit: Some(10),
+        };
+        let png = render(&global_page1);
+        fs::write("test_output/leaderboard/01_global_page1.png", png).unwrap();
+
+        let global_page2 = LeaderboardCardParams {
+            rows: sample_global_rows(),
+            page: 2,
+            total_pages: 3,
+            title: None,
+            show_level: true,
+            custom_empty_message: None,
+            display_limit: Some(10),
+        };
+        let png = render(&global_page2);
+        fs::write("test_output/leaderboard/02_global_page2.png", png).unwrap();
+
+        let global_with_title = LeaderboardCardParams {
+            rows: sample_global_rows(),
+            page: 1,
+            total_pages: 1,
+            title: Some("Guild Leaderboard".to_string()),
+            show_level: true,
+            custom_empty_message: None,
+            display_limit: Some(10),
+        };
+        let png = render(&global_with_title);
+        fs::write("test_output/leaderboard/03_global_with_title.png", png).unwrap();
+        println!("  ✅ 03_global_with_title.png - With title overlay");
+
+        let global_top50 = LeaderboardCardParams {
+            rows: sample_global_rows(),
+            page: 1,
+            total_pages: 5,
+            title: None,
+            show_level: true,
+            custom_empty_message: None,
+            display_limit: Some(50),
+        };
+        let png = render(&global_top50);
+        fs::write("test_output/leaderboard/04_global_top50.png", png).unwrap();
+        println!("  ✅ 04_global_top50.png - TOP 50 display");
+
+        let global_empty = LeaderboardCardParams {
+            rows: vec![],
+            page: 1,
+            total_pages: 1,
+            title: None,
+            show_level: true,
+            custom_empty_message: None,
+            display_limit: None,
+        };
+        let png = render(&global_empty);
+        fs::write("test_output/leaderboard/05_global_empty.png", png).unwrap();
+
+        // === EVENT LEADERBOARD TESTS ===
+        println!("\n🎯 Event Leaderboard Tests:");
+
+        let event_mixed = LeaderboardCardParams {
+            rows: sample_event_rows_mixed(),
+            page: 1,
+            total_pages: 1,
+            title: Some("Spring Event 2026".to_string()),
+            show_level: false, // ⚡ Event mode
+            custom_empty_message: None,
+            display_limit: Some(10),
+        };
+        let png = render(&event_mixed);
+        fs::write("test_output/leaderboard/06_event_mixed_status.png", png).unwrap();
+
+        let event_all_green = LeaderboardCardParams {
+            rows: sample_event_rows_all_qualified(),
+            page: 1,
+            total_pages: 1,
+            title: Some("Event - All Qualified".to_string()),
+            show_level: false,
+            custom_empty_message: None,
+            display_limit: None,
+        };
+        let png = render(&event_all_green);
+        fs::write("test_output/leaderboard/07_event_all_qualified.png", png).unwrap();
+
+        let event_all_red = LeaderboardCardParams {
+            rows: sample_event_rows_none_qualified(),
+            page: 1,
+            total_pages: 1,
+            title: Some("Event - Requirements Not Met".to_string()),
+            show_level: false,
+            custom_empty_message: None,
+            display_limit: None,
+        };
+        let png = render(&event_all_red);
+        fs::write("test_output/leaderboard/08_event_none_qualified.png", png).unwrap();
+
+        let event_page2 = LeaderboardCardParams {
+            rows: sample_event_rows_mixed(),
+            page: 2,
+            total_pages: 3,
+            title: Some("Event Page 2".to_string()),
+            show_level: false,
+            custom_empty_message: None,
+            display_limit: Some(10),
+        };
+        let png = render(&event_page2);
+        fs::write("test_output/leaderboard/09_event_page2.png", png).unwrap();
+
+        let event_empty = LeaderboardCardParams {
+            rows: vec![],
+            page: 1,
+            total_pages: 1,
+            title: Some("Event - No Participants".to_string()),
+            show_level: false,
+            custom_empty_message: Some("No participants yet!".to_string()),
+            display_limit: None,
+        };
+        let png = render(&event_empty);
+        fs::write("test_output/leaderboard/10_event_empty.png", png).unwrap();
+
+        let long_name_rows = vec![
+            LeaderboardRow {
+                rank: 1,
+                username: "WWWWWWWWWWWWWWWW".to_string(),
+                level: 99,
+                total_xp: 999999.0,
+                avatar_bytes: None,
+                hypixel_rank: Some("MVP_PLUS_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("AQUA".to_string()),
+                requirement_met: None,
+            },
+            LeaderboardRow {
+                rank: 2,
+                username: "x".to_string(),
+                level: 1,
+                total_xp: 100.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: None,
+            },
+        ];
+        let long_names = LeaderboardCardParams {
+            rows: long_name_rows,
+            page: 1,
+            total_pages: 1,
+            title: Some("Username Length Test".to_string()),
+            show_level: true,
+            custom_empty_message: None,
+            display_limit: None,
+        };
+        let png = render(&long_names);
+        fs::write("test_output/leaderboard/11_edge_long_names.png", png).unwrap();
+
+        let high_ranks = vec![
+            LeaderboardRow {
+                rank: 999,
+                username: "LastPlace".to_string(),
+                level: 5,
+                total_xp: 500.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+            LeaderboardRow {
+                rank: 1000,
+                username: "Really_Last".to_string(),
+                level: 1,
+                total_xp: 100.0,
+                avatar_bytes: None,
+                hypixel_rank: None,
+                hypixel_rank_plus_color: None,
+                requirement_met: Some(false),
+            },
+        ];
+        let high_rank = LeaderboardCardParams {
+            rows: high_ranks,
+            page: 1,
+            total_pages: 1,
+            title: Some("High Rank Numbers".to_string()),
+            show_level: false,
+            custom_empty_message: None,
+            display_limit: None,
+        };
+        let png = render(&high_rank);
+        fs::write("test_output/leaderboard/12_edge_high_ranks.png", png).unwrap();
     }
 }

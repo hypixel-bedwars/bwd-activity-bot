@@ -61,6 +61,17 @@ pub struct LevelCardParams {
     pub event_mode: bool,
 
     pub is_disqualified: bool,
+
+    /// Message count for event message requirements (event mode only)
+    pub message_count: Option<i32>,
+    /// Required message count for event participation (event mode only)
+    pub required_messages: Option<i32>,
+
+    /// Event milestones: (xp_threshold, reached)
+    /// Used in event mode to replace normal level milestones
+    pub event_milestones: Vec<(f64, bool)>,
+    /// Current XP for calculating milestone progress percentages
+    pub current_xp: f64,
 }
 
 /// Render the level card and return the PNG bytes.
@@ -225,6 +236,49 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
         }
     }
 
+    // == MESSAGE REQUIREMENT STATUS (event mode, top-right) ==================
+    if params.event_mode && !params.is_disqualified {
+        let msg_x = 700;
+        let msg_y = 29;
+
+        match (params.message_count, params.required_messages) {
+            (Some(current), Some(required)) => {
+                if current >= required {
+                    font.render_text(
+                        &mut img,
+                        msg_x,
+                        msg_y,
+                        &format!("Messages: {} / {}", required, required),
+                        2,
+                        CYAN,
+                    );
+                    font.render_text(&mut img, msg_x, msg_y + 24, "Qualified ✔", 2, GREEN);
+                } else {
+                    let remaining = required - current;
+                    font.render_text(
+                        &mut img,
+                        msg_x,
+                        msg_y,
+                        &format!("Messages: {} / {}", current, required),
+                        2,
+                        CYAN,
+                    );
+                    font.render_text(
+                        &mut img,
+                        msg_x,
+                        msg_y + 24,
+                        &format!("Need: {} more", remaining),
+                        2,
+                        RED,
+                    );
+                }
+            }
+            _ => {
+                font.render_text(&mut img, msg_x, msg_y, "No requirement", 2, MUTED);
+            }
+        }
+    }
+
     // == PROGRESS BAR / EVENT XP =============================================
     if params.event_mode {
         if params.is_disqualified {
@@ -318,7 +372,6 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
             .take(max_milestones)
             .enumerate()
         {
-            // m_level is the milestone level
             let column = i / 4;
             let row = i % 4;
             let x = if column == 0 { col1_x } else { col2_x };
@@ -345,20 +398,66 @@ pub fn render(params: &LevelCardParams) -> Vec<u8> {
                 if params.level >= *m_level { 100 } else { 0 }
             };
 
-            let color = if percentage > 0 {
-                if *reached { GREEN } else { WHITE }
+            if *reached {
+                font.render_text(&mut img, x, y, &format!("Level {} ✔", m_level), 2, GREEN);
             } else {
-                MUTED
-            };
+                let text = if percentage > 0 {
+                    format!("Level {} ({}%)", m_level, percentage)
+                } else {
+                    format!("Level {}", m_level)
+                };
 
-            font.render_text(
-                &mut img,
-                x,
-                y,
-                &format!("Level {} ({}%)", m_level, percentage),
-                2,
-                color,
-            );
+                let color = if percentage > 0 { WHITE } else { MUTED };
+
+                font.render_text(&mut img, x, y, &text, 2, color);
+            }
+        }
+    } else {
+        let milestones_x = 540;
+        let milestones_y = 188;
+        font.render_text(
+            &mut img,
+            milestones_x,
+            milestones_y,
+            "EVENT MILESTONES",
+            2,
+            CYAN,
+        );
+
+        let max_milestones = 8;
+        let col1_x = milestones_x;
+        let col2_x = milestones_x + 200;
+        let base_y = milestones_y + 26;
+        let row_step = 22;
+
+        for (i, (threshold, reached)) in params
+            .event_milestones
+            .iter()
+            .take(max_milestones)
+            .enumerate()
+        {
+            let column = i / 4;
+            let row = i % 4;
+            let x = if column == 0 { col1_x } else { col2_x };
+            let y = base_y + (row as u32) * row_step;
+
+            if *reached {
+                font.render_text(&mut img, x, y, &format!("{:.0} XP  ✔", threshold), 2, GREEN);
+            } else {
+                let percentage = if *threshold > 0.0 {
+                    ((params.current_xp / threshold) * 100.0).clamp(0.0, 100.0) as i32
+                } else {
+                    0
+                };
+                font.render_text(
+                    &mut img,
+                    x,
+                    y,
+                    &format!("{:.0} XP  {}%", threshold, percentage),
+                    2,
+                    WHITE,
+                );
+            }
         }
     }
 
@@ -482,8 +581,107 @@ mod tests {
             percentages.push(pct);
         }
 
-        assert_eq!(percentages[0], 100); // level 5
-        assert_eq!(percentages[1], 100); // level 10
-        assert!(percentages[2] > 0 && percentages[2] < 10); // level 15 ≈ 7%
+        assert_eq!(percentages[0], 100);
+        assert_eq!(percentages[1], 100);
+        assert!(percentages[2] > 0 && percentages[2] < 10);
+    }
+
+    #[cfg(test)]
+    mod visual_tests {
+        use crate::cards::level_card::{LevelCardParams, render};
+        use std::fs;
+
+        fn generate_event_card(mode: &str) -> Vec<u8> {
+            let (message_count, required_messages, is_dq) = match mode {
+                "incomplete" => (Some(42), Some(75), false),
+                "complete" => (Some(75), Some(75), false),
+                "none" => (None, None, false),
+                "dq" => (None, None, true),
+                _ => (Some(42), Some(75), false),
+            };
+
+            let params = LevelCardParams {
+                minecraft_username: "TestPlayer".to_string(),
+                level: 10,
+                total_xp: 5420.0,
+                xp_this_level: 420.0,
+                xp_for_next_level: 1000.0,
+                stat_deltas: vec![
+                    ("Messages".to_string(), 127),
+                    ("Bedwars Wins".to_string(), 15),
+                    ("Final Kills".to_string(), 89),
+                    ("Voice Minutes".to_string(), 342),
+                ],
+                xp_gained: 350.0,
+                avatar_bytes: None,
+                rank: Some(3),
+                milestone_progress: vec![],
+                hypixel_rank: Some("MVP_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("GOLD".to_string()),
+                event_mode: true,
+                is_disqualified: is_dq,
+                message_count,
+                required_messages,
+                event_milestones: vec![
+                    (500.0, true),
+                    (1000.0, true),
+                    (2500.0, true),
+                    (5000.0, false),
+                    (7500.0, false),
+                    (10000.0, false),
+                ],
+                current_xp: 5420.0,
+            };
+
+            render(&params)
+        }
+
+        fn generate_normal_card() -> Vec<u8> {
+            let params = LevelCardParams {
+                minecraft_username: "GlobalPlayer".to_string(),
+                level: 12,
+                total_xp: 8420.0,
+                xp_this_level: 420.0,
+                xp_for_next_level: 1000.0,
+                stat_deltas: vec![
+                    ("Messages".to_string(), 200),
+                    ("Bedwars Wins".to_string(), 25),
+                    ("Final Kills".to_string(), 150),
+                    ("Voice Minutes".to_string(), 500),
+                ],
+                xp_gained: 500.0,
+                avatar_bytes: None,
+                rank: Some(1),
+                milestone_progress: vec![(5, true), (10, true), (15, false), (20, false)],
+                hypixel_rank: Some("MVP_PLUS".to_string()),
+                hypixel_rank_plus_color: Some("RED".to_string()),
+                event_mode: false,
+                is_disqualified: false,
+                message_count: None,
+                required_messages: None,
+                event_milestones: vec![],
+                current_xp: 0.0,
+            };
+
+            render(&params)
+        }
+
+        #[test]
+        fn generate_level_card_images() {
+            let modes = ["incomplete", "complete", "none", "dq"];
+
+            fs::create_dir_all("test_output/level").unwrap();
+
+            for mode in modes {
+                let png = generate_event_card(mode);
+                let path = format!("test_output/level/event_{}.png", mode);
+
+                fs::write(&path, png).unwrap();
+            }
+
+            let normal = generate_normal_card();
+            let normal_path = "test_output/level/global.png";
+            fs::write(&normal_path, normal).unwrap();
+        }
     }
 }

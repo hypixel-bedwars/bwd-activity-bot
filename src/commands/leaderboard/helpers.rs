@@ -74,6 +74,7 @@ pub async fn generate_leaderboard_page(
                 avatar_bytes: avatar,
                 hypixel_rank: entry.hypixel_rank.clone(),
                 hypixel_rank_plus_color: entry.hypixel_rank_plus_color.clone(),
+                requirement_met: Some(false), // Guild leaderboard doesn't have milestones, so this is always false.
             }
         })
         .collect();
@@ -165,6 +166,7 @@ pub async fn generate_event_leaderboard_page(
                 avatar_bytes: avatar,
                 hypixel_rank: entry.hypixel_rank.clone(),
                 hypixel_rank_plus_color: entry.hypixel_rank_plus_color.clone(),
+                requirement_met: Some(true), // Event leaderboard rows show milestone progress, so this is always true.
             }
         })
         .collect();

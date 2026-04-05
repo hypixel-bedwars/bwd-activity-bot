@@ -448,3 +448,24 @@ pub struct DbVcSession {
     pub join_time: DateTime<Utc>,
     pub leave_time: Option<DateTime<Utc>>,
 }
+
+// ---------------------------------------------------------------------------
+// Event Message Requirement Detail
+// ---------------------------------------------------------------------------
+
+/// A consolidated view of an event's message requirements and eligible positions.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct EventMessageRequirementDetail {
+    pub id: i64,
+    pub event_id: i64,
+    pub min_messages: i32,
+    pub positions: Vec<i32>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct RequirementStatus {
+    pub is_completed: bool,
+    pub messages_required: i32,
+    pub current_messages: i32,
+}
