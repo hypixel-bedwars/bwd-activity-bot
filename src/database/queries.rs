@@ -3757,3 +3757,48 @@ pub async fn get_requirement_for_position(
         .into_iter()
         .find(|req| req.positions.contains(&position)))
 }
+
+pub async fn check_requirement_for_position(
+    pool: &PgPool,
+    event_id: i64,
+    user_position: i32,
+    user_messages: i32,
+) -> Result<Option<RequirementStatus>, sqlx::Error> {
+    // Fetch ONLY the relevant requirement directly from DB
+    let requirement = sqlx::query_as!(
+        EventMessageRequirementDetail,
+        r#"
+        SELECT id, event_id, min_messages, positions as "positions!", created_at
+        FROM event_message_requirements
+        WHERE event_id = $1
+        AND $2 = ANY(positions)
+        ORDER BY min_messages DESC
+        LIMIT 1
+        "#,
+        event_id,
+        user_position
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    // If no requirement applies → return None
+    let requirement = match requirement {
+        Some(req) => req,
+        None => return Ok(None),
+    };
+
+    // Check completion
+    let is_completed = user_messages >= requirement.min_messages;
+
+    let messages_required = if is_completed {
+        0
+    } else {
+        requirement.min_messages - user_messages
+    };
+
+    Ok(Some(RequirementStatus {
+        is_completed,
+        messages_required,
+        current_messages: user_messages,
+    }))
+}
