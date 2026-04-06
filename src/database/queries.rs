@@ -2353,7 +2353,7 @@ pub async fn get_event_user_message_count(
         FROM event_xp
         WHERE event_id = $1 
           AND user_id = $2 
-          AND stat_name = 'messages'
+          AND stat_name = 'messages_sent'
         "#,
         event_id,
         user_id
