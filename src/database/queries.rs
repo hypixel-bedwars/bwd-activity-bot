@@ -2014,12 +2014,12 @@ pub async fn award_event_xp_for_delta(
     .fetch_all(pool)
     .await?;
 
+    let rows_count = rows.len();
     let total_xp: f64 = rows.into_iter().map(|(xp,)| xp).sum();
 
     info!(
         "award_event_xp_for_delta RESULT: inserted {} rows, total_xp={}",
-        rows.len(),
-        total_xp
+        rows_count, total_xp
     );
 
     Ok(total_xp)
