@@ -1933,15 +1933,47 @@ pub async fn award_event_xp_for_delta(
     difference: i64,
     now: &DateTime<Utc>,
 ) -> Result<f64, sqlx::Error> {
-    debug!(
-        "queries::award_event_xp_for_delta: guild_id={}, user_id={}, stat_name={}, delta_id={}, difference={}",
+    info!(
+        "queries::award_event_xp_for_delta CALLED: guild_id={}, user_id={}, stat_name={}, delta_id={}, difference={}",
         guild_id, user_id, stat_name, delta_id, difference
     );
 
     let units = difference;
     if units <= 0 {
+        info!("award_event_xp_for_delta: units <= 0, returning 0.0");
         return Ok(0.0);
     }
+
+    // Debug: Check what events exist
+    let active_events: Vec<(i64, String)> = sqlx::query_as(
+        "SELECT id, name FROM events WHERE guild_id = $1 AND status = 'active' AND start_date <= $2 AND end_date > $2"
+    )
+    .bind(guild_id)
+    .bind(now)
+    .fetch_all(pool)
+    .await?;
+
+    info!(
+        "award_event_xp_for_delta: Active events for guild {}: {:?}",
+        guild_id, active_events
+    );
+
+    // Debug: Check what event_stats exist for this stat
+    let matching_stats: Vec<(i64, i64, String, f64)> = sqlx::query_as(
+        "SELECT es.id, es.event_id, es.stat_name, es.xp_per_unit 
+         FROM event_stats es 
+         JOIN events e ON e.id = es.event_id 
+         WHERE e.guild_id = $1 AND es.stat_name = $2",
+    )
+    .bind(guild_id)
+    .bind(stat_name)
+    .fetch_all(pool)
+    .await?;
+
+    info!(
+        "award_event_xp_for_delta: Event stats matching stat_name '{}': {:?}",
+        stat_name, matching_stats
+    );
 
     // Single guarded insert-select to enforce:
     // - event active for guild and stat
@@ -1983,6 +2015,13 @@ pub async fn award_event_xp_for_delta(
     .await?;
 
     let total_xp: f64 = rows.into_iter().map(|(xp,)| xp).sum();
+
+    info!(
+        "award_event_xp_for_delta RESULT: inserted {} rows, total_xp={}",
+        rows.len(),
+        total_xp
+    );
+
     Ok(total_xp)
 }
 
