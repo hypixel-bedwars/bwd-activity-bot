@@ -1781,6 +1781,28 @@ pub async fn get_latest_event_name(
     .await
 }
 
+pub async fn get_latest_active_event_name(
+    pool: &PgPool,
+    guild_id: i64,
+) -> Result<Option<String>, sqlx::Error> {
+    debug!(
+        "queries::get_latest_active_event_name: guild_id={}",
+        guild_id
+    );
+
+    sqlx::query_scalar(
+        "SELECT name
+         FROM events
+         WHERE guild_id = $1
+           AND status IN ('active')
+         ORDER BY start_date DESC
+         LIMIT 1",
+    )
+    .bind(guild_id)
+    .fetch_optional(pool)
+    .await
+}
+
 // =========================================================================
 // event_stats
 // =========================================================================

@@ -307,9 +307,9 @@ pub async fn level(
     // Resolve event name
     let event_name = match event_name {
         Some(n) => n,
-        None => queries::get_latest_event_name(&ctx.data().db, guild_id)
+        None => queries::get_latest_active_event_name(&ctx.data().db, guild_id)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("No active or ended events found"))?,
+            .ok_or_else(|| anyhow::anyhow!("No active events found"))?,
     };
 
     let event = match queries::get_event_by_name(&ctx.data().db, guild_id, &event_name).await? {
