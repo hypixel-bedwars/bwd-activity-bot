@@ -2095,9 +2095,7 @@ pub async fn get_event_leaderboard(
         FROM event_xp ex
         JOIN users u ON u.id = ex.user_id
         JOIN events e ON e.id = ex.event_id
-        WHERE ex.event_id = $1
-            AND e.id = $1
-            AND u.active = TRUE
+        WHERE u.active = TRUE
             AND is_player_allowed(ex.user_id, $1) = TRUE
         GROUP BY
             u.discord_user_id,
