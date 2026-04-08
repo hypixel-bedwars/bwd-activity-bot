@@ -2371,8 +2371,8 @@ pub async fn get_event_user_message_count(
         r#"
         SELECT COALESCE(SUM(units), 0)::INT
         FROM event_xp
-        WHERE event_id = $1 
-          AND user_id = $2 
+        WHERE event_id = $1
+          AND user_id = $2
           AND stat_name = 'messages_sent'
         "#,
         event_id,
@@ -2968,21 +2968,23 @@ pub async fn get_event_milestones_with_counts(
         event_id
     );
     sqlx::query_as::<_, EventMilestoneWithCount>(
-        "SELECT em.id, em.event_id, em.xp_threshold,
-                COUNT(sub.user_id) AS user_count
-         FROM event_milestones em
-         LEFT JOIN (
-             SELECT ex.user_id, SUM(ex.xp_earned) AS total_xp
-             FROM event_xp ex
-             JOIN users u ON u.id = ex.user_id
-             WHERE ex.event_id = $1
-               AND u.active = TRUE
-                             AND is_player_allowed(ex.user_id, $1) = TRUE
-             GROUP BY ex.user_id
-         ) sub ON sub.total_xp >= em.xp_threshold
-         WHERE em.event_id = $1
-         GROUP BY em.id
-         ORDER BY em.xp_threshold ASC",
+        "WITH user_totals AS (
+          SELECT ex.user_id, SUM(ex.xp_earned) AS total_xp
+          FROM event_xp ex
+          WHERE ex.event_id = $1
+          GROUP BY ex.user_id
+        )
+        SELECT em.id, em.event_id, em.xp_threshold,
+               COUNT(ut.user_id) AS user_count
+        FROM event_milestones em
+        LEFT JOIN user_totals ut
+          ON ut.total_xp >= em.xp_threshold
+        LEFT JOIN users u ON u.id = ut.user_id
+        WHERE em.event_id = $1
+          AND (u.active = TRUE OR ut.user_id IS NULL)
+          AND (ut.user_id IS NULL OR is_player_allowed(ut.user_id, $1))
+        GROUP BY em.id
+        ORDER BY em.xp_threshold ASC;",
     )
     .bind(event_id)
     .fetch_all(pool)
@@ -3000,7 +3002,7 @@ pub async fn get_event_milestone_completers(
         event_id, xp_threshold
     );
     let rows: Vec<(i64, String, f64)> = sqlx::query_as(
-        "SELECT 
+        "SELECT
             u.discord_user_id,
             u.minecraft_username,
             SUM(ex.xp_earned) as total_xp
