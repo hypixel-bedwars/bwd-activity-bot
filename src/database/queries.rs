@@ -2391,18 +2391,23 @@ pub async fn get_event_user_message_count(
 
 /// Count participants (distinct users) for a given event.
 pub async fn count_event_participants(pool: &PgPool, event_id: i64) -> Result<i64, sqlx::Error> {
-    debug!("queries::count_event_participants: event_id={}", event_id);
     let row: (i64,) = sqlx::query_as(
-        "SELECT COUNT(DISTINCT ex.user_id)
-        FROM event_xp ex
-        JOIN users u ON u.id = ex.user_id
-        WHERE ex.event_id = $1
-          AND u.active = TRUE
-          AND is_player_allowed(ex.user_id, $1) = TRUE",
+        "
+        SELECT COUNT(*)
+        FROM (
+          SELECT DISTINCT ex.user_id
+          FROM event_xp ex
+          WHERE ex.event_id = $1
+        ) t
+        JOIN users u ON u.id = t.user_id
+        WHERE u.active = TRUE
+          AND is_player_allowed(t.user_id, $1)
+        ",
     )
     .bind(event_id)
     .fetch_one(pool)
     .await?;
+
     Ok(row.0)
 }
 
