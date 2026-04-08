@@ -2085,29 +2085,25 @@ pub async fn get_event_leaderboard(
 
     sqlx::query_as::<_, EventLeaderboardEntry>(
         r#"
+        WITH user_totals AS (
+          SELECT ex.user_id, SUM(ex.xp_earned) AS total_event_xp
+          FROM event_xp ex
+          WHERE ex.event_id = $1
+          GROUP BY ex.user_id
+        )
         SELECT
             u.discord_user_id,
             u.minecraft_username,
             u.minecraft_uuid,
             u.hypixel_rank,
             u.hypixel_rank_plus_color,
-            COALESCE(SUM(ex.xp_earned), 0.0) AS total_event_xp
-        FROM event_xp ex
-        JOIN users u ON u.id = ex.user_id
-        JOIN events e ON e.id = ex.event_id
+            COALESCE(ut.total_event_xp, 0.0) AS total_event_xp
+        FROM user_totals ut
+        JOIN users u ON u.id = ut.user_id
         WHERE u.active = TRUE
-            AND is_player_allowed(ex.user_id, $1) = TRUE
-        GROUP BY
-            u.discord_user_id,
-            u.minecraft_username,
-            u.minecraft_uuid,
-            u.hypixel_rank,
-            u.hypixel_rank_plus_color,
-            u.id
-        ORDER BY
-            total_event_xp DESC,
-            u.id ASC
-        LIMIT $2 OFFSET $3
+          AND is_player_allowed(ut.user_id, $1)
+        ORDER BY total_event_xp DESC, u.id ASC
+        LIMIT $2 OFFSET $3;
         "#,
     )
     .bind(event_id)
