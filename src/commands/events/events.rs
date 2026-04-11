@@ -26,6 +26,7 @@ use crate::cards::statistics::{self as statistics_card, StatisticsCardParams};
 
 use crate::commands::leaderboard::helpers as lb_helpers;
 use crate::database::queries;
+use crate::shared::leaderboard_service;
 use crate::shared::types::{Context, Error};
 use crate::sweeper;
 use crate::utils::stats_definitions::display_name_for_key;
@@ -354,7 +355,8 @@ pub async fn level(
     stat_deltas.truncate(8);
 
     // User's rank within the event leaderboard
-    let rank = queries::get_user_event_rank(&ctx.data().db, event.id, db_user.id).await?;
+    let rank_value = leaderboard_service::get_user_rank(event.id, db_user.id).await?;
+    let rank = (rank_value > 0).then_some(rank_value);
 
     // Fetch avatar
     let avatar_bytes = if let Some(tex) = &db_user.head_texture {

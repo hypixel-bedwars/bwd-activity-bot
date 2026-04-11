@@ -21,6 +21,7 @@ use crate::database::models::MessageValidationState;
 use crate::discord_stats::tracker;
 use crate::events::interactions;
 use crate::hypixel::client::HypixelClient;
+use crate::shared::leaderboard_service;
 use crate::shared::types::{Data, Error};
 use crate::sweeper;
 use crate::utils::event_leaderboard_updater;
@@ -97,6 +98,10 @@ pub async fn build(config: AppConfig, db: PgPool) -> Result<poise::Framework<Dat
                 info!("Bot is connected and ready!");
 
                 let leaderboard_cache = lb::new_cache(config.leaderboard_cache_seconds);
+                leaderboard_service::init(
+                    db.clone(),
+                    std::time::Duration::from_secs(config.leaderboard_cache_seconds),
+                );
 
                 // Create bot data
                 let data = Data {

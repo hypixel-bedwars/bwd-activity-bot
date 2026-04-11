@@ -2141,39 +2141,6 @@ pub async fn get_user_event_stats(
     Ok(rows)
 }
 
-/// Return the user's rank (1-indexed) within a specific event leaderboard,
-/// ordered by total event XP descending.  Returns `None` if the user has no
-/// XP recorded for this event.
-pub async fn get_user_event_rank(
-    pool: &PgPool,
-    event_id: i64,
-    user_id: i64,
-) -> Result<Option<i64>, sqlx::Error> {
-    debug!(
-        "queries::get_user_event_rank: event_id={}, user_id={}",
-        event_id, user_id
-    );
-    sqlx::query_scalar::<_, i64>(
-        r#"
-        SELECT rank FROM (
-            SELECT ex.user_id,
-            RANK() OVER (ORDER BY SUM(ex.xp_earned) DESC, ex.user_id ASC)
-            FROM event_xp ex
-            JOIN users u ON u.id = ex.user_id
-            WHERE ex.event_id = $1
-                AND u.active = TRUE
-                AND is_player_allowed(ex.user_id, $1) = TRUE
-            GROUP BY ex.user_id
-        ) sub
-        WHERE user_id = $2
-        "#,
-    )
-    .bind(event_id)
-    .bind(user_id)
-    .fetch_optional(pool)
-    .await
-}
-
 /// Mark a user as inactive (soft-delete) when they leave a guild.
 ///
 /// Sets `active = FALSE`, records `left_at`, and updates `updated_at`.

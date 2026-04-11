@@ -348,7 +348,7 @@ pub struct DbEventXP {
 // ---------------------------------------------------------------------------
 
 /// A single entry in an event leaderboard — user plus their total event XP.
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow, serde::Serialize)]
 pub struct EventLeaderboardEntry {
     pub discord_user_id: i64,
     pub minecraft_username: Option<String>,
@@ -468,4 +468,15 @@ pub struct RequirementStatus {
     pub is_completed: bool,
     pub messages_required: i32,
     pub current_messages: i32,
+}
+
+// ---------------------------------------------------------------------------
+// Event Leaderboard Cache
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct EventLeaderboardCacheEntry {
+    pub event_id: i64,
+    pub leaderboard: Vec<EventLeaderboardEntry>,
+    pub last_updated: DateTime<Utc>,
 }

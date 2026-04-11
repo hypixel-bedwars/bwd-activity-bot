@@ -3,4 +3,5 @@
 /// - `types` — core type definitions (`Data`, `Error`, `Context`, `StatDelta`).
 /// - `cache` — generic TTL-based cache.
 pub mod cache;
+pub mod leaderboard_service;
 pub mod types;
