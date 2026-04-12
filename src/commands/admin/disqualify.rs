@@ -36,7 +36,6 @@ async fn autocomplete_event_name<'a>(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "BAN_MEMBERS",
     default_member_permissions = "BAN_MEMBERS"
 )]
 pub async fn disqualify(
@@ -142,7 +141,6 @@ pub async fn disqualify(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "BAN_MEMBERS",
     default_member_permissions = "BAN_MEMBERS"
 )]
 pub async fn undisqualify(
@@ -219,7 +217,6 @@ pub async fn undisqualify(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "BAN_MEMBERS",
     default_member_permissions = "BAN_MEMBERS"
 )]
 pub async fn ban(
@@ -340,7 +337,6 @@ pub async fn ban(
     slash_command,
     guild_only,
     ephemeral,
-    required_permissions = "BAN_MEMBERS",
     default_member_permissions = "BAN_MEMBERS"
 )]
 pub async fn unban(
@@ -400,7 +396,6 @@ pub async fn unban(
     guild_only,
     ephemeral,
     rename = "list-punishments",
-    required_permissions = "BAN_MEMBERS",
     default_member_permissions = "BAN_MEMBERS"
 )]
 pub async fn punishments(ctx: Context<'_>) -> Result<(), Error> {

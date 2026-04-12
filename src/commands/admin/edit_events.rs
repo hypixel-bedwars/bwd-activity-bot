@@ -340,7 +340,6 @@ fn format_ranks(ranks: &[i32]) -> String {
         "msg_requirements_remove",
         "msg_requirements_list"
     ),
-    required_permissions = "ADMINISTRATOR",
     default_member_permissions = "ADMINISTRATOR"
 )]
 pub async fn edit_event(_ctx: Context<'_>) -> Result<(), Error> {
@@ -470,7 +469,7 @@ pub async fn new(
                     info!(
                         event_id,
                         deltas_processed = summary.deltas_processed,
-                        total_xp = summary.total_xp_awarded,
+                        total_event_xp_recorded = summary.total_event_xp_recorded,
                         users_affected = summary.users_affected,
                         "Background backfill completed for event '{}'.",
                         event_name
@@ -481,10 +480,10 @@ pub async fn new(
                         guild_id,
                         LogType::Info,
                         format!(
-                            "Backfill for **{}** complete — {} deltas, {:.0} XP, {} users affected.",
+                            "Backfill for **{}** complete — {} deltas, {:.0} event XP rows recorded, {} users affected.",
                             event_name,
                             summary.deltas_processed,
-                            summary.total_xp_awarded,
+                            summary.total_event_xp_recorded,
                             summary.users_affected,
                         ),
                     )
@@ -962,7 +961,7 @@ pub async fn backfill(
             info!(
                 event_id = event.id,
                 deltas_processed = summary.deltas_processed,
-                total_xp = summary.total_xp_awarded,
+                total_event_xp_recorded = summary.total_event_xp_recorded,
                 users_affected = summary.users_affected,
                 "Manual backfill completed for event '{}'.",
                 event_name
@@ -971,8 +970,10 @@ pub async fn backfill(
             let embed = poise::serenity_prelude::CreateEmbed::default()
                 .title(format!("Backfill Complete — {event_name}"))
                 .description(format!(
-                    "Deltas processed: **{}**\nXP awarded: **{:.0}**\nUsers affected: **{}**",
-                    summary.deltas_processed, summary.total_xp_awarded, summary.users_affected,
+                    "Deltas processed: **{}**\nEvent XP recorded: **{:.0}**\nUsers affected: **{}**",
+                    summary.deltas_processed,
+                    summary.total_event_xp_recorded,
+                    summary.users_affected,
                 ))
                 .color(0x2ECC71);
 
@@ -984,11 +985,11 @@ pub async fn backfill(
                 ctx.guild_id().unwrap(),
                 LogType::Info,
                 format!(
-                    "{} ran backfill for **{}** — {} deltas, {:.0} XP, {} users.",
+                    "{} ran backfill for **{}** — {} deltas, {:.0} event XP, {} users.",
                     ctx.author().name,
                     event_name,
                     summary.deltas_processed,
-                    summary.total_xp_awarded,
+                    summary.total_event_xp_recorded,
                     summary.users_affected,
                 ),
             )
