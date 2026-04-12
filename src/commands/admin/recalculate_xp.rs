@@ -1,7 +1,7 @@
-/// Admin command to recalculate user XP from source data (xp_events + event_xp).
+/// Admin command to recalculate user global XP from source data (xp_events).
 ///
-/// Global XP is the sum of regular XP (xp_events) plus event XP (event_xp).
-/// This command recomputes that sum and updates xp.total_xp and level.
+/// Event XP is tracked separately in `event_xp` and is not part of global
+/// `xp.total_xp`. This command recomputes global XP from `xp_events` only.
 use chrono::Utc;
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use tracing::{debug, info};
@@ -72,8 +72,8 @@ pub async fn recalculate_xp(
     for db_user in &target_users {
         processed += 1;
 
-        // Calculate correct XP from source tables
-        // Global XP = Regular XP (from xp_events) + Event XP (from event_xp)
+        // Calculate correct global XP from source tables.
+        // Global XP = regular XP only (from xp_events).
         let correct_regular_xp: f64 = sqlx::query_scalar(
             "SELECT COALESCE(SUM(xp_earned), 0) FROM xp_events WHERE user_id = $1",
         )

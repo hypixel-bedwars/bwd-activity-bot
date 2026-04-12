@@ -407,7 +407,7 @@ pub struct DbEventStatusMessage {
 #[derive(Debug, Clone, Default)]
 pub struct BackfillSummary {
     pub deltas_processed: i64,
-    pub total_xp_awarded: f64,
+    pub total_event_xp_recorded: f64,
     pub users_affected: i64,
 }
 

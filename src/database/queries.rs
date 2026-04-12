@@ -8,8 +8,8 @@ use serde_json::Value;
 /// Some functions are not yet called but exist as part of the public query API
 /// for extensions and future commands.
 use sqlx::{PgPool, Postgres, Row, Transaction};
-use std::collections::HashMap;
-use tracing::{debug, error, info, warn};
+use std::collections::{HashMap, HashSet};
+use tracing::{debug, info, warn};
 use uuid::Uuid;
 
 use crate::database::models::{EventMessageRequirementDetail, RequirementStatus};
@@ -2708,16 +2708,16 @@ async fn process_batch_with_retry(
 /// its own transaction and `ON CONFLICT … DO NOTHING` makes the whole job
 /// idempotent — safe to re-run after a crash or via `/edit-events backfill`.
 ///
-/// After all batches finish, `total_xp` is incremented once per affected user
-/// and their level is recalculated once.
+/// This backfills `event_xp` only.
+///
+/// Event XP is intentionally tracked separately from global XP; this function
+/// must never mutate the `xp` table.
 pub async fn backfill_event_xp(
     pool: &PgPool,
     event_id: i64,
-    base_level_xp: f64,
-    level_exponent: f64,
+    _base_level_xp: f64,
+    _level_exponent: f64,
 ) -> Result<BackfillSummary, sqlx::Error> {
-    use crate::xp::calculator::calculate_level;
-
     info!(event_id, "Starting backfill.");
 
     // Load event.
@@ -2752,7 +2752,8 @@ pub async fn backfill_event_xp(
     let mut cursor_id: i64 = 0;
     let mut batch_num: i64 = 0;
     let mut total_deltas: i64 = 0;
-    let mut user_xp_map: HashMap<i64, f64> = HashMap::new();
+    let mut total_event_xp_recorded = 0.0_f64;
+    let mut users_affected: HashSet<i64> = HashSet::new();
 
     loop {
         let batch: Vec<DbStatDelta> = sqlx::query_as::<_, DbStatDelta>(
@@ -2781,14 +2782,11 @@ pub async fn backfill_event_xp(
 
         let batch_xp = process_batch_with_retry(pool, event_id, &batch, &stat_map, 3).await?;
 
-        // Increment XP per-batch for crash safety, and accumulate running totals.
-        let now = Utc::now();
+        // Accumulate only event_xp metrics. Do NOT write into global xp.
         for (&uid, &xp) in &batch_xp {
             if xp > 0.0 {
-                if let Err(e) = increment_xp(pool, uid, xp, &now).await {
-                    error!(event_id, user_id = uid, error = %e, "Failed to increment XP during backfill batch.");
-                }
-                *user_xp_map.entry(uid).or_insert(0.0) += xp;
+                total_event_xp_recorded += xp;
+                users_affected.insert(uid);
             }
         }
 
@@ -2809,39 +2807,16 @@ pub async fn backfill_event_xp(
         }
     }
 
-    // Recalculate levels once per affected user (after all XP has been incremented).
-    let now = Utc::now();
-    let mut total_xp_awarded = 0.0_f64;
-    let users_affected = user_xp_map.len() as i64;
-
-    for (&uid, &xp) in &user_xp_map {
-        total_xp_awarded += xp;
-        match get_xp(pool, uid).await {
-            Ok(Some(xp_row)) => {
-                let new_level = calculate_level(xp_row.total_xp, base_level_xp, level_exponent);
-                if new_level != xp_row.level {
-                    if let Err(e) = update_level(pool, uid, new_level, &now).await {
-                        error!(event_id, user_id = uid, error = %e, "Failed to update level during backfill.");
-                    }
-                }
-            }
-            Ok(None) => {}
-            Err(e) => {
-                error!(event_id, user_id = uid, error = %e, "Failed to fetch XP row during level recalc.");
-            }
-        }
-    }
-
     let summary = BackfillSummary {
         deltas_processed: total_deltas,
-        total_xp_awarded,
-        users_affected,
+        total_event_xp_recorded,
+        users_affected: users_affected.len() as i64,
     };
 
     info!(
         event_id,
         total_deltas_processed = summary.deltas_processed,
-        total_xp = summary.total_xp_awarded,
+        total_event_xp_recorded = summary.total_event_xp_recorded,
         users_affected = summary.users_affected,
         "Backfill completed."
     );
