@@ -226,20 +226,29 @@ async fn refresh_user(data: &Data, user: &DbUser) -> Result<()> {
         }
 
         let old_value = previous.as_ref().map(|s| s.stat_value).unwrap_or(0);
+        let diff = new_value - old_value;
 
         if new_value != old_value {
             queries::insert_hypixel_snapshot(pool, user.id, stat_name, new_value, now).await?;
         }
 
-        let diff = new_value - old_value;
+        if diff > 0 {
+            queries::insert_hypixel_snapshot(pool, user.id, stat_name, new_value, now).await?;
 
-        if diff != 0 {
             deltas.push(StatDelta::new(
                 user.id,
                 stat_name.clone(),
                 old_value,
                 new_value,
             ));
+        } else if diff < 0 {
+            tracing::debug!(
+                user_id = user.id,
+                stat = stat_name,
+                old_value,
+                new_value,
+                "Stale Hypixel API read detected. Ignoring negative delta."
+            );
         }
     }
 
