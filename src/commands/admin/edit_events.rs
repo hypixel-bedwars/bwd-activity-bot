@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use poise::CreateReply;
 /// `/edit-event` command group — admin only.
 ///
@@ -1958,7 +1960,6 @@ pub async fn milestones_completers(
 
     let data = ctx.data();
 
-    // Resolve event name
     let event_name = match event_name {
         Some(n) => n,
         None => queries::get_latest_event_name(&data.db, guild_id)
@@ -1966,7 +1967,6 @@ pub async fn milestones_completers(
             .ok_or_else(|| anyhow::anyhow!("No active or ended events found"))?,
     };
 
-    // Fetch event
     let event = match queries::get_event_by_name(&data.db, guild_id, &event_name).await? {
         Some(e) => e,
         None => {
@@ -1976,7 +1976,6 @@ pub async fn milestones_completers(
         }
     };
 
-    // Fetch milestones
     let mut milestones = queries::get_event_milestones(&data.db, event.id).await?;
 
     if milestones.is_empty() {
@@ -1988,11 +1987,11 @@ pub async fn milestones_completers(
         return Ok(());
     }
 
-    // Sort milestones by highest XP first
     milestones.sort_by(|a, b| b.xp_threshold.partial_cmp(&a.xp_threshold).unwrap());
 
     let mut preview = format!("Milestone Completers — {}\n\n", event.name);
     let mut full_output = String::new();
+    let mut seen_users: HashSet<i64> = HashSet::new();
 
     for milestone in &milestones {
         let completers =
@@ -2006,31 +2005,40 @@ pub async fn milestones_completers(
 
         let header = format!("=== {} XP ===\n", milestone.xp_threshold as i64);
 
-        full_output.push_str(&header);
-
+        let mut section_written = false;
         let mut preview_section = header.clone();
+        let mut full_section = String::new();
 
         for (user_id, mc_name, xp) in completers {
+            if seen_users.contains(&user_id) {
+                continue;
+            }
+
+            seen_users.insert(user_id);
+
             let line = format!("{user_id} - {mc_name} ({xp} XP)\n");
 
-            // Always write to full file
-            full_output.push_str(&line);
+            full_section.push_str(&line);
 
-            // Conditionally write to preview
             if preview.len() + preview_section.len() + line.len() < 1900 {
                 preview_section.push_str(&line);
             }
+
+            section_written = true;
         }
 
-        full_output.push('\n');
+        if section_written {
+            full_output.push_str(&header);
+            full_output.push_str(&full_section);
+            full_output.push('\n');
 
-        if preview.len() + preview_section.len() < 1900 {
-            preview.push_str(&preview_section);
-            preview.push('\n');
+            if preview.len() + preview_section.len() < 1900 {
+                preview.push_str(&preview_section);
+                preview.push('\n');
+            }
         }
     }
 
-    // If nothing found
     if full_output.is_empty() {
         ctx.say(format!(
             "No participants have completed any milestones for **{}** yet.",
@@ -2042,10 +2050,8 @@ pub async fn milestones_completers(
 
     use serenity::all::CreateAttachment;
 
-    // Send preview message
     ctx.say(preview).await?;
 
-    // Send full file
     let file = CreateAttachment::bytes(full_output.into_bytes(), "milestone_completers.txt");
 
     ctx.send(CreateReply::default().attachment(file)).await?;
