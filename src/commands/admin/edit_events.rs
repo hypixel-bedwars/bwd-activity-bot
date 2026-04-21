@@ -1,3 +1,4 @@
+use poise::CreateReply;
 /// `/edit-event` command group — admin only.
 ///
 /// Provides subcommands for managing guild events:
@@ -1976,7 +1977,7 @@ pub async fn milestones_completers(
     };
 
     // Fetch milestones
-    let milestones = queries::get_event_milestones(&data.db, event.id).await?;
+    let mut milestones = queries::get_event_milestones(&data.db, event.id).await?;
 
     if milestones.is_empty() {
         ctx.say(format!(
@@ -1987,28 +1988,50 @@ pub async fn milestones_completers(
         return Ok(());
     }
 
-    use std::collections::HashMap;
+    // Sort milestones by highest XP first
+    milestones.sort_by(|a, b| b.xp_threshold.partial_cmp(&a.xp_threshold).unwrap());
 
-    // user_id -> (mc_name, milestones)
-    let mut participant_milestones: HashMap<i64, (String, Vec<f64>)> = HashMap::new();
+    let mut preview = format!("Milestone Completers — {}\n\n", event.name);
+    let mut full_output = String::new();
 
-    // Collect data
     for milestone in &milestones {
         let completers =
             queries::get_event_milestone_completers(&data.db, event.id, milestone.xp_threshold)
                 .await
                 .unwrap_or_default();
 
-        for (user_id, mc_name, _xp) in completers {
-            let entry = participant_milestones
-                .entry(user_id)
-                .or_insert((mc_name.clone(), Vec::new()));
+        if completers.is_empty() {
+            continue;
+        }
 
-            entry.1.push(milestone.xp_threshold);
+        let header = format!("=== {} XP ===\n", milestone.xp_threshold as i64);
+
+        full_output.push_str(&header);
+
+        let mut preview_section = header.clone();
+
+        for (user_id, mc_name, xp) in completers {
+            let line = format!("{user_id} - {mc_name} ({xp} XP)\n");
+
+            // Always write to full file
+            full_output.push_str(&line);
+
+            // Conditionally write to preview
+            if preview.len() + preview_section.len() + line.len() < 1900 {
+                preview_section.push_str(&line);
+            }
+        }
+
+        full_output.push('\n');
+
+        if preview.len() + preview_section.len() < 1900 {
+            preview.push_str(&preview_section);
+            preview.push('\n');
         }
     }
 
-    if participant_milestones.is_empty() {
+    // If nothing found
+    if full_output.is_empty() {
         ctx.say(format!(
             "No participants have completed any milestones for **{}** yet.",
             event.name
@@ -2017,40 +2040,15 @@ pub async fn milestones_completers(
         return Ok(());
     }
 
-    // Sort by number of milestones desc
-    let mut sorted: Vec<(i64, (String, Vec<f64>))> = participant_milestones.into_iter().collect();
+    use serenity::all::CreateAttachment;
 
-    sorted.sort_by(|a, b| b.1.1.len().cmp(&a.1.1.len()).then(a.0.cmp(&b.0)));
+    // Send preview message
+    ctx.say(preview).await?;
 
-    // Build output
-    let mut content = format!("Milestone Completers — {}\n\n", event.name);
+    // Send full file
+    let file = CreateAttachment::bytes(full_output.into_bytes(), "milestone_completers.txt");
 
-    for (user_id, (mc_name, mut thresholds)) in sorted {
-        thresholds.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-        let threshold_strs: Vec<String> = thresholds
-            .iter()
-            .map(|&t| format!("{} XP", t as i64))
-            .collect();
-
-        let line = format!(
-            "{} - {} - {}\n",
-            user_id,
-            mc_name,
-            threshold_strs.join(", ")
-        );
-
-        // prevent Discord 2000 char limit
-        if content.len() + line.len() > 1900 {
-            content.push_str("...\n(truncated)");
-            break;
-        }
-
-        content.push_str(&line);
-    }
-
-    // Send result
-    ctx.say(content).await?;
+    ctx.send(CreateReply::default().attachment(file)).await?;
 
     Ok(())
 }
