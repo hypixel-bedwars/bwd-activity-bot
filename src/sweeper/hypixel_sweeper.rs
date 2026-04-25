@@ -233,8 +233,6 @@ async fn refresh_user(data: &Data, user: &DbUser) -> Result<()> {
         }
 
         if diff > 0 {
-            queries::insert_hypixel_snapshot(pool, user.id, stat_name, new_value, now).await?;
-
             deltas.push(StatDelta::new(
                 user.id,
                 stat_name.clone(),

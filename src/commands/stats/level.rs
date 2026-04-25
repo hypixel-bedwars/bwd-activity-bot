@@ -2,6 +2,8 @@
 ///
 /// Shows a user's XP, level, progress to the next level, and stat changes
 /// since the last sweep.  Attaches a generated PNG level card image.
+use std::collections::HashMap;
+
 use poise::serenity_prelude::{self as serenity, CreateAttachment, CreateEmbed};
 use tracing::{debug, info};
 use uuid::Uuid;
@@ -117,51 +119,66 @@ pub async fn level(
     // XP is NOT recalculated here — it comes from the pipeline (xp.total_xp above).
     let mut stat_deltas: Vec<(String, i64)> = Vec::new();
 
+    let latest_hypixel_by_stat: HashMap<String, i64> =
+        queries::get_latest_hypixel_snapshots_for_user(&data.db, db_user.id)
+            .await
+            .map_err(|e| {
+                tracing::error!(error = %e, "get_latest_hypixel_snapshots_for_user failed");
+                e
+            })?
+            .into_iter()
+            .map(|s| (s.stat_name, s.stat_value))
+            .collect();
+
+    let first_hypixel_by_stat: HashMap<String, i64> =
+        queries::get_first_hypixel_snapshots_for_user(&data.db, db_user.id)
+            .await
+            .map_err(|e| {
+                tracing::error!(error = %e, "get_first_hypixel_snapshots_for_user failed");
+                e
+            })?
+            .into_iter()
+            .map(|s| (s.stat_name, s.stat_value))
+            .collect();
+
+    let latest_discord_by_stat: HashMap<String, i64> =
+        queries::get_latest_discord_snapshots_for_user(&data.db, db_user.id)
+            .await
+            .map_err(|e| {
+                tracing::error!(error = %e, "get_latest_discord_snapshots_for_user failed");
+                e
+            })?
+            .into_iter()
+            .map(|s| (s.stat_name, s.stat_value))
+            .collect();
+
+    let first_discord_by_stat: HashMap<String, i64> =
+        queries::get_first_discord_snapshots_for_user(&data.db, db_user.id)
+            .await
+            .map_err(|e| {
+                tracing::error!(error = %e, "get_first_discord_snapshots_for_user failed");
+                e
+            })?
+            .into_iter()
+            .map(|s| (s.stat_name, s.stat_value))
+            .collect();
+
     for key in &active_keys {
         let (latest_val, initial_val) = if is_discord_stat(key) {
-            let latest = queries::get_latest_discord_snapshot(&data.db, db_user.id, key)
-                .await
-                .map_err(|e| {
-                    tracing::error!(error = %e, "get_latest_discord_snapshot failed");
-                    e
-                })?
-                .map(|s| s.stat_value)
-                .unwrap_or(0);
+            let latest = *latest_discord_by_stat.get(key).unwrap_or(&0);
 
             let initial;
 
             if key == "voice_minutes" {
                 initial = 0;
             } else {
-                initial = queries::get_first_discord_snapshot(&data.db, db_user.id, key)
-                    .await
-                    .map_err(|e| {
-                        tracing::error!(error = %e, "get_latest_discord_snapshot failed");
-                        e
-                    })?
-                    .map(|s| s.stat_value)
-                    .unwrap_or(0);
+                initial = *first_discord_by_stat.get(key).unwrap_or(&0);
             };
 
             (latest, initial)
         } else {
-            let latest = queries::get_latest_hypixel_snapshot(&data.db, db_user.id, key)
-                .await
-                .map_err(|e| {
-                    tracing::error!(error = %e, "get_latest_discord_snapshot failed");
-                    e
-                })?
-                .map(|s| s.stat_value)
-                .unwrap_or(0);
-
-            let initial = queries::get_first_hypixel_snapshot(&data.db, db_user.id, key)
-                .await
-                .map_err(|e| {
-                    tracing::error!(error = %e, "get_latest_discord_snapshot failed");
-                    e
-                })?
-                .map(|s| s.stat_value)
-                .unwrap_or(0);
+            let latest = *latest_hypixel_by_stat.get(key).unwrap_or(&0);
+            let initial = *first_hypixel_by_stat.get(key).unwrap_or(&0);
 
             (latest, initial)
         };

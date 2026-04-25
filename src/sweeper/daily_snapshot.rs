@@ -8,6 +8,9 @@ use crate::commands::logger::logger::LogType;
 use crate::database::queries;
 use crate::shared::types::Data;
 
+const HPIXEL_SNAPSHOT_RETENTION_DAYS: i64 = 90;
+const HPIXEL_SNAPSHOT_PRUNE_BATCH_SIZE: i64 = 5_000;
+
 pub async fn start_daily_snapshot_loop(data: Arc<Data>) {
     loop {
         let now = Utc::now();
@@ -63,6 +66,42 @@ pub async fn start_daily_snapshot_loop(data: Arc<Data>) {
                     ),
                 )
                 .await;
+            }
+        }
+
+        let cutoff_ts = Utc::now() - ChronoDuration::days(HPIXEL_SNAPSHOT_RETENTION_DAYS);
+
+        match queries::prune_old_hypixel_snapshots(
+            &data.db,
+            &cutoff_ts,
+            HPIXEL_SNAPSHOT_PRUNE_BATCH_SIZE,
+        )
+        .await
+        {
+            Err(e) => {
+                error!(
+                    error = %e,
+                    cutoff = %cutoff_ts,
+                    "Hypixel snapshot prune job failed."
+                );
+                broadcast_log(
+                    &data,
+                    LogType::Error,
+                    format!(
+                        "Hypixel snapshot prune failed (cutoff `{}`): {}",
+                        cutoff_ts.date_naive(),
+                        e
+                    ),
+                )
+                .await;
+            }
+            Ok(deleted_rows) => {
+                info!(
+                    cutoff = %cutoff_ts,
+                    deleted_rows,
+                    retention_days = HPIXEL_SNAPSHOT_RETENTION_DAYS,
+                    "Hypixel snapshot prune completed."
+                );
             }
         }
     }

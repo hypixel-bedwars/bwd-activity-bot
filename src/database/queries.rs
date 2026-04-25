@@ -191,9 +191,9 @@ pub async fn get_hypixel_snapshot_before(
     );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM hypixel_stats_snapshot
-         WHERE user_id = $1 AND stat_name = $2 AND timestamp < $3
-         ORDER BY timestamp DESC
-         LIMIT 1",
+          WHERE user_id = $1 AND stat_name = $2 AND timestamp < $3
+          ORDER BY timestamp DESC, id DESC
+          LIMIT 1",
     )
     .bind(user_id)
     .bind(stat_name)
@@ -216,9 +216,9 @@ pub async fn get_discord_snapshot_before(
     );
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM discord_stats_snapshot
-         WHERE user_id = $1 AND stat_name = $2 AND timestamp < $3
-         ORDER BY timestamp DESC
-         LIMIT 1",
+          WHERE user_id = $1 AND stat_name = $2 AND timestamp < $3
+          ORDER BY timestamp DESC, id DESC
+          LIMIT 1",
     )
     .bind(user_id)
     .bind(stat_name)
@@ -240,12 +240,36 @@ pub async fn get_first_hypixel_snapshot(
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM hypixel_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
-         ORDER BY timestamp ASC
+         ORDER BY timestamp ASC, id ASC
          LIMIT 1",
     )
     .bind(user_id)
     .bind(stat_name)
     .fetch_optional(pool)
+    .await
+}
+
+/// Get the earliest Hypixel snapshots for a user (one per stat name).
+///
+/// Useful for commands that need many first-snapshot lookups at once
+/// (e.g. `/stats`, `/level`) to avoid N+1 queries.
+pub async fn get_first_hypixel_snapshots_for_user(
+    pool: &PgPool,
+    user_id: i64,
+) -> Result<Vec<DbStatsSnapshot>, sqlx::Error> {
+    debug!(
+        "queries::get_first_hypixel_snapshots_for_user: user_id={}",
+        user_id
+    );
+
+    sqlx::query_as::<_, DbStatsSnapshot>(
+        "SELECT DISTINCT ON (stat_name) *
+         FROM hypixel_stats_snapshot
+         WHERE user_id = $1
+         ORDER BY stat_name, timestamp ASC, id ASC",
+    )
+    .bind(user_id)
+    .fetch_all(pool)
     .await
 }
 
@@ -262,12 +286,36 @@ pub async fn get_first_discord_snapshot(
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM discord_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
-         ORDER BY timestamp ASC
+         ORDER BY timestamp ASC, id ASC
          LIMIT 1",
     )
     .bind(user_id)
     .bind(stat_name)
     .fetch_optional(pool)
+    .await
+}
+
+/// Get the earliest Discord snapshots for a user (one per stat name).
+///
+/// Useful for commands that need many first-snapshot lookups at once
+/// (e.g. `/stats`, `/level`) to avoid N+1 queries.
+pub async fn get_first_discord_snapshots_for_user(
+    pool: &PgPool,
+    user_id: i64,
+) -> Result<Vec<DbStatsSnapshot>, sqlx::Error> {
+    debug!(
+        "queries::get_first_discord_snapshots_for_user: user_id={}",
+        user_id
+    );
+
+    sqlx::query_as::<_, DbStatsSnapshot>(
+        "SELECT DISTINCT ON (stat_name) *
+         FROM discord_stats_snapshot
+         WHERE user_id = $1
+         ORDER BY stat_name, timestamp ASC, id ASC",
+    )
+    .bind(user_id)
+    .fetch_all(pool)
     .await
 }
 
@@ -349,7 +397,7 @@ pub async fn get_user_by_discord_id_any(
 /// Get all registered users across every guild. Used by the sweeper.
 pub async fn get_all_registered_users(pool: &PgPool) -> Result<Vec<DbUser>, sqlx::Error> {
     debug!("queries::get_all_registered_users");
-    sqlx::query_as::<_, DbUser>("SELECT * FROM users")
+    sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE active = TRUE")
         .fetch_all(pool)
         .await
 }
@@ -616,7 +664,7 @@ pub async fn get_latest_hypixel_snapshot(
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM hypixel_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
-         ORDER BY timestamp DESC
+         ORDER BY timestamp DESC, id DESC
          LIMIT 1",
     )
     .bind(user_id)
@@ -639,11 +687,103 @@ pub async fn get_latest_hypixel_snapshots_for_user(
         "SELECT DISTINCT ON (stat_name) *
          FROM hypixel_stats_snapshot
          WHERE user_id = $1
-         ORDER BY stat_name, timestamp DESC",
+         ORDER BY stat_name, timestamp DESC, id DESC",
     )
     .bind(user_id)
     .fetch_all(pool)
     .await
+}
+
+/// Delete one batch of old Hypixel snapshot rows while preserving each
+/// `(user_id, stat_name)` pair's earliest and latest row.
+///
+/// Returns the number of deleted rows.
+pub async fn delete_old_hypixel_snapshots_batch(
+    pool: &PgPool,
+    cutoff_ts: &DateTime<Utc>,
+    batch_size: i64,
+) -> Result<u64, sqlx::Error> {
+    debug!(
+        "queries::delete_old_hypixel_snapshots_batch: cutoff_ts={}, batch_size={}",
+        cutoff_ts, batch_size
+    );
+
+    if batch_size <= 0 {
+        return Ok(0);
+    }
+
+    let result = sqlx::query(
+        r#"
+        WITH to_delete AS (
+            SELECT h.id
+            FROM hypixel_stats_snapshot h
+            WHERE h.timestamp < $1
+              AND EXISTS (
+                  SELECT 1
+                  FROM hypixel_stats_snapshot older
+                  WHERE older.user_id = h.user_id
+                    AND older.stat_name = h.stat_name
+                    AND (
+                        older.timestamp < h.timestamp
+                        OR (older.timestamp = h.timestamp AND older.id < h.id)
+                    )
+              )
+              AND EXISTS (
+                  SELECT 1
+                  FROM hypixel_stats_snapshot newer
+                  WHERE newer.user_id = h.user_id
+                    AND newer.stat_name = h.stat_name
+                    AND (
+                        newer.timestamp > h.timestamp
+                        OR (newer.timestamp = h.timestamp AND newer.id > h.id)
+                    )
+              )
+            ORDER BY h.timestamp ASC, h.id ASC
+            LIMIT $2
+        )
+        DELETE FROM hypixel_stats_snapshot h
+        USING to_delete d
+        WHERE h.id = d.id
+        "#,
+    )
+    .bind(cutoff_ts)
+    .bind(batch_size)
+    .execute(pool)
+    .await?;
+
+    Ok(result.rows_affected())
+}
+
+/// Repeatedly prune old Hypixel snapshots in batches until no further rows
+/// can be deleted for the given cutoff.
+///
+/// Returns the total number of deleted rows across all batches.
+pub async fn prune_old_hypixel_snapshots(
+    pool: &PgPool,
+    cutoff_ts: &DateTime<Utc>,
+    batch_size: i64,
+) -> Result<u64, sqlx::Error> {
+    debug!(
+        "queries::prune_old_hypixel_snapshots: cutoff_ts={}, batch_size={}",
+        cutoff_ts, batch_size
+    );
+
+    if batch_size <= 0 {
+        return Ok(0);
+    }
+
+    let mut total_deleted = 0_u64;
+
+    loop {
+        let deleted = delete_old_hypixel_snapshots_batch(pool, cutoff_ts, batch_size).await?;
+        total_deleted += deleted;
+
+        if deleted < batch_size as u64 {
+            break;
+        }
+    }
+
+    Ok(total_deleted)
 }
 
 // =========================================================================
@@ -688,7 +828,7 @@ pub async fn get_latest_discord_snapshot(
     sqlx::query_as::<_, DbStatsSnapshot>(
         "SELECT * FROM discord_stats_snapshot
          WHERE user_id = $1 AND stat_name = $2
-         ORDER BY timestamp DESC
+         ORDER BY timestamp DESC, id DESC
          LIMIT 1",
     )
     .bind(user_id)
@@ -710,7 +850,7 @@ pub async fn get_latest_discord_snapshots_for_user(
         "SELECT DISTINCT ON (stat_name) *
          FROM discord_stats_snapshot
          WHERE user_id = $1
-         ORDER BY stat_name, timestamp DESC",
+         ORDER BY stat_name, timestamp DESC, id DESC",
     )
     .bind(user_id)
     .fetch_all(pool)
@@ -1335,7 +1475,8 @@ pub async fn get_users_with_expired_hypixel_stats(
     sqlx::query_as::<_, DbUser>(
         "SELECT *
          FROM users
-         WHERE COALESCE(last_hypixel_refresh, 'epoch') < $1
+         WHERE active = TRUE
+           AND (last_hypixel_refresh IS NULL OR last_hypixel_refresh < $1)
          ORDER BY last_hypixel_refresh ASC NULLS FIRST
          LIMIT $2",
     )
